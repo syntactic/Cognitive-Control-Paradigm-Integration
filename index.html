@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Super Experiment Test</title>
+    <script src="package/dist/bundle.js"></script>
+    <style>
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #experiment-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        #paradigm-controls {
+            margin-bottom: 20px;
+        }
+        #timeline-container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 20px 50px 20px 100px;
+            border-radius: 8px;
+            overflow-x: visible;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #timeline-svg {
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+        #canvas-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            min-height: 400px;
+        }
+        .paradigm-button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            background: #eee;
+            cursor: pointer;
+        }
+        .paradigm-button:hover {
+            background: #ddd;
+        }
+        canvas {
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="experiment-container">
+        <div id="paradigm-controls">
+            <button class="paradigm-button" data-paradigm="sequential">Sequential</button>
+            <button class="paradigm-button" data-paradigm="minimal_overlap">Minimal Overlap</button>
+            <button class="paradigm-button" data-paradigm="substantial_overlap">Substantial Overlap</button>
+            <button class="paradigm-button" data-paradigm="dual_task">Dual Task</button>
+        </div>
+
+        <div id="canvas-container"></div>
+        <div id="timeline-container">
+            <svg id="timeline-svg" width="800" height="200"></svg>
+        </div>
+    </div>
+    <script src="experiment.js"></script>
+</body>
+</html>
