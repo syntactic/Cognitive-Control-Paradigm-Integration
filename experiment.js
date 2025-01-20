@@ -26,7 +26,7 @@ function drawTimeline(paradigm) {
     // Timeline settings
     const timelineStart = 0;
     const timelineEnd = 7000;  // Extended to 7000ms to show full range
-    const margin = { left: 80, right: 20, top: 20, bottom: 30 };
+    const margin = { left: 100, right: 20, top: 20, bottom: 30 };
     const width = svg.clientWidth - margin.left - margin.right;
     const height = 200 - margin.top - margin.bottom;
     
@@ -99,12 +99,12 @@ function drawTimeline(paradigm) {
     // Draw Task 1 - combining cue and signal periods
     const task1Start = Math.min(params.start_1, params.start_mov_1);
     const task1End = Math.max(params.start_1 + params.dur_1, params.start_mov_1 + params.dur_mov_1);
-    drawComponent(task1Start, task1End - task1Start, 40, "#f39c12", "Task 1");
+    drawComponent(task1Start, task1End - task1Start, 40, "#f39c12", "Motion Task");
     
     // Draw Task 2 - combining cue and signal periods
     const task2Start = params.start_2;
     const task2End = params.start_2 + params.dur_2;
-    drawComponent(task2Start, task2End - task2Start, 100, "#4a90e2", "Task 2");
+    drawComponent(task2Start, task2End - task2Start, 100, "#4a90e2", "Orientation Task");
 }
 const PARADIGMS = {
     sequential: {
