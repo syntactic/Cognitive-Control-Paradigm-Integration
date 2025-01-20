@@ -106,56 +106,31 @@ function drawTimeline(paradigm) {
     const task2End = params.start_2 + params.dur_2;
     drawComponent(task2Start, task2End - task2Start, 100, "#4a90e2", "Task 2");
 }
-const overlap_paradigm = {
-    params: {
-        // First task (Movement)
-        task_1: 'mov',
-        start_1: 0,
-        dur_1: 3000,         // First 3s
-        start_mov_1: 0,
-        dur_mov_1: 3000,     // Motion for first 3s
-        start_or_1: 2000,    // Start orientation at 2s
-        dur_or_1: 1000,      // Overlap for 1s
-        start_go_1: 0,
-        dur_go_1: 3000,
-        
-        // Second task (Orientation)
-        task_2: 'or',
-        start_2: 2000,        // Start at 2s
-        dur_2: 3000,          // Last for 3s
-        start_mov_2: -1000,   // Adjusted for addTime
-        dur_mov_2: 1000,      // Duration of overlap
-        start_or_2: 0,    // Adjusted for addTime
-        dur_or_2: 2000,       // Full orientation duration
-        start_go_2: 2000,
-        dur_go_2: 3000
-    }
-};
 const PARADIGMS = {
     sequential: {
         name: "Pure Sequential Task Switching",
         params: {
             // First task (Movement)
             task_1: 'mov',
-            start_1: 0,
-            dur_1: 3000,
-            start_mov_1: 0,
-            dur_mov_1: 3000,
-            start_or_1: 0,
-            dur_or_1: 0,      // No orientation during first task
-            start_go_1: 0,
-            dur_go_1: 3000,
+            start_1: 1500,           // After pre-task period
+            dur_1: 2000,
+            start_mov_1: 1500,
+            dur_mov_1: 2000,
+            start_or_1: 1500,
+            dur_or_1: 0,             // No orientation during first task
+            start_go_1: 1500,
+            dur_go_1: 2000,
             
             // Second task (Orientation)
             task_2: 'or',
-            start_2: 3500,    // 500ms gap between tasks
-            dur_2: 3000,
-            start_mov_2: 0,   // No movement during second task
+            start_2: 4000,           // 1.5s + 2.0s + 0.5s gap
+            dur_2: 2000,
+            start_mov_2: 0,          // No movement during second task
             dur_mov_2: 0,
-            start_or_2: 3500,    // Will get shifted by 3000
-            dur_or_2: 3000,
-            start_go_2: 3500,
-            dur_go_2: 3000
+            start_or_2: 2500,        // Must match start_2 since dur_or_1 is 0
+            dur_or_2: 2000,
+            start_go_2: 4000,
+            dur_go_2: 2000
         }
     },
     
@@ -163,24 +138,24 @@ const PARADIGMS = {
         name: "Minimal Temporal Overlap",
         params: {
             task_1: 'mov',
-            start_1: 0,
-            dur_1: 3000,
-            start_mov_1: 0,
-            dur_mov_1: 3000,
-            start_or_1: 2500,    // Brief 500ms overlap
+            start_1: 1500,
+            dur_1: 2000,
+            start_mov_1: 1500,
+            dur_mov_1: 2000,
+            start_or_1: 3000,        // Brief 500ms overlap
             dur_or_1: 500,
-            start_go_1: 0,
-            dur_go_1: 3000,
+            start_go_1: 1500,
+            dur_go_1: 2000,
             
             task_2: 'or',
-            start_2: 2500,
-            dur_2: 3000,
-            start_mov_2: -500,   // Brief overlap
+            start_2: 3000,
+            dur_2: 2000,
+            start_mov_2: -500,       // Brief overlap accounting for shift
             dur_mov_2: 500,
-            start_or_2: 0,
-            dur_or_2: 2500,
-            start_go_2: 2500,
-            dur_go_2: 3000
+            start_or_2: 0,        // Must match start_2
+            dur_or_2: 1500,
+            start_go_2: 3000,
+            dur_go_2: 2000
         }
     },
     
@@ -188,24 +163,24 @@ const PARADIGMS = {
         name: "Substantial Temporal Overlap",
         params: {
             task_1: 'mov',
-            start_1: 0,
-            dur_1: 3000,
-            start_mov_1: 0,
-            dur_mov_1: 3000,
-            start_or_1: 2000,    // 1s overlap
+            start_1: 1500,
+            dur_1: 2000,
+            start_mov_1: 1500,
+            dur_mov_1: 2000,
+            start_or_1: 2500,        // 1s overlap
             dur_or_1: 1000,
-            start_go_1: 0,
-            dur_go_1: 3000,
+            start_go_1: 1500,
+            dur_go_1: 2000,
             
             task_2: 'or',
-            start_2: 2000,
-            dur_2: 3000,
-            start_mov_2: -1000,
+            start_2: 2500,
+            dur_2: 2000,
+            start_mov_2: -1000,      // Account for shift with 1s overlap
             dur_mov_2: 1000,
-            start_or_2: 0,
-            dur_or_2: 2000,
-            start_go_2: 2000,
-            dur_go_2: 3000
+            start_or_2: 0,        // Must match start_2
+            dur_or_2: 1000,
+            start_go_2: 2500,
+            dur_go_2: 2000
         }
     },
     
@@ -213,27 +188,28 @@ const PARADIGMS = {
         name: "Full Dual-Task Processing",
         params: {
             task_1: 'mov',
-            start_1: 0,
-            dur_1: 3000,
-            start_mov_1: 0,
-            dur_mov_1: 3000,
-            start_or_1: 0,       // Complete overlap
-            dur_or_1: 3000,
-            start_go_1: 0,
-            dur_go_1: 3000,
+            start_1: 1500,
+            dur_1: 2000,
+            start_mov_1: 1500,
+            dur_mov_1: 2000,
+            start_or_1: 0,        // Complete overlap
+            dur_or_1: 0,
+            start_go_1: 1500,
+            dur_go_1: 2000,
             
             task_2: 'or',
-            start_2: 0,
-            dur_2: 3000,
-            start_mov_2: -3000,
-            dur_mov_2: 3000,
-            start_or_2: 0,
-            dur_or_2: 0,
-            start_go_2: 0,
-            dur_go_2: 3000
+            start_2: 1500,
+            dur_2: 2000,
+            start_mov_2: 0,      // Full overlap accounting for shift
+            dur_mov_2: 0,
+            start_or_2: 1500,        // Must match start_2
+            dur_or_2: 2000,
+            start_go_2: 1500,
+            dur_go_2: 2000
         }
     }
 };
+
 
 function createTrialSequence(numTrials, params) {
     const sequence = [];
@@ -251,11 +227,10 @@ function createTrialSequence(numTrials, params) {
 		'dir_or_1': or_dir,
 		'dir_mov_2': mov_dir,
 		'dir_or_2': or_dir,
-		// Set coherence to 1 for all signals
-		'coh_mov_1': 0.5,
-		'coh_or_1': 0.5,
-		'coh_mov_2': 0.5,
-		'coh_or_2': 0.5
+		'coh_mov_1': 0.25,
+		'coh_or_1': 0.25,
+		'coh_mov_2': 0.25,
+		'coh_or_2': 0.25
             };
 
         sequence.push(trial);

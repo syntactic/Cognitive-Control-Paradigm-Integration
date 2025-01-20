@@ -12,6 +12,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+	    color: white;
         }
         #experiment-container {
             width: 100%;
@@ -71,12 +72,13 @@
             <button class="paradigm-button" data-paradigm="substantial_overlap">Substantial Overlap</button>
             <button class="paradigm-button" data-paradigm="dual_task">Dual Task</button>
         </div>
+	Use a/d keys for responding to the motion task (left or right) and w/s keys for responding to the orientation task (up or down).
 
         <div id="canvas-container"></div>
         <div id="timeline-container">
             <svg id="timeline-svg" width="800" height="200"></svg>
         </div>
     </div>
-    <script src="experiment.js"></script>
+    <script src="experiment.js?2"></script>
 </body>
 </html>
