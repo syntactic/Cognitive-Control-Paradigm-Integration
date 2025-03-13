@@ -16,9 +16,8 @@ function setupCanvas() {
 }
 
 // Update the timeline drawing function
-function drawTimeline(paradigm) {
+function drawTimeline(params) {
     const svg = document.getElementById('timeline-svg');
-    const params = PARADIGMS[paradigm].params;
     
     // Clear previous timeline
     svg.innerHTML = '';
@@ -71,181 +70,161 @@ function drawTimeline(paradigm) {
     }
     
     // Draw task components
-    function drawComponent(start, duration, yPos, color, label) {
+    function drawComponent(start, duration, yPos, color, label, style = 'solid') {
         const x = start * width / timelineEnd;
         const componentWidth = duration * width / timelineEnd;
         
+        // Draw background rectangle for the component
         const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rect.setAttribute("x", x);
         rect.setAttribute("y", yPos);
         rect.setAttribute("width", componentWidth);
         rect.setAttribute("height", "40");
         rect.setAttribute("fill", color);
-        rect.setAttribute("opacity", "0.7");
+        rect.setAttribute("opacity", style === 'solid' ? "0.7" : "0.3");
+        
+        // Add pattern for cue intervals
+        if (style === 'cue') {
+            rect.setAttribute("stroke", "white");
+            rect.setAttribute("stroke-dasharray", "5,5");
+        }
+        // Add pattern for go intervals
+        if (style === 'go') {
+            rect.setAttribute("stroke", "yellow");
+            rect.setAttribute("stroke-width", "2");
+        }
         
         g.appendChild(rect);
         
-        // Label
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", -5);
-        text.setAttribute("y", yPos + 25);
-        text.setAttribute("fill", "white");
-        text.setAttribute("text-anchor", "end");
-        text.setAttribute("font-size", "14px");
-        text.textContent = label;
-        g.appendChild(text);
+        // Label (only for main components)
+        if (style === 'solid') {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", -5);
+            text.setAttribute("y", yPos + 25);
+            text.setAttribute("fill", "white");
+            text.setAttribute("text-anchor", "end");
+            text.setAttribute("font-size", "14px");
+            text.textContent = label;
+            g.appendChild(text);
+        }
     }
     
-    // Draw Task 1 - combining cue and signal periods
-    const task1Start = Math.min(params.start_1, params.start_mov_1);
-    const task1End = Math.max(params.start_1 + params.dur_1, params.start_mov_1 + params.dur_mov_1);
-    drawComponent(task1Start, task1End - task1Start, 40, "#f39c12", "Motion Task");
+    // Draw Task 1 components
+    const task1Y = 40;
+    // Main stimulus period
+    drawComponent(params.start_mov_1, params.dur_mov_1, task1Y, "#f39c12", "Motion Task");
+    // Cue period
+    drawComponent(params.start_1, params.dur_1, task1Y, "#f39c12", "", "cue");
+    // Go period
+    drawComponent(params.start_go_1, params.dur_go_1, task1Y, "#f39c12", "", "go");
     
-    // Draw Task 2 - combining cue and signal periods
-    const task2Start = params.start_2;
-    const task2End = params.start_2 + params.dur_2;
-    drawComponent(task2Start, task2End - task2Start, 100, "#4a90e2", "Orientation Task");
+    // Draw Task 2 (distractor) components
+    const task2Y = 100;
+    if (params.dur_or_2 > 0) {  // Only draw if there's a distractor
+        // Distractor stimulus period
+        drawComponent(params.start_or_2, params.dur_or_2, task2Y, "#4a90e2", "Orientation Task");
+        // No cue or go intervals for distractor
+    }
 }
-const PARADIGMS = {
-    sequential: {
-        name: "Pure Sequential Task Switching",
-        params: {
-            // First task (Movement)
-            task_1: 'mov',
-            start_1: 1500,           // After pre-task period
-            dur_1: 2000,
-            start_mov_1: 1500,
-            dur_mov_1: 2000,
-            start_or_1: 1500,
-            dur_or_1: 0,             // No orientation during first task
-            start_go_1: 1500,
-            dur_go_1: 2000,
-            
-            // Second task (Orientation)
-            task_2: 'or',
-            start_2: 4000,           // 1.5s + 2.0s + 0.5s gap
-            dur_2: 2000,
-            start_mov_2: 0,          // No movement during second task
-            dur_mov_2: 0,
-            start_or_2: 2500,        // Must match start_2 since dur_or_1 is 0
-            dur_or_2: 2000,
-            start_go_2: 4000,
-            dur_go_2: 2000
-        }
-    },
-    
-    minimal_overlap: {
-        name: "Minimal Temporal Overlap",
-        params: {
-            task_1: 'mov',
-            start_1: 1500,
-            dur_1: 2000,
-            start_mov_1: 1500,
-            dur_mov_1: 2000,
-            start_or_1: 3000,        // Brief 500ms overlap
-            dur_or_1: 500,
-            start_go_1: 1500,
-            dur_go_1: 2000,
-            
-            task_2: 'or',
-            start_2: 3000,
-            dur_2: 2000,
-            start_mov_2: -500,       // Brief overlap accounting for shift
-            dur_mov_2: 500,
-            start_or_2: 0,        // Must match start_2
-            dur_or_2: 1500,
-            start_go_2: 3000,
-            dur_go_2: 2000
-        }
-    },
-    
-    substantial_overlap: {
-        name: "Substantial Temporal Overlap",
-        params: {
-            task_1: 'mov',
-            start_1: 1500,
-            dur_1: 2000,
-            start_mov_1: 1500,
-            dur_mov_1: 2000,
-            start_or_1: 2500,        // 1s overlap
-            dur_or_1: 1000,
-            start_go_1: 1500,
-            dur_go_1: 2000,
-            
-            task_2: 'or',
-            start_2: 2500,
-            dur_2: 2000,
-            start_mov_2: -1000,      // Account for shift with 1s overlap
-            dur_mov_2: 1000,
-            start_or_2: 0,        // Must match start_2
-            dur_or_2: 1000,
-            start_go_2: 2500,
-            dur_go_2: 2000
-        }
-    },
-    
-    dual_task: {
-        name: "Full Dual-Task Processing",
-        params: {
-            task_1: 'mov',
-            start_1: 1500,
-            dur_1: 2000,
-            start_mov_1: 1500,
-            dur_mov_1: 2000,
-            start_or_1: 0,        // Complete overlap
-            dur_or_1: 0,
-            start_go_1: 1500,
-            dur_go_1: 2000,
-            
-            task_2: 'or',
-            start_2: 1500,
-            dur_2: 2000,
-            start_mov_2: 0,      // Full overlap accounting for shift
-            dur_mov_2: 0,
-            start_or_2: 1500,        // Must match start_2
-            dur_or_2: 2000,
-            start_go_2: 1500,
-            dur_go_2: 2000
-        }
-    }
-};
 
-
-function createTrialSequence(numTrials, params) {
+function createTrialSequence(numTrials, params, switchRate) {
     const sequence = [];
+    let currentTask = 'mov';  // Start with movement task
     
     for (let i = 0; i < numTrials; i++) {
+        // Determine if this trial should switch tasks
+        if (i > 0 && Math.random() < switchRate) {
+            currentTask = currentTask === 'mov' ? 'or' : 'mov';
+        }
+        
         // Get random directions for motion and orientation
-        // 0 = left, 180 = right
         const mov_dir = Math.random() < 0.5 ? 0 : 180;
         const or_dir = Math.random() < 0.5 ? 90 : 270;
 
         // Create trial with the paradigm's timing parameters
         const trial = {
-		...params,
-		'dir_mov_1': mov_dir,
-		'dir_or_1': or_dir,
-		'dir_mov_2': mov_dir,
-		'dir_or_2': or_dir,
-		'coh_mov_1': 0.25,
-		'coh_or_1': 0.25,
-		'coh_mov_2': 0.25,
-		'coh_or_2': 0.25
-            };
+            ...params,
+            // Switch the task type based on currentTask
+            task_1: currentTask,
+            // If movement is the current task
+            start_mov_1: currentTask === 'mov' ? params.start_mov_1 : 0,
+            dur_mov_1: currentTask === 'mov' ? params.dur_mov_1 : 0,
+            start_or_1: currentTask === 'or' ? params.start_mov_1 : 0,  // Use same timing as mov_1
+            dur_or_1: currentTask === 'or' ? params.dur_mov_1 : 0,
+            // Distractor timing
+            task_2: currentTask === 'mov' ? 'or' : 'mov',  // Always opposite of task_1
+            start_mov_2: currentTask === 'or' ? params.start_or_2 : 0,  // Only active when main task is orientation
+            dur_mov_2: currentTask === 'or' ? params.dur_or_2 : 0,
+            start_or_2: currentTask === 'mov' ? params.start_or_2 : 0,  // Only active when main task is movement  
+            dur_or_2: currentTask === 'mov' ? params.dur_or_2 : 0,
+            // Set directions and coherence
+            dir_mov_1: mov_dir,
+            dir_or_1: or_dir,
+            dir_mov_2: mov_dir,
+            dir_or_2: or_dir,
+            coh_mov_1: 0.25,
+            coh_or_1: 0.25,
+            coh_mov_2: 0.25,
+            coh_or_2: 0.25
+        };
 
         sequence.push(trial);
-	// Log trial directions for debugging
-	console.log(`Trial ${i} directions:`, {
-            movement: mov_dir,    // Log single direction
-            orientation: or_dir    // Log single direction
-        });
+        console.log(`Trial ${i}: ${currentTask} task, switch probability: ${switchRate}`);
     }
 
     return sequence;
-
 }
 
-async function runExperiment(currentParadigm) {
+// Convert slider value (0-4) to actual parameter value (0-1)
+function sliderToValue(sliderValue) {
+    return sliderValue * 0.25;
+}
+
+// Generate trial parameters based on current slider values
+// TODO: Currently go intervals must match cue intervals for proper cue display.
+// This means responses can be made during pre-cue period when stimulus isn't present.
+// Future improvement: Decouple go intervals from cue intervals. That would have to
+// be done in draw() in package/src/game.js
+function generateTrialParams(switchRate, preCueDuration, distractorDuration) {
+    const baseDuration = 2000; // Base stimulus duration
+    const preCueTime = preCueDuration * baseDuration;
+    const distractorTime = distractorDuration * baseDuration;
+    const stimulusStart = 3500;  // Fixed stimulus start time
+    
+    return {
+        task_1: 'mov',  // Primary task is movement
+        start_1: stimulusStart - preCueTime,  // Cue starts before stimulus
+        dur_1: baseDuration + preCueTime,     // Cue spans pre-cue and stimulus period
+        start_mov_1: stimulusStart,           // Stimulus timing unchanged
+        dur_mov_1: baseDuration,
+        start_or_1: 0,
+        dur_or_1: 0,
+        start_go_1: stimulusStart - preCueTime,            // Go signal matches stimulus
+        dur_go_1: baseDuration + preCueTime,
+        
+        // Second task acts as distractor
+        task_2: 'or',
+        start_2: 0,
+        dur_2: 0,
+        start_mov_2: 0,
+        dur_mov_2: 0,
+        start_or_2: distractorTime > 0 ? stimulusStart : 0,
+        dur_or_2: distractorTime > 0 ? distractorTime : 0,
+        start_go_2: 0,
+        dur_go_2: 0
+    };
+}
+
+function validateTimingParams(params) {
+    if (params.start_1 < 0) {
+        console.warn('Warning: Negative cue start time');
+    }
+    if (params.dur_or_2 > params.dur_mov_1) {
+        console.warn('Warning: Distractor duration exceeds main task duration');
+    }
+}
+
+async function runExperiment(currentParams) {
     try {
         console.log('Cleaning up previous experiment...');
         await superExperiment.endBlock();
@@ -253,8 +232,9 @@ async function runExperiment(currentParadigm) {
         await new Promise(resolve => setTimeout(resolve, 100));
         console.log('Starting new experiment setup...');
         
-        const params = PARADIGMS[currentParadigm].params;
-        const trials = createTrialSequence(5, params);
+        const switchRate = sliderToValue(document.getElementById('switch-rate').value);
+        validateTimingParams(currentParams);
+        const trials = createTrialSequence(5, currentParams, switchRate);
         const config = {
             'size': 0.5,
             'movementKeyMap': {
@@ -273,14 +253,10 @@ async function runExperiment(currentParadigm) {
             'orCueStyle': 'dashed'
         };
 
-	const canvasContainer = document.getElementById('canvas-container');
-
+        const canvasContainer = document.getElementById('canvas-container');
         console.log('Starting block with trials...');
-	const data = await superExperiment.block(trials, 2000, config, false, true, null, canvasContainer);
-        
-        // Add this line to move the canvas after it's created
+        const data = await superExperiment.block(trials, 2000, config, false, true, null, canvasContainer);
         setupCanvas();
-        
         console.log('Block completed. Data:', data);
     } catch (error) {
         console.error('Error in experiment:', error);
@@ -289,12 +265,31 @@ async function runExperiment(currentParadigm) {
     }
 }
 
-
-document.querySelectorAll('.paradigm-button').forEach(button => {
-    button.addEventListener('click', async () => {
-        const paradigm = button.dataset.paradigm;
-        console.log(`Starting ${paradigm} paradigm...`);
-        drawTimeline(paradigm);  // Add this line
-        await runExperiment(paradigm);
+// Set up event listeners for sliders and start button
+document.addEventListener('DOMContentLoaded', () => {
+    const sliders = {
+        switchRate: document.getElementById('switch-rate'),
+        preCue: document.getElementById('pre-cue'),
+        distractor: document.getElementById('distractor')
+    };
+    
+    // Update value displays when sliders change
+    Object.entries(sliders).forEach(([key, slider]) => {
+        const valueDisplay = document.getElementById(`${slider.id}-value`);
+        slider.addEventListener('input', () => {
+            valueDisplay.textContent = sliderToValue(slider.value).toFixed(2);
+        });
+    });
+    
+    // Handle experiment start
+    document.getElementById('start-experiment').addEventListener('click', () => {
+        const params = generateTrialParams(
+            sliderToValue(sliders.switchRate.value),
+            sliderToValue(sliders.preCue.value),
+            sliderToValue(sliders.distractor.value)
+        );
+        
+        drawTimeline(params);
+        runExperiment(params);
     });
 });
