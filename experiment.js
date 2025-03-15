@@ -25,9 +25,9 @@ function drawTimeline(params) {
     // Timeline settings
     const timelineStart = 0;
     const timelineEnd = 7000;  // Extended to 7000ms to show full range
-    const margin = { left: 100, right: 20, top: 20, bottom: 30 };
+    const margin = { left: 120, right: 20, top: 20, bottom: 30 }; // Increased left margin for labels
     const width = svg.clientWidth - margin.left - margin.right;
-    const height = 200 - margin.top - margin.bottom;
+    const height = 280 - margin.top - margin.bottom; // Increased height for four axes
     
     // Create a group for the timeline content with margins
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -37,9 +37,9 @@ function drawTimeline(params) {
     // Draw time axis
     const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
     axis.setAttribute("x1", "0");
-    axis.setAttribute("y1", "160");
+    axis.setAttribute("y1", height + 10);
     axis.setAttribute("x2", width);
-    axis.setAttribute("y2", "160");
+    axis.setAttribute("y2", height + 10);
     axis.setAttribute("stroke", "white");
     axis.setAttribute("stroke-width", "2");
     g.appendChild(axis);
@@ -51,9 +51,9 @@ function drawTimeline(params) {
         // Tick mark
         const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
         tick.setAttribute("x1", x);
-        tick.setAttribute("y1", "155");
+        tick.setAttribute("y1", height + 5);
         tick.setAttribute("x2", x);
-        tick.setAttribute("y2", "165");
+        tick.setAttribute("y2", height + 15);
         tick.setAttribute("stroke", "white");
         tick.setAttribute("stroke-width", "2");
         g.appendChild(tick);
@@ -61,7 +61,7 @@ function drawTimeline(params) {
         // Label
         const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
         label.setAttribute("x", x);
-        label.setAttribute("y", "180");
+        label.setAttribute("y", height + 30);
         label.setAttribute("text-anchor", "middle");
         label.setAttribute("fill", "white");
         label.setAttribute("font-size", "12px");
@@ -69,10 +69,53 @@ function drawTimeline(params) {
         g.appendChild(label);
     }
     
+    // Define y-positions for the four axes
+    const yPositions = {
+        motionCue: 40,
+        motionStimulus: 90,
+        orientationCue: 140,
+        orientationStimulus: 190
+    };
+    
+    // Draw axis labels
+    function drawAxisLabel(label, yPos) {
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", -10);
+        text.setAttribute("y", yPos + 20); // Center text vertically
+        text.setAttribute("text-anchor", "end");
+        text.setAttribute("fill", "white");
+        text.setAttribute("font-size", "14px");
+        text.textContent = label;
+        g.appendChild(text);
+        
+        // Add a light horizontal line for the axis
+        const axisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        axisLine.setAttribute("x1", "0");
+        axisLine.setAttribute("y1", yPos + 20);
+        axisLine.setAttribute("x2", width);
+        axisLine.setAttribute("y2", yPos + 20);
+        axisLine.setAttribute("stroke", "rgba(255,255,255,0.2)");
+        axisLine.setAttribute("stroke-width", "1");
+        axisLine.setAttribute("stroke-dasharray", "3,3");
+        g.appendChild(axisLine);
+    }
+    
+    // Draw the four axis labels
+    drawAxisLabel("Motion Cue", yPositions.motionCue);
+    drawAxisLabel("Motion Stimulus", yPositions.motionStimulus);
+    drawAxisLabel("Orientation Cue", yPositions.orientationCue);
+    drawAxisLabel("Orientation Stimulus", yPositions.orientationStimulus);
+    
     // Draw task components
-    function drawComponent(start, duration, yPos, color, label, style = 'solid') {
+    function drawComponent(start, duration, yPos, color, style = 'solid') {
+        if (duration <= 0) return; // Don't draw components with zero duration
+        
         const x = start * width / timelineEnd;
-        const componentWidth = duration * width / timelineEnd;
+        const componentWidth = Math.max(2, duration * width / timelineEnd); // Ensure minimum width for visibility
+        
+        // Create a group for this component
+        const componentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.appendChild(componentGroup);
         
         // Draw background rectangle for the component
         const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -81,49 +124,77 @@ function drawTimeline(params) {
         rect.setAttribute("width", componentWidth);
         rect.setAttribute("height", "40");
         rect.setAttribute("fill", color);
-        rect.setAttribute("opacity", style === 'solid' ? "0.7" : "0.3");
+        rect.setAttribute("opacity", "0.7");
+        componentGroup.appendChild(rect);
         
-        // Add pattern for cue intervals
-        if (style === 'cue') {
-            rect.setAttribute("stroke", "white");
-            rect.setAttribute("stroke-dasharray", "5,5");
-        }
-        // Add pattern for go intervals
+        // Add specialized styling based on component type
         if (style === 'go') {
+            // Add yellow border for go signals
             rect.setAttribute("stroke", "yellow");
             rect.setAttribute("stroke-width", "2");
         }
         
-        g.appendChild(rect);
-        
-        // Label (only for main components)
-        if (style === 'solid') {
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("x", -5);
-            text.setAttribute("y", yPos + 25);
-            text.setAttribute("fill", "white");
-            text.setAttribute("text-anchor", "end");
-            text.setAttribute("font-size", "14px");
-            text.textContent = label;
-            g.appendChild(text);
+        // Add start/end time labels for components with significant duration
+        if (duration >= 500) {
+            // Start time label
+            const startLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            startLabel.setAttribute("x", x + 5);
+            startLabel.setAttribute("y", yPos + 15);
+            startLabel.setAttribute("fill", "white");
+            startLabel.setAttribute("font-size", "10px");
+            startLabel.textContent = `${start}ms`;
+            componentGroup.appendChild(startLabel);
+            
+            // End time label if there's enough space
+            if (componentWidth > 60) {
+                const endLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                endLabel.setAttribute("x", x + componentWidth - 5);
+                endLabel.setAttribute("y", yPos + 15);
+                endLabel.setAttribute("text-anchor", "end");
+                endLabel.setAttribute("fill", "white");
+                endLabel.setAttribute("font-size", "10px");
+                endLabel.textContent = `${start + duration}ms`;
+                componentGroup.appendChild(endLabel);
+            }
         }
     }
     
-    // Draw Task 1 components
-    const task1Y = 40;
-    // Main stimulus period
-    drawComponent(params.start_mov_1, params.dur_mov_1, task1Y, "#f39c12", "Motion Task");
-    // Cue period
-    drawComponent(params.start_1, params.dur_1, task1Y, "#f39c12", "", "cue");
-    // Go period
-    drawComponent(params.start_go_1, params.dur_go_1, task1Y, "#f39c12", "", "go");
+    // Draw motion task components
+    if (params.task_1 === 'mov' || params.task_2 === 'mov') {
+        // Motion cue
+        if (params.task_1 === 'mov') {
+            drawComponent(params.start_1, params.dur_1, yPositions.motionCue, "#f39c12");
+        } else if (params.task_2 === 'mov') {
+            drawComponent(params.start_2, params.dur_2, yPositions.motionCue, "#f39c12");
+        }
+        
+        // Motion stimulus
+        if (params.task_1 === 'mov') {
+            drawComponent(params.start_mov_1, params.dur_mov_1, yPositions.motionStimulus, "#e67e22");
+            drawComponent(params.start_go_1, params.dur_go_1, yPositions.motionStimulus, "#e67e22", "go");
+        } else if (params.task_2 === 'mov') {
+            drawComponent(params.start_mov_2, params.dur_mov_2, yPositions.motionStimulus, "#e67e22");
+            drawComponent(params.start_go_2, params.dur_go_2, yPositions.motionStimulus, "#e67e22", "go");
+        }
+    }
     
-    // Draw Task 2 (distractor) components
-    const task2Y = 100;
-    if (params.dur_or_2 > 0) {  // Only draw if there's a distractor
-        // Distractor stimulus period
-        drawComponent(params.start_or_2, params.dur_or_2, task2Y, "#4a90e2", "Orientation Task");
-        // No cue or go intervals for distractor
+    // Draw orientation task components
+    if (params.task_1 === 'or' || params.task_2 === 'or') {
+        // Orientation cue
+        if (params.task_1 === 'or') {
+            drawComponent(params.start_1, params.dur_1, yPositions.orientationCue, "#4a90e2");
+        } else if (params.task_2 === 'or') {
+            drawComponent(params.start_2, params.dur_2, yPositions.orientationCue, "#4a90e2");
+        }
+        
+        // Orientation stimulus
+        if (params.task_1 === 'or') {
+            drawComponent(params.start_or_1, params.dur_or_1, yPositions.orientationStimulus, "#3498db");
+            drawComponent(params.start_go_1, params.dur_go_1, yPositions.orientationStimulus, "#3498db", "go");
+        } else if (params.task_2 === 'or') {
+            drawComponent(params.start_or_2, params.dur_or_2, yPositions.orientationStimulus, "#3498db");
+            drawComponent(params.start_go_2, params.dur_go_2, yPositions.orientationStimulus, "#3498db", "go");
+        }
     }
 }
 
@@ -255,8 +326,16 @@ async function runExperiment(currentParams) {
 
         const canvasContainer = document.getElementById('canvas-container');
         console.log('Starting block with trials...');
-        const data = await superExperiment.block(trials, 2000, config, false, true, null, canvasContainer);
-        setupCanvas();
+        
+        setupCanvas(); // Call setupCanvas once before starting trials
+        
+        for (let i = 0; i < trials.length; i++) {
+            const trial = trials[i];
+            await superExperiment.endBlock();
+            drawTimeline(trial); // Update the timeline for the current trial
+            const data = await superExperiment.block([trial], 2000, config, false, true, null, canvasContainer);
+        }
+        
         console.log('Block completed. Data:', data);
     } catch (error) {
         console.error('Error in experiment:', error);
