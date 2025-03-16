@@ -111,7 +111,7 @@ function drawTimeline(params) {
         if (duration <= 0) return; // Don't draw components with zero duration
         
         const x = start * width / timelineEnd;
-        const componentWidth = Math.max(2, duration * width / timelineEnd); // Ensure minimum width for visibility
+        const componentWidth = Math.max(2, duration * width / timelineEnd);
         
         // Create a group for this component
         const componentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -124,19 +124,26 @@ function drawTimeline(params) {
         rect.setAttribute("width", componentWidth);
         rect.setAttribute("height", "40");
         rect.setAttribute("fill", color);
-        rect.setAttribute("opacity", "0.7");
+        
+        // Make cue periods more transparent than stimulus periods
+        if (style === 'cue') {
+            rect.setAttribute("opacity", "0.3");
+        } else if (style === 'go') {
+            rect.setAttribute("fill-opacity", "0.0");
+        } else {
+            rect.setAttribute("opacity", "0.7");
+        }
+        
         componentGroup.appendChild(rect);
         
         // Add specialized styling based on component type
         if (style === 'go') {
-            // Add yellow border for go signals
             rect.setAttribute("stroke", "yellow");
             rect.setAttribute("stroke-width", "2");
         }
         
         // Add start/end time labels for components with significant duration
         if (duration >= 500) {
-            // Start time label
             const startLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
             startLabel.setAttribute("x", x + 5);
             startLabel.setAttribute("y", yPos + 15);
@@ -145,7 +152,6 @@ function drawTimeline(params) {
             startLabel.textContent = `${start}ms`;
             componentGroup.appendChild(startLabel);
             
-            // End time label if there's enough space
             if (componentWidth > 60) {
                 const endLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 endLabel.setAttribute("x", x + componentWidth - 5);
@@ -171,10 +177,10 @@ function drawTimeline(params) {
         // Motion stimulus
         if (params.task_1 === 'mov') {
             drawComponent(params.start_mov_1, params.dur_mov_1, yPositions.motionStimulus, "#e67e22");
-            drawComponent(params.start_go_1, params.dur_go_1, yPositions.motionStimulus, "#e67e22", "go");
+            drawComponent(params.start_go_1, params.dur_go_1, yPositions.motionCue, "#e67e22", "go");
         } else if (params.task_2 === 'mov') {
             drawComponent(params.start_mov_2, params.dur_mov_2, yPositions.motionStimulus, "#e67e22");
-            drawComponent(params.start_go_2, params.dur_go_2, yPositions.motionStimulus, "#e67e22", "go");
+            drawComponent(params.start_go_2, params.dur_go_2, yPositions.motionCue, "#e67e22", "go");
         }
     }
     
@@ -190,10 +196,10 @@ function drawTimeline(params) {
         // Orientation stimulus
         if (params.task_1 === 'or') {
             drawComponent(params.start_or_1, params.dur_or_1, yPositions.orientationStimulus, "#3498db");
-            drawComponent(params.start_go_1, params.dur_go_1, yPositions.orientationStimulus, "#3498db", "go");
+            drawComponent(params.start_go_1, params.dur_go_1, yPositions.orientationCue, "#3498db", "go");
         } else if (params.task_2 === 'or') {
             drawComponent(params.start_or_2, params.dur_or_2, yPositions.orientationStimulus, "#3498db");
-            drawComponent(params.start_go_2, params.dur_go_2, yPositions.orientationStimulus, "#3498db", "go");
+            drawComponent(params.start_go_2, params.dur_go_2, yPositions.orientationCue, "#3498db", "go");
         }
     }
 }
@@ -262,15 +268,16 @@ function generateTrialParams(switchRate, preCueDuration, distractorDuration) {
     const distractorTime = distractorDuration * baseDuration;
     const stimulusStart = 3500;  // Fixed stimulus start time
     
+    // Update the timing parameters to correctly reflect the stimulus timing
     return {
         task_1: 'mov',  // Primary task is movement
         start_1: stimulusStart - preCueTime,  // Cue starts before stimulus
         dur_1: baseDuration + preCueTime,     // Cue spans pre-cue and stimulus period
-        start_mov_1: stimulusStart,           // Stimulus timing unchanged
+        start_mov_1: stimulusStart,           // Stimulus starts at 3500ms
         dur_mov_1: baseDuration,
         start_or_1: 0,
         dur_or_1: 0,
-        start_go_1: stimulusStart - preCueTime,            // Go signal matches stimulus
+        start_go_1: stimulusStart - preCueTime,  // Go signal matches cue timing
         dur_go_1: baseDuration + preCueTime,
         
         // Second task acts as distractor
@@ -279,7 +286,7 @@ function generateTrialParams(switchRate, preCueDuration, distractorDuration) {
         dur_2: 0,
         start_mov_2: 0,
         dur_mov_2: 0,
-        start_or_2: distractorTime > 0 ? stimulusStart : 0,
+        start_or_2: distractorTime > 0 ? stimulusStart : 0,  // Distractor starts with main stimulus
         dur_or_2: distractorTime > 0 ? distractorTime : 0,
         start_go_2: 0,
         dur_go_2: 0
@@ -351,13 +358,19 @@ document.addEventListener('DOMContentLoaded', () => {
         preCue: document.getElementById('pre-cue'),
         distractor: document.getElementById('distractor')
     };
+
+    function updateValueDisplay(slider) {
+        const valueDisplay = document.getElementById(`${slider.id}-value`);
+        valueDisplay.textContent = sliderToValue(slider.value).toFixed(2);
+    }
     
     // Update value displays when sliders change
     Object.entries(sliders).forEach(([key, slider]) => {
-        const valueDisplay = document.getElementById(`${slider.id}-value`);
         slider.addEventListener('input', () => {
-            valueDisplay.textContent = sliderToValue(slider.value).toFixed(2);
+            updateValueDisplay(slider);
         });
+
+    updateValueDisplay(slider);
     });
     
     // Handle experiment start
