@@ -165,20 +165,66 @@ function drawTimeline(params) {
         }
     }
     
+    // Determine if we have a dual-task paradigm
+    // TODO double check the logic here
+    const isDualTask = params.task_1 && params.task_2 && 
+                     ((params.dur_mov_1 > 0 && params.dur_or_2 > 0) || 
+                      (params.dur_or_1 > 0 && params.dur_mov_2 > 0));
+    
+    // If it's a dual-task paradigm, draw a visual separator for SOA
+    if (isDualTask) {
+        // Calculate SOA
+        let soaStart = 0;
+        let soaEnd = 0;
+        
+        if (params.task_1 === 'mov' && params.task_2 === 'or') {
+            soaStart = params.start_mov_1;
+            soaEnd = params.start_or_2;
+        } else if (params.task_1 === 'or' && params.task_2 === 'mov') {
+            soaStart = params.start_or_1;
+            soaEnd = params.start_mov_2;
+        }
+        
+        if (soaStart !== soaEnd) {
+            // Draw SOA indicator
+            const soaX1 = soaStart * width / timelineEnd;
+            const soaX2 = soaEnd * width / timelineEnd;
+            
+            // Draw SOA line
+            const soaLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            soaLine.setAttribute("x1", soaX1);
+            soaLine.setAttribute("y1", 10);
+            soaLine.setAttribute("x2", soaX2);
+            soaLine.setAttribute("y2", 10);
+            soaLine.setAttribute("stroke", "#FF5722");
+            soaLine.setAttribute("stroke-width", "3");
+            g.appendChild(soaLine);
+            
+            // Add SOA label
+            const soaLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            soaLabel.setAttribute("x", (soaX1 + soaX2) / 2);
+            soaLabel.setAttribute("y", 8);
+            soaLabel.setAttribute("text-anchor", "middle");
+            soaLabel.setAttribute("fill", "#FF5722");
+            soaLabel.setAttribute("font-size", "12px");
+            soaLabel.textContent = `SOA: ${Math.abs(soaEnd - soaStart)}ms`;
+            g.appendChild(soaLabel);
+        }
+    }
+    
     // Draw motion task components
     if (params.task_1 === 'mov' || params.task_2 === 'mov') {
         // Motion cue
         if (params.task_1 === 'mov') {
             drawComponent(params.start_1, params.dur_1, yPositions.motionCue, "#f39c12");
-        } else if (params.task_2 === 'mov') {
-            drawComponent(params.start_2, params.dur_2, yPositions.motionCue, "#f39c12");
-        }
-        
-        // Motion stimulus
-        if (params.task_1 === 'mov') {
+            // Motion stimulus
             drawComponent(params.start_mov_1, params.dur_mov_1, yPositions.motionStimulus, "#e67e22");
             drawComponent(params.start_go_1, params.dur_go_1, yPositions.motionCue, "#e67e22", "go");
-        } else if (params.task_2 === 'mov') {
+        }
+        
+        if (params.task_2 === 'mov') {
+            drawComponent(params.start_2, params.dur_2, yPositions.motionCue, "#f39c12");
+            // Motion stimulus
             drawComponent(params.start_mov_2, params.dur_mov_2, yPositions.motionStimulus, "#e67e22");
             drawComponent(params.start_go_2, params.dur_go_2, yPositions.motionCue, "#e67e22", "go");
         }
@@ -189,18 +235,46 @@ function drawTimeline(params) {
         // Orientation cue
         if (params.task_1 === 'or') {
             drawComponent(params.start_1, params.dur_1, yPositions.orientationCue, "#4a90e2");
-        } else if (params.task_2 === 'or') {
-            drawComponent(params.start_2, params.dur_2, yPositions.orientationCue, "#4a90e2");
-        }
-        
-        // Orientation stimulus
-        if (params.task_1 === 'or') {
+            // Orientation stimulus
             drawComponent(params.start_or_1, params.dur_or_1, yPositions.orientationStimulus, "#3498db");
             drawComponent(params.start_go_1, params.dur_go_1, yPositions.orientationCue, "#3498db", "go");
-        } else if (params.task_2 === 'or') {
+        }
+        
+        if (params.task_2 === 'or') {
+            drawComponent(params.start_2, params.dur_2, yPositions.orientationCue, "#4a90e2");
+            // Orientation stimulus
             drawComponent(params.start_or_2, params.dur_or_2, yPositions.orientationStimulus, "#3498db");
             drawComponent(params.start_go_2, params.dur_go_2, yPositions.orientationCue, "#3498db", "go");
         }
+    }
+    
+    // If this is a dual-task paradigm, add a label
+    if (isDualTask) {
+        const paradigmLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        paradigmLabel.setAttribute("x", width / 2);
+        paradigmLabel.setAttribute("y", height + 50);
+        paradigmLabel.setAttribute("text-anchor", "middle");
+        paradigmLabel.setAttribute("fill", "white");
+        paradigmLabel.setAttribute("font-size", "14px");
+        paradigmLabel.setAttribute("font-weight", "bold");
+        
+        // Determine paradigm type
+        let paradigmType = "Dual-Task";
+        if (params.start_mov_1 > 0 && params.start_or_2 > 0) {
+            const soa = params.start_or_2 - params.start_mov_1;
+            if (soa <= 50) {
+                paradigmType = "Full Dual-Task";
+            } else if (soa < 300) {
+                paradigmType = "Psychological Refractory Period (PRP) - Short SOA";
+            } else if (soa < 1000) {
+                paradigmType = "Psychological Refractory Period (PRP) - Medium SOA";
+            } else {
+                paradigmType = "Sequential Task Processing";
+            }
+        }
+        
+        paradigmLabel.textContent = paradigmType;
+        g.appendChild(paradigmLabel);
     }
 }
 
@@ -208,9 +282,12 @@ function createTrialSequence(numTrials, params, switchRate) {
     const sequence = [];
     let currentTask = 'mov';  // Start with movement task
     
+    // Check if this is a dual-task paradigm - both tasks should be active
+    const isDualTask = params.dur_1 > 0 && params.dur_2 > 0;
+    
     for (let i = 0; i < numTrials; i++) {
-        // Determine if this trial should switch tasks
-        if (i > 0 && Math.random() < switchRate) {
+        // Determine if this trial should switch tasks (only for single-task paradigm)
+        if (!isDualTask && i > 0 && Math.random() < switchRate) {
             currentTask = currentTask === 'mov' ? 'or' : 'mov';
         }
         
@@ -219,34 +296,59 @@ function createTrialSequence(numTrials, params, switchRate) {
         const or_dir = Math.random() < 0.5 ? 90 : 270;
 
         // Create trial with the paradigm's timing parameters
-        const trial = {
-            ...params,
-            // Switch the task type based on currentTask
-            task_1: currentTask,
-            // If movement is the current task
-            start_mov_1: currentTask === 'mov' ? params.start_mov_1 : 0,
-            dur_mov_1: currentTask === 'mov' ? params.dur_mov_1 : 0,
-            start_or_1: currentTask === 'or' ? params.start_mov_1 : 0,  // Use same timing as mov_1
-            dur_or_1: currentTask === 'or' ? params.dur_mov_1 : 0,
-            // Distractor timing
-            task_2: currentTask === 'mov' ? 'or' : 'mov',  // Always opposite of task_1
-            start_mov_2: currentTask === 'or' ? params.start_or_2 : 0,  // Only active when main task is orientation
-            dur_mov_2: currentTask === 'or' ? params.dur_or_2 : 0,
-            start_or_2: currentTask === 'mov' ? params.start_or_2 : 0,  // Only active when main task is movement  
-            dur_or_2: currentTask === 'mov' ? params.dur_or_2 : 0,
-            // Set directions and coherence
-            dir_mov_1: mov_dir,
-            dir_or_1: or_dir,
-            dir_mov_2: mov_dir,
-            dir_or_2: or_dir,
-            coh_mov_1: 0.25,
-            coh_or_1: 0.25,
-            coh_mov_2: 0.25,
-            coh_or_2: 0.25
-        };
+        let trial;
+        
+        if (isDualTask) {
+            // For dual-task paradigms, use the parameters directly
+            // Both tasks are active and should run according to their specified timing
+            trial = {
+                ...params,
+                // Set directions and coherence for both tasks
+                dir_mov_1: mov_dir,
+                dir_or_1: or_dir,
+                dir_mov_2: mov_dir,
+                dir_or_2: or_dir,
+                coh_mov_1: 0.25,
+                coh_or_1: 0.25,
+                coh_mov_2: 0.25,
+                coh_or_2: 0.25
+            };
+        } else {
+            // For single-task paradigms, adjust parameters based on current task
+            trial = {
+                ...params,
+                // Switch the task type based on currentTask
+                task_1: currentTask,
+                // If movement is the current task
+                start_mov_1: currentTask === 'mov' ? params.start_mov_1 : 0,
+                dur_mov_1: currentTask === 'mov' ? params.dur_mov_1 : 0,
+                start_or_1: currentTask === 'or' ? params.start_mov_1 : 0,  // Use same timing as mov_1
+                dur_or_1: currentTask === 'or' ? params.dur_mov_1 : 0,
+                // Distractor timing
+                task_2: currentTask === 'mov' ? 'or' : 'mov',  // Always opposite of task_1
+                start_mov_2: currentTask === 'or' ? params.start_or_2 : 0,  // Only active when main task is orientation
+                dur_mov_2: currentTask === 'or' ? params.dur_or_2 : 0,
+                start_or_2: currentTask === 'mov' ? params.start_or_2 : 0,  // Only active when main task is movement  
+                dur_or_2: currentTask === 'mov' ? params.dur_or_2 : 0,
+                // Set directions and coherence
+                dir_mov_1: mov_dir,
+                dir_or_1: or_dir,
+                dir_mov_2: mov_dir,
+                dir_or_2: or_dir,
+                coh_mov_1: 0.25,
+                coh_or_1: 0.25,
+                coh_mov_2: 0.25,
+                coh_or_2: 0.25
+            };
+        }
 
         sequence.push(trial);
-        console.log(`Trial ${i}: ${currentTask} task, switch probability: ${switchRate}`);
+        
+        if (isDualTask) {
+            console.log(`Trial ${i}: Dual-task paradigm with both motion and orientation tasks`);
+        } else {
+            console.log(`Trial ${i}: ${currentTask} task, switch probability: ${switchRate}`);
+        }
     }
 
     return sequence;
@@ -257,7 +359,7 @@ function sliderToValue(sliderValue) {
     return sliderValue * 0.25;
 }
 
-// Generate trial parameters based on current slider values
+// Generate trial parameters for single-task/task-switching paradigms
 // TODO: Currently go intervals must match cue intervals for proper cue display.
 // This means responses can be made during pre-cue period when stimulus isn't present.
 // Future improvement: Decouple go intervals from cue intervals. That would have to
@@ -293,12 +395,104 @@ function generateTrialParams(switchRate, preCueDuration, distractorDuration) {
     };
 }
 
-function validateTimingParams(params) {
-    if (params.start_1 < 0) {
-        console.warn('Warning: Negative cue start time');
+// Generate trial parameters for dual-task/PRP paradigms
+function generateDualTaskParams(temporalSeparation, cueReduction, preCueDuration) {
+    const baseDuration = 2000; // Base stimulus duration
+    const stimulusStart = 1500;  // Fixed stimulus start time
+    
+    // Calculate SOA based on temporal separation
+    const soaTime = baseDuration * temporalSeparation;
+    
+    // Handle mutual exclusivity between pre-cue and cue reduction
+    let preCueTime = 0;
+    let cueReductionTime = 0;
+    
+    if (cueReduction > 0) {
+        cueReductionTime = cueReduction * baseDuration;
+        preCueTime = 0;
+    } else {
+        preCueTime = preCueDuration * baseDuration;
+        cueReductionTime = 0;
     }
-    if (params.dur_or_2 > params.dur_mov_1) {
+    
+    // Determine paradigm type for visualization/logging purposes
+    let paradigmType;
+    if (temporalSeparation < 0.05) paradigmType = "FULL_DUAL_TASK";
+    else if (temporalSeparation < 0.3) paradigmType = "PRP_SHORT";
+    else if (temporalSeparation < 0.6) paradigmType = "PRP_MEDIUM";
+    else paradigmType = "PRP_LONG";
+    
+    console.log(`Generating ${paradigmType} paradigm with SOA=${soaTime}ms`);
+    
+    // Create the parameters with unified logic
+    return {
+        // First task (movement)
+        task_1: 'mov',
+        start_1: stimulusStart - preCueTime,
+        dur_1: baseDuration + preCueTime,
+        start_mov_1: stimulusStart,
+        dur_mov_1: baseDuration,
+        start_or_1: 0,
+        dur_or_1: 0,
+        start_go_1: stimulusStart - preCueTime,
+        dur_go_1: baseDuration + preCueTime,
+        
+        // Second task (orientation)
+        task_2: 'or',
+        start_2: cueReductionTime > 0 
+            ? stimulusStart + soaTime + cueReductionTime
+            : (stimulusStart + soaTime) - preCueTime,
+        dur_2: cueReductionTime > 0 
+            ? baseDuration - cueReductionTime
+            : baseDuration + preCueTime,
+        start_mov_2: 0,
+        dur_mov_2: 0,
+        start_or_2: stimulusStart + soaTime,
+        dur_or_2: baseDuration,
+        start_go_2: cueReductionTime > 0 
+            ? stimulusStart + soaTime + cueReductionTime
+            : (stimulusStart + soaTime) - preCueTime,
+        dur_go_2: cueReductionTime > 0 
+            ? baseDuration - cueReductionTime
+            : baseDuration + preCueTime
+    };
+}
+
+function validateTimingParams(params) {
+    // Validate dual-task parameters
+    const isDualTask = params.task_1 && params.task_2 && 
+                     ((params.dur_mov_1 > 0 && params.dur_or_2 > 0) || 
+                      (params.dur_or_1 > 0 && params.dur_mov_2 > 0));
+    
+    if (params.start_1 < 0) {
+        console.warn('Warning: Negative cue start time for task 1');
+    }
+    
+    if (params.start_2 < 0) {
+        console.warn('Warning: Negative cue start time for task 2');
+    }
+    
+    if (!isDualTask && params.dur_or_2 > params.dur_mov_1) {
         console.warn('Warning: Distractor duration exceeds main task duration');
+    }
+    
+    if (isDualTask) {
+        // Check if both tasks have appropriate parameters set
+        if (params.task_1 === 'mov' && params.dur_mov_1 <= 0) {
+            console.warn('Warning: Task 1 is movement but duration is zero or negative');
+        }
+        
+        if (params.task_1 === 'or' && params.dur_or_1 <= 0) {
+            console.warn('Warning: Task 1 is orientation but duration is zero or negative');
+        }
+        
+        if (params.task_2 === 'mov' && params.dur_mov_2 <= 0) {
+            console.warn('Warning: Task 2 is movement but duration is zero or negative');
+        }
+        
+        if (params.task_2 === 'or' && params.dur_or_2 <= 0) {
+            console.warn('Warning: Task 2 is orientation but duration is zero or negative');
+        }
     }
 }
 
@@ -353,10 +547,37 @@ async function runExperiment(currentParams) {
 
 // Set up event listeners for sliders and start button
 document.addEventListener('DOMContentLoaded', () => {
-    const sliders = {
+    // Setup paradigm type radio buttons
+    const paradigmRadios = document.querySelectorAll('input[name="paradigm-type"]');
+    const singleTaskParams = document.getElementById('single-task-parameters');
+    const dualTaskParams = document.getElementById('dual-task-parameters');
+    
+    // Enable both radio buttons
+    paradigmRadios.forEach(radio => {
+        radio.disabled = false;
+        radio.addEventListener('change', () => {
+            if (radio.value === 'single-task') {
+                singleTaskParams.style.display = 'flex';
+                dualTaskParams.style.display = 'none';
+            } else if (radio.value === 'dual-task') {
+                singleTaskParams.style.display = 'none';
+                dualTaskParams.style.display = 'flex';
+            }
+        });
+    });
+    
+    // Configure single-task sliders
+    const singleTaskSliders = {
         switchRate: document.getElementById('switch-rate'),
         preCue: document.getElementById('pre-cue'),
         distractor: document.getElementById('distractor')
+    };
+    
+    // Configure dual-task sliders
+    const dualTaskSliders = {
+        temporalSeparation: document.getElementById('temporal-separation'),
+        cueReduction: document.getElementById('second-task-cue-reduction'),
+        preCue: document.getElementById('dual-pre-cue')
     };
 
     function updateValueDisplay(slider) {
@@ -364,22 +585,62 @@ document.addEventListener('DOMContentLoaded', () => {
         valueDisplay.textContent = sliderToValue(slider.value).toFixed(2);
     }
     
-    // Update value displays when sliders change
-    Object.entries(sliders).forEach(([key, slider]) => {
+    // Update value displays when sliders change for single-task paradigms
+    Object.entries(singleTaskSliders).forEach(([key, slider]) => {
         slider.addEventListener('input', () => {
             updateValueDisplay(slider);
         });
-
-    updateValueDisplay(slider);
+        updateValueDisplay(slider);
+    });
+    
+    // Update value displays when sliders change for dual-task paradigms
+    Object.entries(dualTaskSliders).forEach(([key, slider]) => {
+        slider.addEventListener('input', () => {
+            updateValueDisplay(slider);
+            
+            // Implement mutual exclusivity between pre-cue and cue reduction
+            if (key === 'cueReduction' && sliderToValue(slider.value) > 0) {
+                // If cue reduction is active, disable pre-cue
+                dualTaskSliders.preCue.value = 0;
+                updateValueDisplay(dualTaskSliders.preCue);
+                dualTaskSliders.preCue.disabled = true;
+            } else if (key === 'cueReduction' && sliderToValue(slider.value) === 0) {
+                // Re-enable pre-cue when cue reduction is zero
+                dualTaskSliders.preCue.disabled = false;
+            }
+            
+            if (key === 'preCue' && sliderToValue(slider.value) > 0) {
+                // If pre-cue is active, disable cue reduction
+                dualTaskSliders.cueReduction.value = 0;
+                updateValueDisplay(dualTaskSliders.cueReduction);
+                dualTaskSliders.cueReduction.disabled = true;
+            } else if (key === 'preCue' && sliderToValue(slider.value) === 0) {
+                // Re-enable cue reduction when pre-cue is zero
+                dualTaskSliders.cueReduction.disabled = false;
+            }
+        });
+        updateValueDisplay(slider);
     });
     
     // Handle experiment start
     document.getElementById('start-experiment').addEventListener('click', () => {
-        const params = generateTrialParams(
-            sliderToValue(sliders.switchRate.value),
-            sliderToValue(sliders.preCue.value),
-            sliderToValue(sliders.distractor.value)
-        );
+        // Get selected paradigm type
+        const paradigmType = document.querySelector('input[name="paradigm-type"]:checked').value;
+        
+        let params;
+        if (paradigmType === 'single-task') {
+            params = generateTrialParams(
+                sliderToValue(singleTaskSliders.switchRate.value),
+                sliderToValue(singleTaskSliders.preCue.value),
+                sliderToValue(singleTaskSliders.distractor.value)
+            );
+        } else if (paradigmType === 'dual-task') {
+            params = generateDualTaskParams(
+                sliderToValue(dualTaskSliders.temporalSeparation.value),
+                sliderToValue(dualTaskSliders.cueReduction.value),
+                sliderToValue(dualTaskSliders.preCue.value)
+            );
+        }
         
         drawTimeline(params);
         runExperiment(params);

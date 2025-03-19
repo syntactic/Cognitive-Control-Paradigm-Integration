@@ -12,7 +12,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-	    color: white;
+            color: white;
         }
         #experiment-container {
             width: 100%;
@@ -117,11 +117,11 @@
                     <input type="radio" name="paradigm-type" value="single-task" checked> Single-Task/Task-Switching
                 </label>
                 <label>
-                    <input type="radio" name="paradigm-type" value="dual-task" disabled> Dual-Task/PRP
+                    <input type="radio" name="paradigm-type" value="dual-task"> Dual-Task/PRP
                 </label>
             </div>
             
-            <div class="parameter-sliders">
+            <div class="parameter-sliders" id="single-task-parameters">
                 <div class="slider-container">
                     <label for="switch-rate">Switch Rate: <span id="switch-rate-value">0</span></label>
                     <input type="range" id="switch-rate" min="0" max="4" step="1" value="0.0">
@@ -135,6 +135,23 @@
                 <div class="slider-container">
                     <label for="distractor">Distractor Duration: <span id="distractor-value">0</span></label>
                     <input type="range" id="distractor" min="0" max="4" step="1" value="0.0">
+                </div>
+            </div>
+            
+            <div class="parameter-sliders" id="dual-task-parameters" style="display: none;">
+                <div class="slider-container">
+                    <label for="temporal-separation">Temporal Separation (SOA): <span id="temporal-separation-value">0</span></label>
+                    <input type="range" id="temporal-separation" min="0" max="4" step="1" value="0.0">
+                </div>
+                
+                <div class="slider-container">
+                    <label for="second-task-cue-reduction">Second Task Cue Reduction: <span id="second-task-cue-reduction-value">0</span></label>
+                    <input type="range" id="second-task-cue-reduction" min="0" max="4" step="1" value="0.0">
+                </div>
+                
+                <div class="slider-container">
+                    <label for="dual-pre-cue">Pre-cue Duration: <span id="dual-pre-cue-value">0</span></label>
+                    <input type="range" id="dual-pre-cue" min="0" max="4" step="1" value="0.0">
                 </div>
             </div>
 
