@@ -1,5 +1,8 @@
-#effect #phenomenon
-
+---
+tags:
+  - effect
+  - phenomenon
+---
 Definition: A performance decrement (typically slower reaction times and/or increased error rates) observed when participants switch from performing one task to performing a different task, compared to when they repeat the same task.
 
 **Calculation:** Switch Cost = RT_switch_trial - RT_repeat_trial

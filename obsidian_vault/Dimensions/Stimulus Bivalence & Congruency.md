@@ -1,5 +1,8 @@
-#dimension #stimulus_property
-
+---
+tags:
+  - dimension
+  - stimulus_property
+---
 Definition: Describes properties of a stimulus object, particularly its relevance to multiple potential task rules and the relationship between those interpretations.
 
 - **Bivalence:** A stimulus is **bivalent** if it possesses features relevant to the rules of two or more tasks that could potentially be active. A stimulus is **univalent** if its features are only relevant to one task.

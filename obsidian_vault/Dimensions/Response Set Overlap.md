@@ -17,7 +17,7 @@ Definition: Describes the relationship between the sets of possible motor respon
 - [[Yeung & Monsell (2003)]] showed that manipulating response set overlap (making them disjoint) reversed the asymmetry of switch costs.
 - Studies on ideomotor compatibility in [[Dual-Task Performance & PRP|PRP]] often rely on disjoint modalities (e.g., manual vs. vocal).
 
-Super Exp. Mapping: Directly controlled by the movementKeyMap and orientationKeyMap parameters, and the specific response values defined in the trial sequence. Your extension to allow up/down (w/s) responses for orientation, separate from left/right (a/d) for motion, explicitly enables the "Disjoint-Effector (Same Modality - Manual)" case.
+Super Exp. Mapping: Directly controlled by the movementKeyMap and orientationKeyMap parameters, and the specific response values defined in the trial sequence. The extension to allow up/down (w/s) responses for orientation, separate from left/right (a/d) for motion, explicitly enables the "Disjoint-Effector (Same Modality - Manual)" case.
 
 **Key Literature:**
 
