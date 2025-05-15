@@ -1,0 +1,4 @@
+*   **Task Difficulty:** Should it be added as a formal derived dimension (e.g., mapping to SE `coh_` parameters)?
+	*   How to consistently operationalize Task Difficulty from diverse literature?
+*   **N > 2 Task Pools:** How to best represent experiments with more than two available task sets (e.g., [[Rubin & Meiran (2005)]] Exp2 Conditions: MWC, AMWBC, UMWBC) when SE is structured for two tasks per trial? Should we exclude the experiment?
+* **Trial Sequence Format:** Besides switch rate, some studies (e.g., [[Yeung & Monsell (2003)]]) have a predictable task switching format like AABB. We can create trial sequences like that in the Super Experiment, but how should we encode it such that it's compatible with PCA? 
