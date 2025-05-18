@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Ongoing Questions.md",
+                "file": "Dimensions/RSI (Response Stimulus Interval).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ongoing Questions"
+              "title": "RSI (Response Stimulus Interval)"
             }
           },
           {
@@ -444,13 +444,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Ongoing Questions.md",
+                "file": "Dimensions/RSI (Response Stimulus Interval).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Ongoing Questions"
+              "title": "Outline of RSI (Response Stimulus Interval)"
             }
           }
         ],
@@ -472,35 +472,35 @@
   },
   "active": "a39f77d66e3724d6",
   "lastOpenFiles": [
+    "Papers/Meiran (1996).md",
+    "Dimensions/RSI (Response Stimulus Interval).md",
     "Papers/Stephan & Koch (2010).md",
+    "Papers/Rogers & Monsell (1995).md",
+    "Dimensions/Stimulus Bivalence & Congruency.md",
+    "Dimensions/Switch Rate.md",
+    "Dimensions/Task Difficulty.md",
+    "Dimensions/Task Cue Type.md",
+    "Dimensions/Response Set Overlap.md",
+    "Dual-Task Performance & PRP.md",
+    "Derived Dimensions vs. Low-Level Parameters.md",
+    "Theoretical Concepts/Task-Set Reconfiguration.md",
+    "Theoretical Concepts/Task-Set Inertia.md",
+    "Theoretical Concepts/Crosstalk.md",
+    "Theoretical Concepts/Capacity Sharing.md",
+    "Theoretical Concepts/Bottleneck Theories.md",
+    "Papers/Sigman & Dehaene (2006).md",
+    "Papers/Koch et al. (2018).md",
+    "Study Limitations.md",
     "Ongoing Questions.md",
+    "Thesis Outline.md",
     "Papers/Yeung & Monsell (2003).md",
     "Papers/Rubin & Meiran (2005).md",
-    "Thesis Outline.md",
-    "Study Limitations.md",
-    "Papers/Sigman & Dehaene (2006).md",
-    "Papers/Rogers & Monsell (1995).md",
-    "Dual-Task Performance & PRP.md",
-    "Papers/Meiran (1996).md",
     "repomix-output.xml",
     "Papers/Jersild (1927).md",
     "Papers/Stroop (1935).md",
     "Papers/Jersild (1927)",
     "Papers/Telford (1931).md",
-    "Dimensions/Stimulus Bivalence & Congruency.md",
-    "Effects/Switch Cost.md",
-    "Theoretical Concepts/Capacity Sharing.md",
-    "Dimensions/Task Cue Type.md",
     "Untitled",
-    "Papers/Koch et al. (2018).md",
-    "Dimensions/SOA (Stimulus Onset Asynchrony).md",
-    "Dimensions/Response Set Overlap.md",
-    "Dimensions/N_Tasks.md",
-    "Dimensions/CSI (Cue-Stimulus Interval).md",
-    "Theoretical Concepts/Task-Set Reconfiguration.md",
-    "Theoretical Concepts/Task-Set Inertia.md",
-    "Theoretical Concepts/Crosstalk.md",
-    "Theoretical Concepts/Bottleneck Theories.md",
     "Theoretical Concepts",
     "Papers",
     "Effects",
