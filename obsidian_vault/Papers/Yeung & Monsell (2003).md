@@ -33,6 +33,7 @@ To investigate the "paradoxical" asymmetry in [[Effects/Switch Cost|Switch Costs
         *   **Category Overlap (Modality Disjoint):** Spoken digit names (strong); manual keypresses 1-4 (arbitrarily mapped) for color (weak).
         *   **No Overlap:** Spoken digit names (strong); manual keypresses for directions (arbitrarily mapped) for color (weak).
 3.  **Task Strength/Familiarity:** Inherently manipulated by choosing tasks like word/digit naming (strong) versus color naming, odd/even, or tens-complement (weaker).
+4. [[RSI (Response Stimulus Interval)]]: 1000ms (Exp 1), 1200ms (Exp 2), 1000ms (Exp 3)
 
 **Key Findings:**
 

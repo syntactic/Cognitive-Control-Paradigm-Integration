@@ -1,63 +1,79 @@
-Experiment,# of Tasks per Trial,SOA,CSI,Switch Rate,Stimulus Bivalence,Response Set Overlap,Task Cue Type,Response-Stimulus Interval,Task 1 Difficulty,Task 2 Difficulty,Task 1 Type,Task 2 Type,Notes
-Telford 1931 Auditory RT,2,500,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA)
-Telford 1931 Auditory RT,2,1000,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA)
-Telford 1931 Auditory RT,2,2000,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA)
-Telford 1931 Auditory RT,2,4000,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA)
-Telford 1931 Line Length,2,1000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA)
-Telford 1931 Line Length,2,2000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA)
-Telford 1931 Line Length,2,4000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA)
-Telford 1931 Line Length,2,8000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA)
-Telford 1931 Number Assoc. (Adults) SOA 1s,2,1000,0,0,Univalent,Identical,None/Implict,Not Specified,3,3,Number Association,Number Association,Both tasks were of the same task (i.e. two association tasks in succession with varying SOA)
-Telford 1931 Number Assoc. (Adults) SOA 2s,,2000,0,0,Univalent,Identical,None/Implict,Not Specified,3,3,Number Association,Number Association,
-Telford 1931 Number Assoc. (Adults) SOA 4s,,4000,0,0,Univalent,Identical,None/Implict,Not Specified,3,3,Number Association,Number Association,
-Telford 1931 Number Assoc. (Adults) SOA 8s,,8000,0,0,Univalent,Identical,None/Implict,Not Specified,3,3,Number Association,Number Association,
-Telford 1931 Number Assoc. (Adults) SOA 16s,,16000,0,0,Univalent,Identical,None/Implict,Not Specified,3,3,Number Association,Number Association,
-Stroop 1935 Word Reading,1,0,0,0,Bivalent-Incongruent,N/A,None/Implicit,Not Specified,1,N/A,Word Reading,,
-Stroop 1935 Color Naming,1,0,0,0,Bivalent-Incongruent,N/A,None/Implict,Not Specified,3,N/A,Color Naming,,
-Jersild 1927 Calculation,1,N/A,0,100,Bivalent-Neutral,Identical,None/Implicit,Not Specified,3,3,Add 6,Subtract 3,"This is an example of the larger class of ""Calculation"" experiments. Jersild uses the words ""cost of shift"" to mean ""switch cost""."
-Jersild 1927 Controlled Association,1,N/A,0,100,Univalent,Disjoint,None/Implicit,Not Specified,3,3,Name Opposite,Name Object,"Jersild uses the words ""cost of shift"" to mean ""switch cost""."
-Jersild 1927 Controlled Association + Calculation,1,N/A,0,100,Univalent,Disjoint,None/Implicit,Not Specified,3,3,Name Opposite,Subtract 3,"Jersild uses the words ""cost of shift"" to mean ""switch cost""."
-Jersild 1927 Color Naming + Form Naming,1,N/A,0,100,Bivalent-Neutral,Disjoint,None/Implicit,Not Specified,2,2,Name Color,Name Form,"Jersild uses the words ""cost of shift"" to mean ""switch cost""."
-Hazeltine et al. (2006) Exp 1a,2,0,0,0,Univalent,Disjoint - Modality (Non-Standard),None/Implicit,500,3,3,Auditory Choice RT,Word Categorization,Visual/Vocal and Auditory/Manual S-R Pairings
-Hazeltine et al. (2006) Exp 1b,2,0,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,3,Word Categorization,Auditory Choice RT,"Visual/Manual and Auditory/Vocal S-R Pairings, previously trained in 1a"
-Hazeltine et al. (2006) Exp 2a,2,0,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,3,Word Categorization (Manual),Auditory Choice RT (Vocal),
-Hazeltine et al. (2006) Exp 2a,2,0,0,0,Univalent,Disjoint - Modality (Non-Standard),None/Implicit,500,3,3,Auditory Choice RT (Manual),Word Categorization (Vocal),
-Hazeltine et al. (2006) Exp 2b,2,+/-50,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,3,Word Categorization (Manual),Auditory Choice CT (Vocal),
-Hazeltine et al. (2006) Exp 2b,2,+/-50,0,0,Univalent,Disjoint - Modality (Non-Standard),None/Implicit,500,3,3,Auditory Choice RT (Manual),Word Categorization (Vocal),
-Hazeltine et al. (2006) Exp 3,2,0,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,4,Word Categorization (Manual),Auditory Quality RT (Vocal),"They made the auditory task from a tone discrimination to a quality discrimination, making it harder"
-Rogers & Monsell 1995 Experiment 1,1,0,0,33%,Bivalent,Identical,Implicit,150,2,2,Letter Identification,Number Identification,RSI was manipulated - this isn't possible in the Super Experiment
-Rogers & Monsell 1995 Experiment 2,1,0,0,33%,Bivalent,Identical,Implicit,"Varied (150-1200ms, random)",2,2,Letter Identification,Number Identification,"RSI was random across trials, showing that when it's unpredictable that switch costs aren't reduced."
-Rogers & Monsell 1995 Experiment 3 150ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,Implicit,150,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 3 300ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,Implicit,300,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 3 450ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,Implicit,450,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 3 600ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,Implicit,600,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 3 1200ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,Implicit,1200,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 4 150ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,Implicit,150,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 4 300ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,Implicit,300,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 4 450ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,Implicit,450,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 4 600ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,Implicit,600,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 4 1200ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,Implicit,1200,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 5 Neutral Irrelevant,1,0,0,33%,Bivalent-Neutral,Identical,Implicit,1000,2,2,Letter Identification,Number Identification,They made the irrelevant task's character neutral (#)
-Rogers & Monsell 1995 Experiment 5 Competing Irrelevant,1,0,0,33%,Bivalent,Identical,Implicit,1000,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 6 AABB,1,0,0,33%,Bivalent,Identical,Implicit,450,2,2,Letter Identification,Number Identification,
-Rogers & Monsell 1995 Experiment 6 AAAABBBB,1,0,0,14%,Bivalent,Identical,Implicit,450,2,2,Letter Identification,Number Identification,
-Meiran 1996 Exp 1 Short CSI,1,N/A,203,50%,Bivalent,Identical,Arbitrary,1341,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 1 Long CSI,1,N/A,1423,50%,Bivalent,Identical,Arbitrary,2561,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 2 Short CSI,1,N/A,216,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 2 Long CSI,1,N/A,1716,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 3,1,N/A,216,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),Experiment 3 simply had more incompatible trials than experiment 2. Not sure how to represent this.
-Meiran 1996 Exp 3,1,N/A,1716,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 4,1,N/A,132,50%,Bivalent,Identical,Arbitrary,1548,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 4,1,N/A,1632,50%,Bivalent,Identical,Arbitrary,3048,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),
-Meiran 1996 Exp 5 Short CSI,1,N/A,659,50%,Bivalent,Identical,Arbitrary,1814,2,2,Color Discrimination,Shape Discrimination,
-Meiran 1996 Exp 5 Long CSI,1,N/A,1908,50%,Bivalent,Identical,Arbitrary,3063,2,2,Color Discrimination,Shape Discrimination,
-Stephan & Koch (2010) Standard S-R Pairing,1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Standard),Arbitrary,600,2,2,Auditory Location (Vocal),Spatial Location (Manual),
-Stephan & Koch (2010) Non-Standard S-R Pairing,1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Non-Standard),Arbitrary,600,2,2,Auditory Location (Manual),Spatial Location (Vocal),
-"Stephan & Koch (2010) Standard S-R Pairing, Random RSI",1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Standard),Implicit,"Varied (randomly between two values: 600, 1600ms)",2,2,Auditory Location (Vocal),Spatial Location (Manual),This and the next four manipulated RSI
-"Stephan & Koch (2010) Non-Standard S-R Pairing, Random RSI",1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Non-Standard),Implicit,"Varied (randomly between two values: 600, 1600ms)",2,2,Auditory Location (Manual),Spatial Location (Vocal),
-Rubin & Meiran (2005) Exp 1 Uni NoFilt ShortCSI,1,N/A,100,50%,Univalent,Disjoint-Effector (different keys for shape vs. color),Arbitrary,1600,3,3,Shape Discrimination,Color Discrimination,
-Rubin & Meiran (2005) Exp 1 Uni NoFilt LongCSI,1,N/A,1000,50%,Univalent,Disjoint-Effector (different keys for shape vs. color),Arbitrary,2500,3,3,Shape Discrimination,Color Discrimination,
-Rubin & Meiran (2005) Exp 1 Uni+F ShortCSI,1,N/A,100,50%,Univalent,Disjoint-Effector (different keys for shape vs. color),Arbitrary,1600,3,3,Shape Discrimination,Color Discrimination,
-Rubin & Meiran (2005) Exp 1 Uni+F LongCSI,1,N/A,1000,50%,Univalent,Disjoint-Effector (different keys for shape vs. color),Arbitrary,2500,3,3,Shape Discrimination,Color Discrimination,
-Rubin & Meiran (2005) Exp 1 Biv+F ShortCSI,1,N/A,100,50%,Bivalent-Neutral,Disjoint-Effector (different keys for shape vs. color),Arbitrary,1600,3,3,Shape Discrimination,Color Discrimination,
-Rubin & Meiran (2005) Exp 1 Biv+F LongCSI,1,N/A,1000,50%,Bivalent-Neutral,Disjoint-Effector (different keys for shape vs. color),Arbitrary,2500,3,3,Shape Discrimination,Color Discrimination,
+Experiment,Number of Tasks,SOA,CSI,Switch Rate,Stimulus Valency,Response Set Overlap,Task Cue Type,RSI,Task 1 Difficulty,Task 2 Difficulty,Task 1 Type,Task 2 Type,Notes,Super_Experiment_Mapping_Notes
+Telford 1931 Auditory RT,2,500,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA),
+Telford 1931 Auditory RT,2,1000,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA),
+Telford 1931 Auditory RT,2,2000,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA),
+Telford 1931 Auditory RT,2,4000,0,0,Univalent,Identical,None/Implicit,Not Specified,1,1,Auditory RT,Auditory RT,Both tasks were of the same task (i.e. two auditory response tasks in succession with varying SOA),
+Telford 1931 Line Length,2,1000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA),
+Telford 1931 Line Length,2,2000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA),
+Telford 1931 Line Length,2,4000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA),
+Telford 1931 Line Length,2,8000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Line Length Comparison,Line Length Comparison,Both tasks were of the same task (i.e. two length comparison tasks in succession with varying SOA),
+Telford 1931 Number Assoc. (Adults) SOA 1s,2,1000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Number Association,Number Association,Both tasks were of the same task (i.e. two association tasks in succession with varying SOA),
+Telford 1931 Number Assoc. (Adults) SOA 2s,2,2000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Number Association,Number Association,,
+Telford 1931 Number Assoc. (Adults) SOA 4s,2,4000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Number Association,Number Association,,
+Telford 1931 Number Assoc. (Adults) SOA 8s,2,8000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Number Association,Number Association,,
+Telford 1931 Number Assoc. (Adults) SOA 16s,2,16000,0,0,Univalent,Identical,None/Implicit,Not Specified,3,3,Number Association,Number Association,,
+Stroop 1935 Word Reading,1,0,0,0,Bivalent-Incongruent,N/A,None/Implicit,Not Specified,1,N/A,Word Reading,,,
+Stroop 1935 Color Naming,1,0,0,0,Bivalent-Incongruent,N/A,None/Implicit,Not Specified,3,N/A,Color Naming,,,
+Jersild 1927 Calculation,1,N/A,0,100,Bivalent-Neutral,Identical,None/Implicit,Not Specified,3,3,Add 6,Subtract 3,"This is an example of the larger class of ""Calculation"" experiments. Jersild uses the words ""cost of shift"" to mean ""switch cost"".",
+Jersild 1927 Controlled Association,1,N/A,0,100,Univalent,Disjoint - Category (Same Modality),None/Implicit,Not Specified,3,3,Name Opposite,Name Object,"Jersild uses the words ""cost of shift"" to mean ""switch cost"".",
+Jersild 1927 Controlled Association + Calculation,1,N/A,0,100,Univalent,Disjoint - Modality,None/Implicit,Not Specified,3,3,Name Opposite,Subtract 3,"Jersild uses the words ""cost of shift"" to mean ""switch cost"".",
+Jersild 1927 Color Naming + Form Naming,1,N/A,0,100,Bivalent-Neutral,Disjoint - Category (Same Modality),None/Implicit,Not Specified,2,2,Name Color,Name Form,"Jersild uses the words ""cost of shift"" to mean ""switch cost"".",
+Hazeltine et al. (2006) Exp 1a,2,0,0,0,Univalent,Disjoint - Modality (Non-Standard),None/Implicit,500,3,3,Auditory Choice RT,Word Categorization,Visual/Vocal and Auditory/Manual S-R Pairings,
+Hazeltine et al. (2006) Exp 1b,2,0,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,3,Word Categorization,Auditory Choice RT,"Visual/Manual and Auditory/Vocal S-R Pairings, previously trained in 1a",
+Hazeltine et al. (2006) Exp 2a,2,0,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,3,Word Categorization (Manual),Auditory Choice RT (Vocal),,
+Hazeltine et al. (2006) Exp 2a,2,0,0,0,Univalent,Disjoint - Modality (Non-Standard),None/Implicit,500,3,3,Auditory Choice RT (Manual),Word Categorization (Vocal),,
+Hazeltine et al. (2006) Exp 2b,2,50,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,3,Word Categorization (Manual),Auditory Choice CT (Vocal),"Exp 2b had mixed block, so this row and the following row were both represented in a single block, where the first half presented the word categorization task first and the second half presented the auditory choice task first.",
+Hazeltine et al. (2006) Exp 2b,2,50,0,0,Univalent,Disjoint - Modality (Non-Standard),None/Implicit,500,3,3,Auditory Choice RT (Manual),Word Categorization (Vocal),,
+Hazeltine et al. (2006) Exp 3,2,0,0,0,Univalent,Disjoint - Modality (Standard),None/Implicit,500,3,4,Word Categorization (Manual),Auditory Quality RT (Vocal),"They made the auditory task from a tone discrimination to a quality discrimination, making it harder",
+Rogers & Monsell 1995 Experiment 1,1,0,0,33%,Bivalent,Identical,None/Implicit,150,2,2,Letter Identification,Number Identification,RSI was manipulated - this isn't possible in the Super Experiment,AABB trial sequence
+Rogers & Monsell 1995 Experiment 2,1,0,0,33%,Bivalent,Identical,None/Implicit,"Varied (Uniform: 150, 1200)",2,2,Letter Identification,Number Identification,"RSI was random across trials, showing that when it's unpredictable that switch costs aren't reduced.",AABB trial sequence
+Rogers & Monsell 1995 Experiment 3 150ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,None/Implicit,150,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 3 300ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,None/Implicit,300,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 3 450ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,None/Implicit,450,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 3 600ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,None/Implicit,600,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 3 1200ms RSI w/crosstalk,1,0,0,33%,Bivalent,Identical,None/Implicit,1200,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 4 150ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,None/Implicit,150,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 4 300ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,None/Implicit,300,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 4 450ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,None/Implicit,450,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 4 600ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,None/Implicit,600,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 4 1200ms RSI no crosstalk,1,0,0,33%,Bivalent-Neutral,Identical,None/Implicit,1200,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 5 Neutral Irrelevant,1,0,0,33%,Bivalent-Neutral,Identical,None/Implicit,1000,2,2,Letter Identification,Number Identification,They made the irrelevant task's character neutral (#),AABB trial sequence
+Rogers & Monsell 1995 Experiment 5 Competing Irrelevant,1,0,0,33%,Bivalent,Identical,None/Implicit,1000,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 6 AABB,1,0,0,33%,Bivalent,Identical,None/Implicit,450,2,2,Letter Identification,Number Identification,,AABB trial sequence
+Rogers & Monsell 1995 Experiment 6 AAAABBBB,1,0,0,14%,Bivalent,Identical,None/Implicit,450,2,2,Letter Identification,Number Identification,,AAAABBBB trial sequence
+Meiran 1996 Exp 1 Short CSI,1,N/A,203,50%,Bivalent,Identical,Arbitrary,1341,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 1 Long CSI,1,N/A,1423,50%,Bivalent,Identical,Arbitrary,2561,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 2 Short CSI,1,N/A,216,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 2 Long CSI,1,N/A,1716,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 3,1,N/A,216,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),Experiment 3 simply had more incompatible trials than experiment 2. Not sure how to represent this.,
+Meiran 1996 Exp 3,1,N/A,1716,50%,Bivalent,Identical,Arbitrary,1848,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 4,1,N/A,132,50%,Bivalent,Identical,Arbitrary,1548,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 4,1,N/A,1632,50%,Bivalent,Identical,Arbitrary,3048,2,2,Spatial Classification (Left/Right),Spatial Classification (Up/Down),,
+Meiran 1996 Exp 5 Short CSI,1,N/A,659,50%,Bivalent,Identical,Arbitrary,1814,2,2,Color Discrimination,Shape Discrimination,,
+Meiran 1996 Exp 5 Long CSI,1,N/A,1908,50%,Bivalent,Identical,Arbitrary,3063,2,2,Color Discrimination,Shape Discrimination,,
+Stephan & Koch (2010) Standard S-R Pairing,1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Standard),None/Implicit,600,2,2,Auditory Location (Vocal),Spatial Location (Manual),,
+Stephan & Koch (2010) Non-Standard S-R Pairing,1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Non-Standard),None/Implicit,600,2,2,Auditory Location (Manual),Spatial Location (Vocal),,
+"Stephan & Koch (2010) Standard S-R Pairing, Random RSI",1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Standard),None/Implicit,"Varied (choice: 600, 1600)",2,2,Auditory Location (Vocal),Spatial Location (Manual),This and the next four manipulated RSI,
+"Stephan & Koch (2010) Non-Standard S-R Pairing, Random RSI",1,N/A,0,50%,Bivalent-Neutral,Disjoint - Modality (Non-Standard),None/Implicit,"Varied (choice: 600, 1600)",2,2,Auditory Location (Manual),Spatial Location (Vocal),,
+Rubin & Meiran (2005) Exp 1 Uni NoFilt ShortCSI,1,N/A,100,50%,Univalent,Disjoint - Effector,Arbitrary,1600,3,3,Shape Discrimination,Color Discrimination,,
+Rubin & Meiran (2005) Exp 1 Uni NoFilt LongCSI,1,N/A,1000,50%,Univalent,Disjoint - Effector,Arbitrary,2500,3,3,Shape Discrimination,Color Discrimination,,
+Rubin & Meiran (2005) Exp 1 Uni+F ShortCSI,1,N/A,100,50%,Univalent,Disjoint - Effector,Arbitrary,1600,3,3,Shape Discrimination,Color Discrimination,,
+Rubin & Meiran (2005) Exp 1 Uni+F LongCSI,1,N/A,1000,50%,Univalent,Disjoint - Effector,Arbitrary,2500,3,3,Shape Discrimination,Color Discrimination,,
+Rubin & Meiran (2005) Exp 1 Biv+F ShortCSI,1,N/A,100,50%,Bivalent-Neutral,Disjoint - Effector,Arbitrary,1600,3,3,Shape Discrimination,Color Discrimination,,
+Rubin & Meiran (2005) Exp 1 Biv+F LongCSI,1,N/A,1000,50%,Bivalent-Neutral,Disjoint - Effector,Arbitrary,2500,3,3,Shape Discrimination,Color Discrimination,,
+Yeung & Monsell (2003) Exp 1 NoDelay - Incongruent Trials,1,0,0,33%,Bivalent-Incongruent,Identical,None/Implicit,1000,2,3,Word Naming (Vocal),Color Naming (Vocal),Analysis focuses on incongruent Stroop trials,AABB trial sequence
+Yeung & Monsell (2003) Exp 1 NoDelay - Neutral Trials,1,0,0,33%,Univalent,Identical,None/Implicit,1000,2,3,Word Naming (Vocal),Color Naming (Vocal),Analysis focuses on neutral (control) Stroop trials,AABB trial sequence
+Yeung & Monsell (2003) Exp 1 160ms delay - Incongruent Trials,1,160,0,33%,Bivalent-Incongruent,Identical,None/Implicit,1000,2,3,Word Naming (Vocal),Color Naming (Vocal),,AABB trial sequence
+Yeung & Monsell (2003) Exp 1 160ms delay - Neutral Trials,1,160,0,33%,Univalent,Identical,None/Implicit,1000,2,3,Word Naming (Vocal),Color Naming (Vocal),,AABB trial sequence
+Yeung & Monsell (2003) Exp 1 320ms delay - Incongruent Trials,1,320,0,33%,Bivalent-Incongruent,Identical,None/Implicit,1000,2,3,Word Naming (Vocal),Color Naming (Vocal),,AABB trial sequence
+Yeung & Monsell (2003) Exp 1 320ms delay - Neutral Trials,1,320,0,33%,Univalent,Identical,None/Implicit,1000,2,3,Word Naming (Vocal),Color Naming (Vocal),,AABB trial sequence
+Yeung & Monsell (2003) Exp 2a,1,N/A,0,33%,Bivalent-Neutral,Disjoint - Category (Same Modality),None/Implicit,1200,2,3,Digit Naming (Stronger),Odd/Even Classification (Weaker),,AABB trial sequence
+Yeung & Monsell (2003) Exp 2b,1,N/A,0,33%,Bivalent-Neutral,Identical,None/Implicit,1200,2,4,Digit Naming (Stronger),Tens-Complement Naming (Weaker),,AABB trial sequence
+Yeung & Monsell (2003) Exp 3 Full Overlap - Incongruent Trials,1,0,0,33%,Bivalent-Incongruent,Identical,None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Spoken Digit (Vocal),"Analysis focuses on incongruent trials, Full Response Overlap",AABB trial sequence
+Yeung & Monsell (2003) Exp 3 Full Overlap - Neutral Trials,1,0,0,33%,Univalent,Identical,None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Spoken Digit (Vocal),"Analysis focuses on neutral trials, Full Response Overlap",AABB trial sequence
+Yeung & Monsell (2003) Exp 3 Modality Overlap - Incongruent Trials,1,0,0,33%,Bivalent-Incongruent,Disjoint - Category (Same Modality),None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Spoken Direction (Vocal),Modality Overlap Group,AABB trial sequence
+Yeung & Monsell (2003) Exp 3 Modality Overlap - Neutral Trials,1,0,0,33%,Univalent,Disjoint - Category (Same Modality),None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Spoken Direction (Vocal),Modality Overlap Group,AABB trial sequence
+Yeung & Monsell (2003) Exp 3 Category Overlap - Incongruent Trials,1,0,0,33%,Bivalent-Incongruent,Disjoint - Modality,None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Manual Digit Keypress (Manual),Category Overlap Group,AABB trial sequence
+Yeung & Monsell (2003) Exp 3 Category Overlap - Neutral Trials,1,0,0,33%,Univalent,Disjoint - Modality,None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Manual Digit Keypress (Manual),Category Overlap Group,AABB trial sequence
+Yeung & Monsell (2003) Exp 3 No Overlap - Incongruent Trials,1,0,0,33%,Bivalent-Incongruent,Disjoint - Modality,None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Manual Direction Keypress (Manual),No Overlap Group,AABB trial sequence
+Yeung & Monsell (2003) Exp 3 No Overlap - Neutral Trials,1,0,0,33%,Univalent,Disjoint - Modality,None/Implicit,1000,2,3,"Digit Naming (Stronger, Vocal)",Color -> Manual Direction Keypress (Manual),No Overlap Group,AABB trial sequence
