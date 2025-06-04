@@ -276,6 +276,127 @@ function drawTimeline(params) {
         paradigmLabel.textContent = paradigmType;
         g.appendChild(paradigmLabel);
     }
+    
+    // Add congruency information for all paradigms
+    if (params.responseSetRelationship || params.stimulusCongruency) {
+        const congruencyLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        congruencyLabel.setAttribute("x", width / 2);
+        congruencyLabel.setAttribute("y", height + (isDualTask ? 70 : 50));
+        congruencyLabel.setAttribute("text-anchor", "middle");
+        congruencyLabel.setAttribute("fill", "#FFA500");
+        congruencyLabel.setAttribute("font-size", "12px");
+        congruencyLabel.setAttribute("font-weight", "bold");
+        
+        const responseSet = params.responseSetRelationship || 'parallel';
+        const congruency = params.stimulusCongruency || 'neutral';
+        let congruencyText = `${responseSet.charAt(0).toUpperCase() + responseSet.slice(1)} Response Set`;
+        
+        if (responseSet === 'parallel' && congruency !== 'neutral') {
+            congruencyText += ` - ${congruency.charAt(0).toUpperCase() + congruency.slice(1)} Stimuli`;
+        }
+        
+        congruencyLabel.textContent = congruencyText;
+        g.appendChild(congruencyLabel);
+    }
+}
+
+// Helper functions for congruency control
+function getKeyMappingsFromConfig() {
+    // Default key mappings based on response set relationship
+    const config = {
+        parallel: {
+            movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
+            orientationKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' }  // Same as movement for parallel
+        },
+        orthogonal: {
+            movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
+            orientationKeyMap: { 90: 'w', 270: 's', 180: 'a', 0: 'd' }  // Orientation uses up/down for orthogonal
+        }
+    };
+    return config;
+}
+
+function getConceptualResponse(direction, keyMap) {
+    // Map direction to conceptual response based on key mapping
+    const key = keyMap[direction];
+    if (key === 'a') return 'left';
+    if (key === 'd') return 'right';
+    if (key === 'w') return 'up';
+    if (key === 's') return 'down';
+    return null;
+}
+
+function getDirectionForConceptualResponse(conceptualResponse, keyMap) {
+    // Find direction that maps to the desired conceptual response
+    for (const [direction, key] of Object.entries(keyMap)) {
+        if (getConceptualResponse(parseInt(direction), keyMap) === conceptualResponse) {
+            return parseInt(direction);
+        }
+    }
+    console.log("Returning null for getting direction for a conceptual response.")
+    return null;
+}
+
+function getOppositeConceptualResponse(conceptualResponse) {
+    const opposites = {
+        'left': 'right',
+        'right': 'left',
+        'up': 'down',
+        'down': 'up'
+    };
+    return opposites[conceptualResponse];
+}
+
+function generateCongruentDirections(responseSetRelationship, stimulusCongruency) {
+    const keyMappings = getKeyMappingsFromConfig();
+    const movementKeyMap = keyMappings[responseSetRelationship].movementKeyMap;
+    const orientationKeyMap = keyMappings[responseSetRelationship].orientationKeyMap;
+    
+    if (responseSetRelationship === 'orthogonal' || stimulusCongruency === 'neutral') {
+        // For orthogonal or neutral, generate directions independently
+        const mov_dir = Math.random() < 0.5 ? 0 : 180;
+        // For orthogonal response sets, orientation task should use up/down directions
+        const or_dir = responseSetRelationship === 'orthogonal' ? 
+            (Math.random() < 0.5 ? 90 : 270) : 
+            (Math.random() < 0.5 ? 180 : 0);
+        return { mov_dir, or_dir };
+    }
+    
+    // For parallel response sets with controlled congruency
+    const availableMovementDirections = [0, 180]; // left/right for movement
+    const availableOrientationDirections = [180, 0]; // left/right pointing for orientation (matching movement conceptually)
+    
+    if (stimulusCongruency === 'congruent') {
+        // Both stimuli should lead to the same conceptual response
+        const conceptualResponse = Math.random() < 0.5 ? 'left' : 'right';
+        const mov_dir = getDirectionForConceptualResponse(conceptualResponse, movementKeyMap);
+        const or_dir = getDirectionForConceptualResponse(conceptualResponse, orientationKeyMap);
+        
+	console.log(`Stimuli should be congruent. mov_dir is ${mov_dir} and or_dir is ${or_dir}`)
+        return { 
+            mov_dir: mov_dir ?? (Math.random() < 0.5 ? 0 : 180), 
+            or_dir: or_dir ?? (Math.random() < 0.5 ? 180 : 0) 
+        };
+    } else if (stimulusCongruency === 'incongruent') {
+        // Stimuli should lead to opposite conceptual responses
+        const firstConceptualResponse = Math.random() < 0.5 ? 'left' : 'right';
+        const secondConceptualResponse = getOppositeConceptualResponse(firstConceptualResponse);
+        
+        const mov_dir = getDirectionForConceptualResponse(firstConceptualResponse, movementKeyMap);
+        const or_dir = getDirectionForConceptualResponse(secondConceptualResponse, orientationKeyMap);
+	console.log(`Stimuli should be incongruent. mov_dir is ${mov_dir} and or_dir is ${or_dir}`)
+        
+        return { 
+            mov_dir: mov_dir ?? (Math.random() < 0.5 ? 0 : 180), 
+            or_dir: or_dir ?? (Math.random() < 0.5 ? 180 : 0) 
+        };
+    }
+    
+    // Fallback to random
+    return {
+        mov_dir: Math.random() < 0.5 ? 0 : 180,
+        or_dir: Math.random() < 0.5 ? 180 : 0
+    };
 }
 
 function createTrialSequence(numTrials, params, switchRate) {
@@ -291,9 +412,29 @@ function createTrialSequence(numTrials, params, switchRate) {
             currentTask = currentTask === 'mov' ? 'or' : 'mov';
         }
         
-        // Get random directions for motion and orientation
-        const mov_dir = Math.random() < 0.5 ? 0 : 180;
-        const or_dir = Math.random() < 0.5 ? 90 : 270;
+        // Generate directions based on congruency settings
+        const directions = generateCongruentDirections(
+            params.responseSetRelationship || 'parallel', 
+            params.stimulusCongruency || 'neutral'
+        );
+        const mov_dir = directions.mov_dir;
+        const or_dir = directions.or_dir;
+        
+        // Log congruency info for testing
+        if (i === 0) {
+            console.log(`Congruency Settings: ${params.responseSetRelationship || 'parallel'} response set, ${params.stimulusCongruency || 'neutral'} stimuli`);
+            console.log(`Generated directions: movement=${mov_dir}°, orientation=${or_dir}°`);
+            
+            // Test conceptual responses for parallel response sets
+            if ((params.responseSetRelationship || 'parallel') === 'parallel') {
+                const keyMappings = getKeyMappingsFromConfig();
+                const movementKeyMap = keyMappings.parallel.movementKeyMap;
+                const orientationKeyMap = keyMappings.parallel.orientationKeyMap;
+                const movResponse = getConceptualResponse(mov_dir, movementKeyMap);
+                const orResponse = getConceptualResponse(or_dir, orientationKeyMap);
+                console.log(`Conceptual responses: movement=${movResponse}, orientation=${orResponse}`);
+            }
+        }
 
         // Create trial with the paradigm's timing parameters
         let trial;
@@ -308,13 +449,26 @@ function createTrialSequence(numTrials, params, switchRate) {
                 dir_or_1: or_dir,
                 dir_mov_2: mov_dir,
                 dir_or_2: or_dir,
-                coh_mov_1: 0.25,
-                coh_or_1: 0.25,
-                coh_mov_2: 0.25,
-                coh_or_2: 0.25
+                coh_mov_1: 0.35,
+                coh_or_1: 0.35,
+                coh_mov_2: 0.35,
+                coh_or_2: 0.35
             };
         } else {
             // For single-task paradigms, adjust parameters based on current task
+            // The congruency is between the main task stimulus and the distractor stimulus
+            let mainTaskDir, distractorDir;
+            
+            if (currentTask === 'mov') {
+                // Main task is movement (dir_mov_1), distractor is orientation (dir_or_2)
+                mainTaskDir = mov_dir;
+                distractorDir = or_dir;
+            } else {
+                // Main task is orientation (dir_or_1), distractor is movement (dir_mov_2)  
+                mainTaskDir = or_dir;
+                distractorDir = mov_dir;
+            }
+            
             trial = {
                 ...params,
                 // Switch the task type based on currentTask
@@ -330,15 +484,15 @@ function createTrialSequence(numTrials, params, switchRate) {
                 dur_mov_2: currentTask === 'or' ? params.dur_or_2 : 0,
                 start_or_2: currentTask === 'mov' ? params.start_or_2 : 0,  // Only active when main task is movement  
                 dur_or_2: currentTask === 'mov' ? params.dur_or_2 : 0,
-                // Set directions and coherence
-                dir_mov_1: mov_dir,
-                dir_or_1: or_dir,
-                dir_mov_2: mov_dir,
-                dir_or_2: or_dir,
-                coh_mov_1: 0.25,
-                coh_or_1: 0.25,
-                coh_mov_2: 0.25,
-                coh_or_2: 0.25
+                // Set directions correctly for active stimuli
+                dir_mov_1: currentTask === 'mov' ? mainTaskDir : 0,
+                dir_or_1: currentTask === 'or' ? mainTaskDir : 0, 
+                dir_mov_2: currentTask === 'or' ? distractorDir : 0,
+                dir_or_2: currentTask === 'mov' ? distractorDir : 0,
+                coh_mov_1: 0.35,
+                coh_or_1: 0.35,
+                coh_mov_2: 0.35,
+                coh_or_2: 0.35
             };
         }
 
@@ -364,7 +518,7 @@ function sliderToValue(sliderValue) {
 // This means responses can be made during pre-cue period when stimulus isn't present.
 // Future improvement: Decouple go intervals from cue intervals. That would have to
 // be done in draw() in package/src/game.js
-function generateTrialParams(switchRate, preCueDuration, distractorDuration) {
+function generateTrialParams(switchRate, preCueDuration, distractorDuration, responseSetRelationship = 'parallel', stimulusCongruency = 'neutral') {
     const baseDuration = 2000; // Base stimulus duration
     const preCueTime = preCueDuration * baseDuration;
     const distractorTime = distractorDuration * baseDuration;
@@ -391,12 +545,16 @@ function generateTrialParams(switchRate, preCueDuration, distractorDuration) {
         start_or_2: distractorTime > 0 ? stimulusStart : 0,  // Distractor starts with main stimulus
         dur_or_2: distractorTime > 0 ? distractorTime : 0,
         start_go_2: 0,
-        dur_go_2: 0
+        dur_go_2: 0,
+        
+        // Congruency parameters
+        responseSetRelationship: responseSetRelationship,
+        stimulusCongruency: stimulusCongruency
     };
 }
 
 // Generate trial parameters for dual-task/PRP paradigms
-function generateDualTaskParams(temporalSeparation, cueReduction, preCueDuration) {
+function generateDualTaskParams(temporalSeparation, cueReduction, preCueDuration, responseSetRelationship = 'parallel', stimulusCongruency = 'neutral') {
     const baseDuration = 2000; // Base stimulus duration
     const stimulusStart = 1500;  // Fixed stimulus start time
     
@@ -454,7 +612,11 @@ function generateDualTaskParams(temporalSeparation, cueReduction, preCueDuration
             : (stimulusStart + soaTime) - preCueTime,
         dur_go_2: cueReductionTime > 0 
             ? baseDuration - cueReductionTime
-            : baseDuration + preCueTime
+            : baseDuration + preCueTime,
+            
+        // Congruency parameters
+        responseSetRelationship: responseSetRelationship,
+        stimulusCongruency: stimulusCongruency
     };
 }
 
@@ -507,20 +669,26 @@ async function runExperiment(currentParams) {
         const switchRate = sliderToValue(document.getElementById('switch-rate').value);
         validateTimingParams(currentParams);
         const trials = createTrialSequence(5, currentParams, switchRate);
+        
+        // Set key mappings based on response set relationship
+        const keyMappings = getKeyMappingsFromConfig();
+        const responseSetRelationship = currentParams.responseSetRelationship || 'parallel';
+        
+        let movementKeyMap, orientationKeyMap;
+        if (responseSetRelationship === 'orthogonal') {
+            // For orthogonal: movement uses left/right (a/d), orientation uses up/down (w/s)
+            movementKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
+            orientationKeyMap = { 90: 'w', 270: 's', 180: 'a', 0: 'd' };
+        } else {
+            // For parallel: both tasks use the same conceptual mapping
+            movementKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
+            orientationKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
+        }
+        
         const config = {
             'size': 0.5,
-            'movementKeyMap': {
-                180: 'a',
-                0: 'd',
-                90: 'w',
-                270: 's'
-            },
-            'orientationKeyMap': {
-                180: 'a',
-                0: 'd',
-                90: 'w',
-                270: 's'
-            },
+            'movementKeyMap': movementKeyMap,
+            'orientationKeyMap': orientationKeyMap,
             'movCueStyle': 'dotted',
             'orCueStyle': 'dashed'
         };
@@ -556,12 +724,80 @@ document.addEventListener('DOMContentLoaded', () => {
     paradigmRadios.forEach(radio => {
         radio.disabled = false;
         radio.addEventListener('change', () => {
-            if (radio.value === 'single-task') {
-                singleTaskParams.style.display = 'flex';
-                dualTaskParams.style.display = 'none';
-            } else if (radio.value === 'dual-task') {
-                singleTaskParams.style.display = 'none';
-                dualTaskParams.style.display = 'flex';
+            updateParadigmUI(radio.value);
+        });
+    });
+    
+    // Function to update UI based on paradigm selection
+    function updateParadigmUI(paradigmType) {
+        const responseSetRadios = document.querySelectorAll('input[name="response-set-relationship"]');
+        const congruencyControls = document.getElementById('congruency-controls');
+        const responseSetContainer = responseSetRadios[0].closest('.paradigm-type');
+        const responseSetNote = document.getElementById('response-set-note');
+        
+        if (paradigmType === 'single-task') {
+            singleTaskParams.style.display = 'flex';
+            dualTaskParams.style.display = 'none';
+            
+            // Enable both response set options for single-task
+            responseSetRadios.forEach(radio => {
+                radio.disabled = false;
+            });
+            // Reset to parallel as default for single-task if currently orthogonal
+            if (document.querySelector('input[name="response-set-relationship"]:checked').value === 'orthogonal') {
+                const parallelRadio = document.querySelector('input[name="response-set-relationship"][value="parallel"]');
+                parallelRadio.checked = true;
+                // Trigger change event to update UI
+                parallelRadio.dispatchEvent(new Event('change'));
+            }
+            responseSetContainer.style.opacity = '1';
+            responseSetNote.style.display = 'none';
+            
+            // Show congruency controls if parallel is selected
+            const selectedResponseSet = document.querySelector('input[name="response-set-relationship"]:checked').value;
+            congruencyControls.style.display = selectedResponseSet === 'parallel' ? 'block' : 'none';
+            
+        } else if (paradigmType === 'dual-task') {
+            singleTaskParams.style.display = 'none';
+            dualTaskParams.style.display = 'flex';
+            
+            // Force orthogonal response set for dual-task and disable parallel option
+            const orthogonalRadio = document.querySelector('input[name="response-set-relationship"][value="orthogonal"]');
+            orthogonalRadio.checked = true;
+            orthogonalRadio.dispatchEvent(new Event('change'));
+            document.querySelector('input[name="response-set-relationship"][value="parallel"]').disabled = true;
+            responseSetContainer.style.opacity = '0.6';
+            responseSetNote.style.display = 'block';
+            
+            // Hide congruency controls for dual-task (not applicable with orthogonal)
+            congruencyControls.style.display = 'none';
+            
+            // Update instructions
+            document.getElementById('parallel-instructions').style.display = 'none';
+            document.getElementById('orthogonal-instructions').style.display = 'block';
+        }
+    }
+    
+    // Initialize UI based on current paradigm selection
+    const currentParadigm = document.querySelector('input[name="paradigm-type"]:checked').value;
+    updateParadigmUI(currentParadigm);
+    
+    // Setup response set relationship radio buttons
+    const responseSetRadios = document.querySelectorAll('input[name="response-set-relationship"]');
+    const congruencyControls = document.getElementById('congruency-controls');
+    const parallelInstructions = document.getElementById('parallel-instructions');
+    const orthogonalInstructions = document.getElementById('orthogonal-instructions');
+    
+    responseSetRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'parallel') {
+                congruencyControls.style.display = 'block';
+                parallelInstructions.style.display = 'block';
+                orthogonalInstructions.style.display = 'none';
+            } else if (radio.value === 'orthogonal') {
+                congruencyControls.style.display = 'none';
+                parallelInstructions.style.display = 'none';
+                orthogonalInstructions.style.display = 'block';
             }
         });
     });
@@ -627,18 +863,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Get selected paradigm type
         const paradigmType = document.querySelector('input[name="paradigm-type"]:checked').value;
         
+        // Get congruency settings
+        const responseSetRelationship = document.querySelector('input[name="response-set-relationship"]:checked').value;
+        const stimulusCongruency = document.querySelector('input[name="stimulus-congruency"]:checked').value;
+        
         let params;
         if (paradigmType === 'single-task') {
             params = generateTrialParams(
                 sliderToValue(singleTaskSliders.switchRate.value),
                 sliderToValue(singleTaskSliders.preCue.value),
-                sliderToValue(singleTaskSliders.distractor.value)
+                sliderToValue(singleTaskSliders.distractor.value),
+                responseSetRelationship,
+                stimulusCongruency
             );
         } else if (paradigmType === 'dual-task') {
             params = generateDualTaskParams(
                 sliderToValue(dualTaskSliders.temporalSeparation.value),
                 sliderToValue(dualTaskSliders.cueReduction.value),
-                sliderToValue(dualTaskSliders.preCue.value)
+                sliderToValue(dualTaskSliders.preCue.value),
+                responseSetRelationship,
+                stimulusCongruency
             );
         }
         

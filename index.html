@@ -121,6 +121,32 @@
                 </label>
             </div>
             
+            <div class="paradigm-type">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Response Set Relationship:</label>
+                <label>
+                    <input type="radio" name="response-set-relationship" value="parallel" checked> Parallel (shared response dimensions)
+                </label>
+                <label>
+                    <input type="radio" name="response-set-relationship" value="orthogonal"> Orthogonal (distinct response dimensions)
+                </label>
+                <div id="response-set-note" style="font-size: 11px; color: #ccc; margin-top: 5px; display: none;">
+                    Note: Dual-task paradigms require orthogonal response sets to avoid ambiguous responses.
+                </div>
+            </div>
+            
+            <div class="paradigm-type" id="congruency-controls">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Stimulus Congruency:</label>
+                <label>
+                    <input type="radio" name="stimulus-congruency" value="neutral" checked> Neutral (random/uncontrolled)
+                </label>
+                <label>
+                    <input type="radio" name="stimulus-congruency" value="congruent"> Congruent (same response)
+                </label>
+                <label>
+                    <input type="radio" name="stimulus-congruency" value="incongruent"> Incongruent (opposite response)
+                </label>
+            </div>
+            
             <div class="parameter-sliders" id="single-task-parameters">
                 <div class="slider-container">
                     <label for="switch-rate">Switch Rate: <span id="switch-rate-value">0</span></label>
@@ -158,7 +184,14 @@
             <button id="start-experiment">Start Experiment</button>
         </div>
 
-        <div>Use a/d keys for responding to the motion task (left or right) and w/s keys for responding to the orientation task (up or down).</div>
+        <div id="instruction-text">
+            <div id="parallel-instructions">
+                <strong>Parallel Response Set:</strong> Use a/d keys for both tasks (a=left, d=right). Motion task responds to movement direction, orientation task responds to object pointing direction.
+            </div>
+            <div id="orthogonal-instructions" style="display: none;">
+                <strong>Orthogonal Response Set:</strong> Use a/d keys for motion task (left/right) and w/s keys for orientation task (up/down).
+            </div>
+        </div>
 
         <div id="canvas-container"></div>
         <div id="timeline-container">
