@@ -4,68 +4,62 @@ tags:
   - flanker_task
   - interference
   - attention
+aliases:
+  - Eriksen & Eriksen 1974
 ---
-###### Core Goal:
-To investigate the effect of flanking "noise" letters on the reaction time (RT) to identify a central target letter when no visual search is required (i.e., target always appears in the same, known location). The study specifically examined how the type of noise letters (response compatible or incompatible) and the spacing between letters in the display affect target identification.
 
-###### Paradigm(s) Used & Key Manipulations:
+###### Core Goal
+Eriksen & Eriksen (1974) investigated the impact of flanking "noise" letters on reaction time (RT) for identifying a central target letter in a non-search task (target location was fixed and known). The study aimed to determine how noise letter type (response compatible or incompatible) and the spatial separation between letters influence target identification.
 
-**Paradigm:** [[Flanker Task]] (nonsearch version)
--   **Task:** Participants made a right or left lever press to a single target letter.
--   **Target Stimuli:** H and K (mapped to one response) OR S and C (mapped to the other response).
--   **Target Location:** Always directly above a fixation cross (0.5 deg visual angle).
--   **Noise Stimuli:** Three noise letters flanked the target on either side (e.g., NNN T NNN).
--   **Stimulus Presentation:** 1-second tachistoscopic exposure.
+###### Paradigm & Key Manipulations
 
-**Key Manipulations:**
+*   **Paradigm:** [[Flanker Task]] (non-search variant).
+*   **Task:** Participants performed a two-choice (left/right) lever-press response to a central target letter (H/K vs. S/C).
+*   **Target Location:** Consistently 0.5 degrees visual angle above fixation.
+*   **Noise Array:** The target was flanked by three noise letters on each side.
+*   **Stimulus Exposure:** 1-second tachistoscopic presentation.
 
-1.  **Noise Type (Response Compatibility of Flankers):** (See Table 1 in paper)
-    *   **1. Noise Same as Target:** Flankers were repetitions of the target letter (e.g., HHHHHHH if target H). (Congruent - Identity)
-    *   **2. Noise Response Compatible:** Flankers were the other letter from the target's response set (e.g., KKKHKKK if target H). (Congruent - Response Set)
-    *   **3. Noise Response Incompatible:** Flankers were letters from the opposite response set (e.g., SSSHSSS if target H). (Incongruent)
-    *   **4. Noise Heterogeneous-Similar:** Flankers had visual features similar to the target's response set (e.g., N, W, Z for H/K; G, J, Q for S/C) but were not from the target sets. (Potentially a type of Neutral or less conflicting)
-    *   **5. Noise Heterogeneous-Dissimilar:** Flankers had visual features similar to the *opposite* target's response set. (Potentially a type of Neutral or more conflicting)
-2.  **Between-Letter Spacing:** The separation between adjacent letters in the display was varied:
-    *   Closest: ~0.06 deg (edge-to-edge)
-    *   Medium: 0.5 deg
-    *   Widest: 1.0 deg
+**Key Independent Variables:**
+
+1.  **Noise Type (Response Compatibility of Flankers):**
+    *   **1. Noise Same as Target:** Flankers identical to the target (e.g., HHHHHHH for target H). *CSV Valency: `Bivalent-Congruent (Identical)`*
+    *   **2. Noise Response Compatible:** Flankers were the other letter from the target's response set (e.g., KKKHKKK for target H). *CSV Valency: `Bivalent-Congruent (ResponseSet)`*
+    *   **3. Noise Response Incompatible:** Flankers from the opposing response set (e.g., SSSHSSS for target H). *CSV Valency: `Bivalent-Incongruent`*
+    *   **4. Noise Heterogeneous-Similar:** Flankers shared visual features with the target's response set but were not members (e.g., N, W, Z for H/K). *CSV Valency: `Bivalent-Neutral (FeatureSimilar)`*
+    *   **5. Noise Heterogeneous-Dissimilar:** Flankers shared visual features with the *opposite* target response set. *CSV Valency: `Bivalent-Neutral (FeatureDissimilar)`*
+2.  **Between-Letter Spacing:** Varied at three levels: ~0.06 deg (closest), 0.5 deg, and 1.0 deg.
 3.  **Control Conditions (Target Alone):**
-    *   **Target Alone - Mixed:** Single target letter presented without flankers, randomly intermixed with noise-condition trials.
-    *   **Target Alone - Blocked:** Single target letter presented in blocks where participants knew no noise elements would appear.
+    *   **Target Alone - Mixed:** Single target presented, intermixed randomly with noise trials. *CSV Valency: `Univalent`*
+    *   **Target Alone - Blocked:** Single target presented in dedicated blocks with no expectation of noise. *CSV Valency: `Univalent`*
 
-###### Key Findings:
+###### Key Findings
 
-1.  **Spacing Effect:** For all noise conditions, RT to the target decreased as the spacing between letters increased (Fig. 1). The largest differences between noise conditions were observed at the closest spacing.
-2.  **Noise Compatibility Effect:**
-    *   **Incompatible noise letters** (from the opposite response set) significantly impaired RT more than any other noise type.
-    *   There was little difference in RT between "Noise Same as Target" and "Noise Response Compatible" conditions.
-3.  **Heterogeneous Noise:**
-    *   Produced intermediate RT impairment.
-    *   At wider spacings (0.5 and 1.0 deg), "dissimilar" heterogeneous noise (features of the opposite set) led to longer RTs than "similar" heterogeneous noise (features of the target set).
-4.  **Control Condition Difference:** RT to the target letter alone was significantly faster (approx. 30ms) in the **blocked** condition (where no noise was expected) compared to the **mixed** condition (where target-alone trials were interspersed with noise trials).
-5.  **Error Rates:** Generally mirrored the RT findings. The highest error rates occurred with incompatible noise, especially at the closest spacing (Table 3).
+1.  **Spacing Effect:** RT decreased as letter spacing increased across all noise conditions. Differences between noise conditions were most pronounced at the closest spacing.
+2.  **Noise Compatibility:** Incompatible noise letters yielded significantly longer RTs than other noise types. "Noise Same as Target" and "Noise Response Compatible" conditions produced similar RTs.
+3.  **Heterogeneous Noise Effects:** These conditions resulted in intermediate RTs. At wider spacings, "dissimilar" heterogeneous noise led to longer RTs than "similar" heterogeneous noise.
+4.  **Control Condition Performance:** RTs to target-alone presentations were significantly faster (by ~30ms) in the blocked condition compared to the mixed condition.
+5.  **Error Patterns:** Error rates generally paralleled RT findings, with the highest error rates for incompatible noise at close spacing.
 
-###### Authors' Main Conclusions/Interpretations:
+###### Authors' Conclusions & Interpretations
 
-1.  **Limited Attentional Selectivity:** Participants cannot completely prevent the processing of noise letters occurring within approximately 1 degree of visual angle from the target, even when the target's location is known.
-2.  **Minimal Processing Channel Capacity:** The visual system's minimal channel capacity for processing letters exceeds that required for a single letter. If other letters are present nearby, they will be processed simultaneously to some extent.
-3.  **Locus of Interference is Response Competition:** The strong effect of the noise letters' response compatibility (rather than just physical similarity) suggests that the primary locus of the interference effect is at the **response selection stage**, not solely at early perceptual processing stages. Noise letters are processed to the point of activating their associated responses.
-4.  **Inhibitory Process & Spatial Discrimination:** An inhibitory process is necessary to prevent responses to the processed noise letters and to allow selection of the response appropriate for the target's location. This selection process (based on spatial discrimination of the target) is:
-    *   Slower and more difficult at closer letter spacings.
-    *   More difficult when noise letters prime a conflicting response.
-5.  **Preparatory Set:** The faster RTs in the "target alone - blocked" condition suggest that participants can abandon or reduce the preparatory inhibitory process when they know no noise letters will appear, speeding up their response to the target.
+1.  **Limits of Selective Attention:** Processing of noise letters within ~1 degree of the target cannot be entirely suppressed, even with a known target location.
+2.  **Minimum Channel Capacity:** The visual processing channel has a minimum capacity that exceeds what is needed for a single letter; nearby letters are processed concurrently.
+3.  **Locus of Interference at Response Selection:** The pronounced effect of noise response compatibility suggests that interference primarily occurs at the response selection stage due to competition from responses activated by the flankers.
+4.  **Role of Inhibition and Spatial Discrimination:** An inhibitory mechanism is required to prevent responses to flankers, and response selection depends on spatial discrimination of the target. This discrimination is less efficient at closer spacings and when flankers prime conflicting responses.
+5.  **Preparatory Set for Inhibition:** The advantage in the "target alone - blocked" condition indicates that the inhibitory process can be modulated or disengaged when no noise is anticipated.
 
-###### Relevance to Thesis:
+###### Relevance to Thesis & Mapping Notes
 
-*   **Foundational Flanker Task Study:** This is a seminal paper establishing key characteristics of the flanker effect in a non-search context.
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Clearly demonstrates the impact of response-congruent and response-incongruent flankers.
-*   **Parameter Exploration:** Systematically varies flanker-target spacing, a key physical parameter influencing interference.
-*   **Neutral Conditions:** While not using "XXXXX" type neutrals, the "Heterogeneous-Similar" and "Heterogeneous-Dissimilar" conditions provide early examples of attempting to create flankers that are not directly response-mapped, offering insights into different types of "less conflicting" stimuli.
-*   **Response Competition:** Provides strong evidence for response competition as a core mechanism of flanker interference.
-*   **Baseline Considerations:** The difference between mixed and blocked target-alone conditions is important for understanding how the expectation of conflict can modulate baseline performance.
-*   **Mapping:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1
-    *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (if flankers considered S2 attribute) / N/A
-    *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
-    *   [[Dimensions/Switch Rate|Switch Rate]]: 0
-    *   [[Dimensions/Task Cue Type|Task Cue Type]]: None/Implicit
+*   **Foundational Study:** Establishes key characteristics of the flanker effect and the impact of flanker-target spacing and response compatibility.
+*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Provides clear operationalizations of congruent, incongruent, and different types of neutral flanker conditions.
+*   **Parameter for Spacing:** Systematically varied letter spacing, a critical physical parameter.
+*   **Neutral Condition Varieties:** The "Heterogeneous-Similar" and "-Dissimilar" conditions exemplify early attempts to create neutral flankers based on feature overlap, distinct from simple unrelated symbols.
+*   **SE Mapping Considerations:**
+    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
+    *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (conceptual, flankers as simultaneous attribute) or N/A.
+    *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0.
+    *   The effect of `Letter Spacing` is coded in the CSV using a float `Task 1 Difficulty`, which is then translated to influence `coh_mov_1` (target pathway coherence) in SE.
+    *   Flanker presence and type are mapped to the `or` pathway in SE (`stim_or_1`, with `coh_or_1=1.0`). Congruency/incongruency arises from the S-R mapping of `stim_mov_1` vs. `stim_or_1`.
+    *   SE's abstraction means `Bivalent-Neutral (FeatureSimilar)` and `(FeatureDissimilar)` would both likely map to SE's standard "orthogonal/non-competing distractor" configuration, with the specific feature-based distinction noted as a limitation of SE's direct modeling capability.
+
+---
