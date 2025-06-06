@@ -14,6 +14,10 @@ Definition: Crosstalk refers to the unwanted transmission of information or proc
 - Response Selection Level: Conflict or facilitation between selected response codes (depends on [[Response Set Overlap]]).
 - Task-Set Level: Interference from activation of competing task rules.
 
+**Super Experiment Relevance:**
+- The `experiment.js` UI, by allowing explicit control over [[Dimensions/Response Set Overlap|Response Set Overlap]] ("Identical" vs. "Disjoint") and [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] ("Congruent", "Incongruent", "Neutral"), enables more direct and systematic setup of experimental conditions hypothesized to modulate crosstalk.
+- For instance, selecting "Identical" response sets with "Incongruent" stimuli is designed to maximize response-level crosstalk. Selecting "Disjoint" response sets aims to minimize such crosstalk, potentially shifting any observed interference to earlier processing stages.
+
 **Theoretical Relevance:**
 
 - Challenges theories assuming strict modularity or complete encapsulation of processing streams.

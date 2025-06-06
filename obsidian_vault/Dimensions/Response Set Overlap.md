@@ -17,7 +17,12 @@ Definition: Describes the relationship between the sets of possible motor respon
 - [[Yeung & Monsell (2003)]] showed that manipulating response set overlap (making them disjoint) reversed the asymmetry of switch costs.
 - Studies on ideomotor compatibility in [[Dual-Task Performance & PRP|PRP]] often rely on disjoint modalities (e.g., manual vs. vocal).
 
-Super Exp. Mapping: Directly controlled by the movementKeyMap and orientationKeyMap parameters, and the specific response values defined in the trial sequence. The extension to allow up/down (w/s) responses for orientation, separate from left/right (a/d) for motion, explicitly enables the "Disjoint-Effector (Same Modality - Manual)" case.
+Super Exp. Mapping:
+- The `experiment.js` UI provides explicit control via the "Response Set Relationship" setting, which then configures the `movementKeyMap` and `orientationKeyMap` for `superExperiment.block()`:
+    - **"Identical":** This selection maps to **Identical** conceptual response sets. Both motion and orientation tasks will use the same keys for the same conceptual responses (e.g., 'a' for left, 'd' for right for both tasks). This allows for meaningful manipulation of stimulus congruency.
+    - **"Disjoint":** This selection maps to **Disjoint-Effector (Same Modality - Manual)**. The motion task typically uses 'a'/'d' for left/right responses, while the orientation task uses 'w'/'s' for up/down responses. This makes the response sets distinct.
+- The UI in `index.html` enforces an "Disjoint" response set relationship for Dual-Task/PRP paradigms to ensure response ambiguity is avoided.
+- The `getKeyMappingsFromConfig()` and `runExperiment()` functions in `experiment.js` implement the logic to pass the appropriate `movementKeyMap` and `orientationKeyMap` to the Super Experiment package.
 
 **Key Literature:**
 

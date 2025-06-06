@@ -3,23 +3,60 @@ tags:
   - dimension
   - stimulus_property
 ---
-Definition: Describes properties of a stimulus object, particularly its relevance to multiple potential task rules and the relationship between those interpretations.
+Definition: Describes properties of a stimulus object or array, particularly its relevance to multiple potential task rules and the relationship between those interpretations, especially in tasks involving cognitive conflict or selection.
 
-- **Bivalence:** A stimulus is **bivalent** if it possesses features relevant to the rules of two or more tasks that could potentially be active. A stimulus is **univalent** if its features are only relevant to one task.
-    
-    - Example (Bivalent): In Stroop, a colored word (e.g., "RED" in blue ink) is bivalent; it has word identity (for reading task) and ink color (for color-naming task).
-    - Example (Univalent): A pure color patch is univalent for color naming; a black-and-white word is univalent for reading.
-- **Congruency:** Applies to **bivalent** stimuli when the response mappings of the multiple tasks it affords lead to:
-    
-    - **Congruent:** The same response decision or category (e.g., word "RED" in red ink).
-    - **Incongruent:** Different/conflicting response decisions (e.g., word "RED" in blue ink).
-    - **Neutral:** The irrelevant dimension does not map to a response in the current task's response set (e.g., word "TABLE" in blue ink, for color naming). This is "Bivalent-Neutral."
+---
 
-**Values:** Categorical {Univalent, Bivalent-Congruent, Bivalent-Neutral, Bivalent-Incongruent}. NA if N_Tasks=1 and no distractor.
+###### Core Concepts:
 
-**Relevance to Design Space:**
+*   **Valency (Stimulus Potential):**
+    *   **Univalent Stimulus:** Possesses features relevant to only *one* active or potential task rule set, or only one dimension of response. Minimal ambiguity regarding task relevance.
+        *   *Example:* A simple color patch when the only task is color naming.
+    *   **Bivalent (or Multivalent) Stimulus:** Possesses features relevant to *two or more* active or potential task rule sets, or multiple dimensions of response. This creates the potential for facilitation or conflict.
+        *   *Example (Stroop):* The word "RED" printed in blue ink is bivalent; it has word identity (for a reading task) and ink color (for a color-naming task).
+        *   *Example (Flanker):* A central target letter 'H' flanked by 'S's; both 'H' and 'S' are relevant to the letter identification rule set.
+        *   *Example (Task Switching):* A stimulus (e.g., a dot at a specific location) that can be processed according to two different task rules (e.g., judge its horizontal position OR its vertical position).
 
-- Central to all [[Interference Control]] paradigms (Stroop, Flanker, Simon).
-- Important for understanding [[Mixing Cost]] and some aspects of [[Switch Cost]] in [[Task Switching]] when bivalent stimuli are used.
+*   **Congruency (Stimulus-Response Relationship in Context):** Applies to **bivalent** stimuli when the different features or afforded tasks lead to particular S-R outcomes *within the current task context*.
+    *   **Inter-Task Congruency ([[Super Experiment Framework]] Focus):** Arises when two distinct tasks are defined (e.g., SE's 'mov' and 'or'), and the response dictated by one task's processing (e.g., for `stim_mov_1`) aligns or conflicts with the response dictated by the other task's processing (e.g., for `stim_or_1`).
+    *   **Intra-Task S-R Congruency (Classic Interference Task Focus):** Arises in single-task contexts (e.g., Flanker, Stroop) where an irrelevant dimension of the stimulus array (e.g., flanker identity, word meaning) would, *if it were the target for the current task rule*, lead to the same or a different response as the actual target.
 
-Super Exp. Mapping: Requires configuring stimuli with multiple relevant features (e.g., a triangle that is both moving and oriented) and, for congruency, using overlapping movementKeyMap and orientationKeyMap.
+###### Key Categories for Literature Coding:
+
+*   **Univalent:**
+    *   The stimulus (or relevant part of it) only affords one interpretation or maps to only one relevant task/response dimension in the current context.
+    *   Often used in control conditions (e.g., "target alone" in Flanker, non-color words or meaningless symbols in Stroop controls).
+    *   *SE Mapping:* Typically involves one SE pathway active (`coh_1=1.0`) and the other inactive (`coh_2=0.0`) or presenting unrelated information.
+
+*   **Bivalent-Congruent:**
+    *   Multiple relevant features/afforded tasks lead to the *same* response decision or category.
+    *   *Example (Stroop):* Word "RED" in red ink for color naming.
+    *   *Example (Flanker - Identity):* Target H, Flankers HHHHHHH. (Flanker is identical and affords same response).
+    *   *Example (Flanker - ResponseSet):* Target H, Flankers KKKHKKK (where H and K map to the same response key). (Flanker is different but affords same response).
+    *   *SE Mapping (Inter-Task Style):* `stim_mov_1` and `stim_or_1` both map to the same response output (e.g., "left").
+
+*   **Bivalent-Incongruent:**
+    *   Multiple relevant features/afforded tasks lead to *different/conflicting* response decisions or categories.
+    *   *Example (Stroop):* Word "RED" in blue ink for color naming.
+    *   *Example (Flanker):* Target H, Flankers SSSHSSS (where H and S map to different response keys).
+    *   *SE Mapping (Inter-Task Style):* `stim_mov_1` maps to one response (e.g., "left") and `stim_or_1` maps to a different response (e.g., "right").
+
+*   **Bivalent-Neutral:**
+    *   The stimulus is bivalent, but the irrelevant dimension(s) or afforded task(s) do not map to a response within the current task's primary response set, or they prime competing responses equally, resulting in no net bias. This serves as a critical baseline.
+    *   **Types of Neutrality observed in literature:**
+        *   **Orthogonal/Unrelated Feature:** The irrelevant dimension is unrelated to the response categories of the primary task.
+            *   *Example (Stroop):* Word "TABLE" (or "XXXXX") in blue ink, for color naming. The word itself doesn't map to "red," "blue," or "green."
+            *   *Example (Task Switching - Meiran 1996):* When judging Left/Right position of a dot, its Up/Down position is an orthogonal, neutral feature.
+            *   *Example (Flanker):* Target H, Flankers +++++++.
+        *   **Feature-Based Neutrality (e.g., [[Eriksen & Eriksen 1974]]):**
+            *   *FeatureSimilar:* Flankers share abstract features with the target's response set but aren't actual members of it (e.g., for target H/K, flankers N,W,Z).
+            *   *FeatureDissimilar:* Flankers share abstract features with the *non-target* response set.
+        *   **Balanced Priming:** An irrelevant feature primes multiple responses equally (e.g., a double-headed arrow `<-->` as a flanker in a left/right arrow task).
+    *   *SE Mapping (Typical for Orthogonal/Unrelated):* Target pathway active (e.g., `mov`). Distractor pathway (e.g., `or`) presents a stimulus whose S-R mapping does not conflict with the target pathway's S-R set (e.g., `stim_or_1` maps to an unused response key, or if SE represented orthogonal dimensions more directly). For E&E's feature-based neutrals, SE mapping is an abstraction (see specific paper notes).
+
+###### Relevance to Design Space & SE Mapping:
+
+*   Central to all [[Interference Control]] paradigms (Stroop, Flanker, Simon).
+*   Important for understanding [[Effects/Mixing Cost]] and some aspects of [[Effects/Switch Cost]] in [[Task Switching]] when bivalent stimuli are used.
+*   SE models bivalence/congruency primarily through its two task pathways (`mov`, `or`). A single-task interference paradigm (like Flanker) is mapped by assigning the target to one pathway and the distractor/flanker information to the other, with [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]=0. Congruency then depends on how the stimuli for these two pathways map to responses (often via shared `keyMap`s).
+*   The specific *type* of neutrality (orthogonal, feature-based) can be difficult to distinguish with SE's current abstract parameters, often requiring simplification to a general "orthogonal/non-competing distractor" model.

@@ -6,13 +6,11 @@ A critical decision in preparing data for Principal Component Analysis (PCA) wit
 1.  **Low-Level Super Experiment (SE) Parameters:** These are the direct, numerous parameters required by the SE framework to instantiate a trial (e.g., `start_1`, `dur_1`, `start_mov_1`, `dur_mov_1`, `coh_mov_1`, `start_go_1`, `keyMap` settings, etc.).
 2.  **Higher-Level Derived Dimensions:** These are conceptual parameters abstracted from the literature and SE parameters, reflecting functional experimental manipulations (e.g., [[SOA (Stimulus Onset Asynchrony)|SOA]], [[CSI (Cue-Stimulus Interval)|CSI]], [[N_Tasks]], [[Response Set Overlap]], [[Task Difficulty]]).
 
-**The thesis opts to use Higher-Level Derived Dimensions as the primary features for PCA.**
-
-**Justification:**
+**Justification for using Higher-Level Derived Dimensions as the primary features for PCA:**
 
 1.  **Interpretability of Principal Components:**
     *  **Derived Dimensions:** PCA components derived from these features are more directly interpretable in cognitive terms. For example, a component heavily loading on `SOA_ms_PCA`, `N_Tasks_PCA`, and `Task2_Difficulty_Normalized_PCA` could be readily understood as representing "Dual-Task Load & Temporal Coordination." This aligns with how cognitive psychologists conceptualize experimental designs.
-    *  **Low-Level SE Parameters:** Components based on numerous, fine-grained SE parameters would be significantly harder to interpret. A component loading on `dur_mov_1`, `start_go_2`, and `coh_or_1` lacks immediate psychological meaning and would require extensive reverse-engineering to understand its functional significance.
+    *  **Low-Level SE Parameters:** Components based on numerous, fine-grained SE parameters would be significantly harder to interpret. A component loading on `dur_mov_1`, `start_go_2`, and `coh_or_1` lacks immediate psychological meaning and would require reverse-engineering to understand its functional significance.
 
 2.  **Alignment with Thesis Goals:**
     *  The primary aim is to map the *conceptual design space* of cognitive control paradigms as understood in the literature and to identify *parametric transitions* between them. Derived dimensions represent these conceptual manipulations.
@@ -33,6 +31,3 @@ A critical decision in preparing data for Principal Component Analysis (PCA) wit
 
 *   **Interpretive Step:** The mapping from literature to derived dimensions involves an interpretive step. The PCA results will reflect the structure of this *coded representation*. This necessitates careful and consistent coding, which is a core part of this project's methodology.
 *   **Loss of Fine-Grained Detail (Potentially):** By abstracting to derived dimensions, some very specific SE parameter combinations that might differentiate studies subtly could be collapsed. However, for the primary goal of understanding the broader conceptual space, this is a necessary and beneficial simplification.
-
-**Conclusion:**
-Using higher-level derived dimensions for PCA offers the best balance for achieving interpretable, cognitively relevant insights into the structure of the cognitive control experimental design space, directly aligning with the overarching goals of the thesis. The relationship to SE's specific instantiation capabilities can then be explored as a separate, complementary analysis.

@@ -61,5 +61,14 @@ To investigate the "paradoxical" asymmetry in [[Effects/Switch Cost|Switch Costs
 -   **Interaction of Factors:** Demonstrates the interplay between task strength, interference levels (due to stimulus and response factors), and control processes in determining switching performance.
 -   **Mapping to Super Experiment:**
     *   Exp 1's SOA-within-stimulus is tricky for SE. SE's `start_mov_1` vs `start_or_1` could simulate attributes appearing at different times, but SE's cueing is tied to the *task*, not individual attributes within a bivalent stimulus for one task. This might be a limitation or require careful interpretation for SE mapping.
-    *   Exp 2 & 3 are highly relevant for mapping different `Response Set Overlap` conditions, as SE's `movementKeyMap` and `orientationKeyMap` can be configured to be identical, share category, or be entirely disjoint by effector/modality (if keys vs. hypothetical vocal responses were mapped, or different key groups).
+    -   The Super Experiment's client UI (`index.html`, `experiment.js`) allows direct selection of "Identical" or "Disjoint" response set relationships.
+    -   **"Identical" in SE** (same keys for same conceptual responses, e.g., 'a'/'d' for left/right for both tasks) can model:
+        -   Their "Full Overlap" condition (Exp 3), where both tasks used spoken digit names.
+        -   Their "Tens-Complement Naming" vs. "Digit Naming" (Exp 2b), where both used spoken digit names (Identical response categories).
+    -   **"Disjoint" in SE** (e.g., 'a'/'d' for movement task, 'w'/'s' for orientation task) can model:
+        -   Their "No Overlap" condition (Exp 3: spoken digits vs. manual direction keys). This is a good mapping as SE uses different keys for different conceptual dimensions.
+        -   Their "Category Overlap" (Exp 3: spoken digits vs. manual digit keys) can be approximated if one conceptual dimension (e.g., digit identity) is mapped to different effectors/key groups.
+        -   Their "Modality Overlap" (Exp 3: spoken digits vs. spoken directions) is harder to map directly since SE is keypress-based, but the "Orthogonal" setting (distinct key groups for distinct conceptual dimensions) captures the essence of disjoint response categories within the same manual modality.
+        -   Their "Odd/Even Classification" vs. "Digit Naming" (Exp 2a), though both vocal, used different response categories. "Orthogonal" in SE (mapping to different key groups) is the closest analogy for distinct response categories.
+    -   The SE's `movementKeyMap` and `orientationKeyMap` are dynamically configured by `experiment.js` based on the UI selection, allowing these different overlap conditions to be set up more directly.
 -   Connects to the literature on task-set inertia, priming, and the strategic allocation of control.
