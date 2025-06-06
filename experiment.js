@@ -287,11 +287,11 @@ function drawTimeline(params) {
         congruencyLabel.setAttribute("font-size", "12px");
         congruencyLabel.setAttribute("font-weight", "bold");
         
-        const responseSet = params.responseSetRelationship || 'parallel';
+        const responseSet = params.responseSetRelationship || 'identical';
         const congruency = params.stimulusCongruency || 'neutral';
         let congruencyText = `${responseSet.charAt(0).toUpperCase() + responseSet.slice(1)} Response Set`;
         
-        if (responseSet === 'parallel' && congruency !== 'neutral') {
+        if (responseSet === 'identical' && congruency !== 'neutral') {
             congruencyText += ` - ${congruency.charAt(0).toUpperCase() + congruency.slice(1)} Stimuli`;
         }
         
@@ -304,13 +304,13 @@ function drawTimeline(params) {
 function getKeyMappingsFromConfig() {
     // Default key mappings based on response set relationship
     const config = {
-        parallel: {
+        identical: {
             movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
-            orientationKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' }  // Same as movement for parallel
+            orientationKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' }  // Same as movement for identical
         },
-        orthogonal: {
+        disjoint: {
             movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
-            orientationKeyMap: { 90: 'w', 270: 's', 180: 'a', 0: 'd' }  // Orientation uses up/down for orthogonal
+            orientationKeyMap: { 90: 'w', 270: 's', 180: 'a', 0: 'd' }  // Orientation uses up/down for disjoint
         }
     };
     return config;
@@ -352,17 +352,17 @@ function generateCongruentDirections(responseSetRelationship, stimulusCongruency
     const movementKeyMap = keyMappings[responseSetRelationship].movementKeyMap;
     const orientationKeyMap = keyMappings[responseSetRelationship].orientationKeyMap;
     
-    if (responseSetRelationship === 'orthogonal' || stimulusCongruency === 'neutral') {
-        // For orthogonal or neutral, generate directions independently
+    if (responseSetRelationship === 'disjoint' || stimulusCongruency === 'neutral') {
+        // For disjoint or neutral, generate directions independently
         const mov_dir = Math.random() < 0.5 ? 0 : 180;
-        // For orthogonal response sets, orientation task should use up/down directions
-        const or_dir = responseSetRelationship === 'orthogonal' ? 
+        // For disjoint response sets, orientation task should use up/down directions
+        const or_dir = responseSetRelationship === 'disjoint' ? 
             (Math.random() < 0.5 ? 90 : 270) : 
             (Math.random() < 0.5 ? 180 : 0);
         return { mov_dir, or_dir };
     }
     
-    // For parallel response sets with controlled congruency
+    // For identical response sets with controlled congruency
     const availableMovementDirections = [0, 180]; // left/right for movement
     const availableOrientationDirections = [180, 0]; // left/right pointing for orientation (matching movement conceptually)
     
@@ -414,7 +414,7 @@ function createTrialSequence(numTrials, params, switchRate) {
         
         // Generate directions based on congruency settings
         const directions = generateCongruentDirections(
-            params.responseSetRelationship || 'parallel', 
+            params.responseSetRelationship || 'identical', 
             params.stimulusCongruency || 'neutral'
         );
         const mov_dir = directions.mov_dir;
@@ -422,14 +422,14 @@ function createTrialSequence(numTrials, params, switchRate) {
         
         // Log congruency info for testing
         if (i === 0) {
-            console.log(`Congruency Settings: ${params.responseSetRelationship || 'parallel'} response set, ${params.stimulusCongruency || 'neutral'} stimuli`);
+            console.log(`Congruency Settings: ${params.responseSetRelationship || 'identical'} response set, ${params.stimulusCongruency || 'neutral'} stimuli`);
             console.log(`Generated directions: movement=${mov_dir}°, orientation=${or_dir}°`);
             
-            // Test conceptual responses for parallel response sets
-            if ((params.responseSetRelationship || 'parallel') === 'parallel') {
+            // Test conceptual responses for identical response sets
+            if ((params.responseSetRelationship || 'identical') === 'identical') {
                 const keyMappings = getKeyMappingsFromConfig();
-                const movementKeyMap = keyMappings.parallel.movementKeyMap;
-                const orientationKeyMap = keyMappings.parallel.orientationKeyMap;
+                const movementKeyMap = keyMappings.identical.movementKeyMap;
+                const orientationKeyMap = keyMappings.identical.orientationKeyMap;
                 const movResponse = getConceptualResponse(mov_dir, movementKeyMap);
                 const orResponse = getConceptualResponse(or_dir, orientationKeyMap);
                 console.log(`Conceptual responses: movement=${movResponse}, orientation=${orResponse}`);
@@ -518,7 +518,7 @@ function sliderToValue(sliderValue) {
 // This means responses can be made during pre-cue period when stimulus isn't present.
 // Future improvement: Decouple go intervals from cue intervals. That would have to
 // be done in draw() in package/src/game.js
-function generateTrialParams(switchRate, preCueDuration, distractorDuration, responseSetRelationship = 'parallel', stimulusCongruency = 'neutral') {
+function generateTrialParams(switchRate, preCueDuration, distractorDuration, responseSetRelationship = 'identical', stimulusCongruency = 'neutral') {
     const baseDuration = 2000; // Base stimulus duration
     const preCueTime = preCueDuration * baseDuration;
     const distractorTime = distractorDuration * baseDuration;
@@ -554,7 +554,7 @@ function generateTrialParams(switchRate, preCueDuration, distractorDuration, res
 }
 
 // Generate trial parameters for dual-task/PRP paradigms
-function generateDualTaskParams(temporalSeparation, cueReduction, preCueDuration, responseSetRelationship = 'parallel', stimulusCongruency = 'neutral') {
+function generateDualTaskParams(temporalSeparation, cueReduction, preCueDuration, responseSetRelationship = 'identical', stimulusCongruency = 'neutral') {
     const baseDuration = 2000; // Base stimulus duration
     const stimulusStart = 1500;  // Fixed stimulus start time
     
@@ -672,15 +672,15 @@ async function runExperiment(currentParams) {
         
         // Set key mappings based on response set relationship
         const keyMappings = getKeyMappingsFromConfig();
-        const responseSetRelationship = currentParams.responseSetRelationship || 'parallel';
+        const responseSetRelationship = currentParams.responseSetRelationship || 'identical';
         
         let movementKeyMap, orientationKeyMap;
-        if (responseSetRelationship === 'orthogonal') {
-            // For orthogonal: movement uses left/right (a/d), orientation uses up/down (w/s)
+        if (responseSetRelationship === 'disjoint') {
+            // For disjoint: movement uses left/right (a/d), orientation uses up/down (w/s)
             movementKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
             orientationKeyMap = { 90: 'w', 270: 's', 180: 'a', 0: 'd' };
         } else {
-            // For parallel: both tasks use the same conceptual mapping
+            // For identical: both tasks use the same conceptual mapping
             movementKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
             orientationKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
         }
@@ -743,38 +743,38 @@ document.addEventListener('DOMContentLoaded', () => {
             responseSetRadios.forEach(radio => {
                 radio.disabled = false;
             });
-            // Reset to parallel as default for single-task if currently orthogonal
-            if (document.querySelector('input[name="response-set-relationship"]:checked').value === 'orthogonal') {
-                const parallelRadio = document.querySelector('input[name="response-set-relationship"][value="parallel"]');
-                parallelRadio.checked = true;
+            // Reset to identical as default for single-task if currently disjoint
+            if (document.querySelector('input[name="response-set-relationship"]:checked').value === 'disjoint') {
+                const identicalRadio = document.querySelector('input[name="response-set-relationship"][value="identical"]');
+                identicalRadio.checked = true;
                 // Trigger change event to update UI
-                parallelRadio.dispatchEvent(new Event('change'));
+                identicalRadio.dispatchEvent(new Event('change'));
             }
             responseSetContainer.style.opacity = '1';
             responseSetNote.style.display = 'none';
             
-            // Show congruency controls if parallel is selected
+            // Show congruency controls if identical is selected
             const selectedResponseSet = document.querySelector('input[name="response-set-relationship"]:checked').value;
-            congruencyControls.style.display = selectedResponseSet === 'parallel' ? 'block' : 'none';
+            congruencyControls.style.display = selectedResponseSet === 'identical' ? 'block' : 'none';
             
         } else if (paradigmType === 'dual-task') {
             singleTaskParams.style.display = 'none';
             dualTaskParams.style.display = 'flex';
             
-            // Force orthogonal response set for dual-task and disable parallel option
-            const orthogonalRadio = document.querySelector('input[name="response-set-relationship"][value="orthogonal"]');
-            orthogonalRadio.checked = true;
-            orthogonalRadio.dispatchEvent(new Event('change'));
-            document.querySelector('input[name="response-set-relationship"][value="parallel"]').disabled = true;
+            // Force disjoint response set for dual-task and disable identical option
+            const disjointRadio = document.querySelector('input[name="response-set-relationship"][value="disjoint"]');
+            disjointRadio.checked = true;
+            disjointRadio.dispatchEvent(new Event('change'));
+            document.querySelector('input[name="response-set-relationship"][value="identical"]').disabled = true;
             responseSetContainer.style.opacity = '0.6';
             responseSetNote.style.display = 'block';
             
-            // Hide congruency controls for dual-task (not applicable with orthogonal)
+            // Hide congruency controls for dual-task (not applicable with disjoint)
             congruencyControls.style.display = 'none';
             
             // Update instructions
-            document.getElementById('parallel-instructions').style.display = 'none';
-            document.getElementById('orthogonal-instructions').style.display = 'block';
+            document.getElementById('identical-instructions').style.display = 'none';
+            document.getElementById('disjoint-instructions').style.display = 'block';
         }
     }
     
@@ -785,19 +785,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup response set relationship radio buttons
     const responseSetRadios = document.querySelectorAll('input[name="response-set-relationship"]');
     const congruencyControls = document.getElementById('congruency-controls');
-    const parallelInstructions = document.getElementById('parallel-instructions');
-    const orthogonalInstructions = document.getElementById('orthogonal-instructions');
+    const identicalInstructions = document.getElementById('identical-instructions');
+    const disjointInstructions = document.getElementById('disjoint-instructions');
     
     responseSetRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            if (radio.value === 'parallel') {
+            if (radio.value === 'identical') {
                 congruencyControls.style.display = 'block';
-                parallelInstructions.style.display = 'block';
-                orthogonalInstructions.style.display = 'none';
-            } else if (radio.value === 'orthogonal') {
+                identicalInstructions.style.display = 'block';
+                disjointInstructions.style.display = 'none';
+            } else if (radio.value === 'disjoint') {
                 congruencyControls.style.display = 'none';
-                parallelInstructions.style.display = 'none';
-                orthogonalInstructions.style.display = 'block';
+                identicalInstructions.style.display = 'none';
+                disjointInstructions.style.display = 'block';
             }
         });
     });

@@ -124,13 +124,13 @@
             <div class="paradigm-type">
                 <label style="font-weight: bold; display: block; margin-bottom: 10px;">Response Set Relationship:</label>
                 <label>
-                    <input type="radio" name="response-set-relationship" value="parallel" checked> Parallel (shared response dimensions)
+                    <input type="radio" name="response-set-relationship" value="identical" checked> Identical (shared response dimensions)
                 </label>
                 <label>
-                    <input type="radio" name="response-set-relationship" value="orthogonal"> Orthogonal (distinct response dimensions)
+                    <input type="radio" name="response-set-relationship" value="disjoint"> Disjoint (distinct response dimensions)
                 </label>
                 <div id="response-set-note" style="font-size: 11px; color: #ccc; margin-top: 5px; display: none;">
-                    Note: Dual-task paradigms require orthogonal response sets to avoid ambiguous responses.
+                    Note: Dual-task paradigms require disjoint response sets to avoid ambiguous responses.
                 </div>
             </div>
             
@@ -185,11 +185,11 @@
         </div>
 
         <div id="instruction-text">
-            <div id="parallel-instructions">
-                <strong>Parallel Response Set:</strong> Use a/d keys for both tasks (a=left, d=right). Motion task responds to movement direction, orientation task responds to object pointing direction.
+            <div id="identical-instructions">
+                <strong>Identical Response Set:</strong> Use a/d keys for both tasks (a=left, d=right). Motion task responds to movement direction, orientation task responds to object pointing direction.
             </div>
-            <div id="orthogonal-instructions" style="display: none;">
-                <strong>Orthogonal Response Set:</strong> Use a/d keys for motion task (left/right) and w/s keys for orientation task (up/down).
+            <div id="disjoint-instructions" style="display: none;">
+                <strong>Disjoint Response Set:</strong> Use a/d keys for motion task (left/right) and w/s keys for orientation task (up/down).
             </div>
         </div>
 
