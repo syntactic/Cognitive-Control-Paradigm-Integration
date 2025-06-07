@@ -674,6 +674,7 @@ async function runExperiment(currentParams) {
         const keyMappings = getKeyMappingsFromConfig();
         const responseSetRelationship = currentParams.responseSetRelationship || 'identical';
         
+        // Get base key mappings
         let movementKeyMap, orientationKeyMap;
         if (responseSetRelationship === 'disjoint') {
             // For disjoint: movement uses left/right (a/d), orientation uses up/down (w/s)
@@ -683,6 +684,31 @@ async function runExperiment(currentParams) {
             // For identical: both tasks use the same conceptual mapping
             movementKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
             orientationKeyMap = { 180: 'a', 0: 'd', 90: 'w', 270: 's' };
+        }
+        
+        // Apply S-R mapping modifications if incompatible is selected
+        const srMapping = document.querySelector('input[name="sr-mapping"]:checked').value;
+        if (srMapping === 'incompatible') {
+            // Create new key maps by swapping the keys for opposite directions
+            const newMovementKeyMap = { ...movementKeyMap };
+            const newOrientationKeyMap = { ...orientationKeyMap };
+            
+            // For movement task: swap left (180) and right (0) keys
+            newMovementKeyMap[180] = movementKeyMap[0];  // left direction gets right key
+            newMovementKeyMap[0] = movementKeyMap[180];  // right direction gets left key
+            
+            if (responseSetRelationship === 'identical') {
+                // For identical response set, orientation task uses same logic as movement
+                newOrientationKeyMap[180] = orientationKeyMap[0];  // left direction gets right key
+                newOrientationKeyMap[0] = orientationKeyMap[180];  // right direction gets left key
+            } else {
+                // For disjoint response set, orientation task uses up/down, so swap up (90) and down (270)
+                newOrientationKeyMap[90] = orientationKeyMap[270];  // up direction gets down key
+                newOrientationKeyMap[270] = orientationKeyMap[90];  // down direction gets up key
+            }
+            
+            movementKeyMap = newMovementKeyMap;
+            orientationKeyMap = newOrientationKeyMap;
         }
         
         const config = {
@@ -773,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
             congruencyControls.style.display = 'none';
             
             // Update instructions
-            document.getElementById('identical-instructions').style.display = 'none';
+            document.getElementById('compatible-sr-instructions').style.display = 'none';
             document.getElementById('disjoint-instructions').style.display = 'block';
         }
     }
@@ -785,20 +811,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup response set relationship radio buttons
     const responseSetRadios = document.querySelectorAll('input[name="response-set-relationship"]');
     const congruencyControls = document.getElementById('congruency-controls');
-    const identicalInstructions = document.getElementById('identical-instructions');
+    const compatibleSrInstructions = document.getElementById('compatible-sr-instructions');
     const disjointInstructions = document.getElementById('disjoint-instructions');
+    
+    // Setup S-R mapping radio buttons
+    const srMappingRadios = document.querySelectorAll('input[name="sr-mapping"]');
+    const incompatibleSrInstructions = document.getElementById('incompatible-sr-instructions');
+    
+    srMappingRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'compatible') {
+                // Show appropriate compatible instructions based on response set relationship
+                const responseSetRelationship = document.querySelector('input[name="response-set-relationship"]:checked').value;
+                if (responseSetRelationship === 'identical') {
+                    compatibleSrInstructions.style.display = 'block';
+                    disjointInstructions.style.display = 'none';
+                } else {
+                    compatibleSrInstructions.style.display = 'none';
+                    disjointInstructions.style.display = 'block';
+                }
+                incompatibleSrInstructions.style.display = 'none';
+            } else if (radio.value === 'incompatible') {
+                compatibleSrInstructions.style.display = 'none';
+                disjointInstructions.style.display = 'none';
+                incompatibleSrInstructions.style.display = 'block';
+            }
+        });
+    });
     
     responseSetRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            if (radio.value === 'identical') {
-                congruencyControls.style.display = 'block';
-                identicalInstructions.style.display = 'block';
-                disjointInstructions.style.display = 'none';
-            } else if (radio.value === 'disjoint') {
-                congruencyControls.style.display = 'none';
-                identicalInstructions.style.display = 'none';
-                disjointInstructions.style.display = 'block';
+            // Only update instructions if compatible S-R mapping is selected
+            const srMapping = document.querySelector('input[name="sr-mapping"]:checked').value;
+            if (srMapping === 'compatible') {
+                if (radio.value === 'identical') {
+                    congruencyControls.style.display = 'block';
+                    compatibleSrInstructions.style.display = 'block';
+                    disjointInstructions.style.display = 'none';
+                } else if (radio.value === 'disjoint') {
+                    congruencyControls.style.display = 'none';
+                    compatibleSrInstructions.style.display = 'none';
+                    disjointInstructions.style.display = 'block';
+                }
             }
+            // If incompatible S-R mapping is selected, don't change the instruction display
         });
     });
     

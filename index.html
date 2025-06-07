@@ -147,6 +147,16 @@
                 </label>
             </div>
             
+            <div class="paradigm-type">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">S-R Mapping:</label>
+                <label>
+                    <input type="radio" name="sr-mapping" value="compatible" checked> Compatible
+                </label>
+                <label>
+                    <input type="radio" name="sr-mapping" value="incompatible"> Incompatible
+                </label>
+            </div>
+            
             <div class="parameter-sliders" id="single-task-parameters">
                 <div class="slider-container">
                     <label for="switch-rate">Switch Rate: <span id="switch-rate-value">0</span></label>
@@ -185,11 +195,14 @@
         </div>
 
         <div id="instruction-text">
-            <div id="identical-instructions">
+            <div id="compatible-sr-instructions">
                 <strong>Identical Response Set:</strong> Use a/d keys for both tasks (a=left, d=right). Motion task responds to movement direction, orientation task responds to object pointing direction.
             </div>
             <div id="disjoint-instructions" style="display: none;">
                 <strong>Disjoint Response Set:</strong> Use a/d keys for motion task (left/right) and w/s keys for orientation task (up/down).
+            </div>
+            <div id="incompatible-sr-instructions" style="display: none;">
+                <strong>Incompatible S-R Set:</strong> For the motion task, press 'd' for leftward movement and 'a' for rightward. For the orientation task, press 's' for upward orientation and 'w' for downward.
             </div>
         </div>
 
