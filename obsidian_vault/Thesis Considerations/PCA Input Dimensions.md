@@ -59,3 +59,10 @@ C.  **`Task_Cue_Type_External` (from CSV `Task Cue Type`) -> SE-Mappable for PCA
         *   `TCT_SE_NA`
     *   One-Hot Encoded PCA Features: `TCT_SE_None_Implicit`, `TCT_SE_Info_Precedes_Stim`. (If CSI=0 for an external cue, it might fall into `None_Implicit` effectively for SE timing, or a third category `TCT_SE_Info_Simultaneous_Stim`).
         *Given CSI_ms_PCA is a numerical feature, perhaps one-hot encoding Task Cue Type for PCA is less critical if CSI captures the main timing variance. If the *nature* (Arbitrary vs Transparent) of external cues is thought to have effects SE can't model but we want in PCA, then keep more distinct categories.*
+D.  **`Stimulus_Response_Mapping` (from CSV `Stimulus Response Mapping`) -> SE-Mappable for PCA:**
+    *   **Literature Categories (from CSV):** "`Compatible`", "`Incompatible`", "`Arbitrary`", (potentially "`N/A`")
+    *   **SE-Mappable PCA Categories:** These categories are directly SE-mappable as they define how the `keyMap` is configured in the Super Experiment.
+        *   `SRM_SE_Compatible` (Lit: "Compatible" -> SE: `keyMap` aligns stimulus with spatially/semantically congruent response)
+        *   `SRM_SE_Incompatible` (Lit: "Incompatible" -> SE: `keyMap` forces a crossed or counter-intuitive stimulus-response link)
+        *   `SRM_SE_Arbitrary` (Lit: "Arbitrary" -> SE: `keyMap` is based on learned, non-prepotent associations; this is the typical setup for many tasks)
+    *   **One-Hot Encoded PCA Features:** `SRM_SE_Compatible`, `SRM_SE_Incompatible`. Arbitrary is represented by 0 values for those two columns.
