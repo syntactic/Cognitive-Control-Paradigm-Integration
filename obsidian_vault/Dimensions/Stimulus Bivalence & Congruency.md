@@ -3,19 +3,27 @@ tags:
   - dimension
   - stimulus_property
 ---
-Definition: Describes properties of a stimulus object or array, particularly its relevance to multiple potential task rules and the relationship between those interpretations, especially in tasks involving cognitive conflict or selection.
+Definition: Describes the **relational property between a stimulus and the set of tasks currently active in an experimental block.** A stimulus is bivalent if it possesses features or affords operations that are relevant to **more than one** of the active task-sets. This property is the source of task ambiguity and is fundamental to creating cognitive conflict.
 
 ---
-
 ###### Core Concepts:
 
-*   **Valency (Stimulus Potential):**
-    *   **Univalent Stimulus:** Possesses features relevant to only *one* active or potential task rule set, or only one dimension of response. Minimal ambiguity regarding task relevance.
-        *   *Example:* A simple color patch when the only task is color naming.
-    *   **Bivalent (or Multivalent) Stimulus:** Possesses features relevant to *two or more* active or potential task rule sets, or multiple dimensions of response. This creates the potential for facilitation or conflict.
-        *   *Example (Stroop):* The word "RED" printed in blue ink is bivalent; it has word identity (for a reading task) and ink color (for a color-naming task).
-        *   *Example (Flanker):* A central target letter 'H' flanked by 'S's; both 'H' and 'S' are relevant to the letter identification rule set.
-        *   *Example (Task Switching):* A stimulus (e.g., a dot at a specific location) that can be processed according to two different task rules (e.g., judge its horizontal position OR its vertical position).
+*   **Valency (in the context of a task pool):**
+    *   **Univalent Stimulus:** A stimulus that affords processing by only *one* of the active task rule sets.
+        *   *Example:* In a block switching between a "Letter Task" and a "Digit Task," the stimulus "7" is univalent.
+        *   *Inference Task Example:* A pure color patch in a Stroop experiment where word reading is also a possible task. The patch has no word feature, so it only affords the color-naming task.
+        *   **Rule:** Univalent stimuli in an `N_Tasks=1` paradigm have `SOA = N/A`.
+    *   **Bivalent (or Multivalent) Stimulus:** A stimulus that affords processing by *two or more* of the active task rule sets.
+        *   **Rule:** Bivalent stimuli in an `N_Tasks=1` paradigm have a numerical `SOA` value (typically `0` for simultaneous feature presentation).
+###### Types of Bivalence:
+
+*   **1. Attribute-Based Bivalence (Decomposable Stimulus):** Conflict arises from multiple, separable perceptual attributes of a single object.
+    *   *Example:* A **blue circle** when switching between a Color Task and a Shape Task. The `color` attribute is relevant to one task, and the `shape` attribute is relevant to the other. This maps cleanly to a "target vs. distractor" model.
+    *   *Examples:* [[Canonical Tasks/Stroop Task|Stroop]], [[Canonical Tasks/Flanker Task|Flanker]], [[Canonical Tasks/Simon Task|Simon]].
+
+*   **2. Operation-Based Bivalence (Non-Decomposable Stimulus):** Conflict arises when multiple task rules/operations can be applied to the *same single attribute*.
+    *   *Example:* The number **"64"** when switching between an "Add the Digits" task and a "Multiply the Digits" task. The single attribute (number identity) affords two different transformations. The conflict is at a higher level of rule selection.
+    *   *Example:* [[Jersild (1927)]]'s calculation tasks.
 
 *   **Congruency (Stimulus-Response Relationship in Context):** Applies to **bivalent** stimuli when the different features or afforded tasks lead to particular S-R outcomes *within the current task context*.
     *   **Inter-Task Congruency ([[Super Experiment Framework]] Focus):** Arises when two distinct tasks are defined (e.g., SE's 'mov' and 'or'), and the response dictated by one task's processing (e.g., for `stim_mov_1`) aligns or conflicts with the response dictated by the other task's processing (e.g., for `stim_or_1`).

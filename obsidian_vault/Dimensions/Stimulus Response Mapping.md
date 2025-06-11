@@ -7,7 +7,6 @@ aliases:
   - S-R Mapping Type
   - Stimulus-Response Compatibility Rule
 ---
-
 ###### Definition
 **Stimulus Response Mapping (SRM)** refers to the specific rule set that dictates how a given stimulus (or a feature of it) should be translated into a particular response. This dimension primarily concerns the *nature* of this instructed S-R relationship, particularly whether it aligns with or opposes pre-existing, "natural," or highly learned tendencies.
 

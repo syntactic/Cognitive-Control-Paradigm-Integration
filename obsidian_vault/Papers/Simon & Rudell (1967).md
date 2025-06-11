@@ -8,7 +8,6 @@ tags:
 aliases:
   - Simon & Rudell 1967
 ---
-
 ###### Core Goal
 Simon & Rudell (1967) aimed to demonstrate the existence of a strong auditory S-R compatibility effect, where an irrelevant directional cue (the ear in which an auditory command was presented) would influence the speed of responding to the semantic content of that command. They investigated whether this effect, later known as the Simon effect, persisted even when uncertainty about the stimulus source was removed.
 

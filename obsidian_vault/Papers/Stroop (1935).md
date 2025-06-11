@@ -86,6 +86,6 @@ To investigate and quantify the interference effects observed when there is a co
     *   Both Exp 1 and Exp 2 are [[Dimensions/N_Tasks|N_Tasks]]=1 paradigms.
     *   SE can model these by using one task channel for the "target" dimension (e.g., 'mov' for word form, 'or' for ink color) and the other channel to present the "distractor" dimension simultaneously (`start_mov_1 = start_or_1`, `dur_mov_1 = dur_or_1`).
     *   For the target task, `coh_` would be 1. For the distractor dimension, `coh_` would also be 1 (to represent its presence) in incongruent conditions, and `coh_` = 0 (or stimulus set to neutral) in univalent/control conditions.
-    *   The "SOA (attr)" concept we discussed for Yeung & Monsell (2003) Exp 1 would be 0 here, as attributes are simultaneous.
+    *   The SOA would be 0 here, as attributes are simultaneous.
 *   **Task Strength/Automatization:** Highlights how differential practice/automatization of tasks (reading vs. color naming) leads to asymmetrical interference. This is a key concept when considering why some tasks interfere more than others.
 *   **Practice Effects & Plasticity:** Experiment 3 provides data on how [[Cognitive Control]] processes and interference effects can be modified (but not entirely overcome) by practice.

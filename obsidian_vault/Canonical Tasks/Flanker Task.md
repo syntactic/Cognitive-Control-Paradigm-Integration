@@ -8,7 +8,6 @@ tags:
 aliases:
   - Eriksen Flanker Task
 ---
-
 ###### Core Concept: The Flanker Task
 
 The **Flanker Task**, developed by Eriksen and Eriksen, is a widely used experimental paradigm to investigate **selective attention** and **response competition**. It assesses the extent to which task-irrelevant stimuli (flankers) presented spatially near a target stimulus can interfere with or facilitate the processing of, and response to, that target.
@@ -61,6 +60,6 @@ The core finding is the **Flanker Effect**: reaction times (RTs) are typically s
 *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
 *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: Defines congruent/incongruent/neutral conditions.
 *   Flanker-Target Spacing (often mapped to [[Task Difficulty]] or an SE coherence parameter for the target/distractor interaction).
-*   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: Typically 0 (or N/A) as target and flankers are presented simultaneously.
+*  [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (Standard case, as target and distractor dimensions are presented simultaneously). Non-zero SOAs can be used to manipulate distractor priming (e.g., [[Kopp et al. (1996)]]).
 *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: Typically 0.
 *   [[Dimensions/Switch Rate|Switch Rate]]: Typically 0%.

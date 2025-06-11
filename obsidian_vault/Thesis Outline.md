@@ -9,7 +9,7 @@
       1.3.2. Locating existing empirical literature within the space
           - Hypotheses about space structure (clusters, etc.)
       1.3.3. Analyze the space using PCA (Principal Component Analysis)
-      1.3.4. Identify [[Key Transitions Between Paradigms]]
+      1.3.4. Identify [[Transitions and Modulators]]
       1.3.5. Identifying Gaps and Limitations
 
 ## 2. Literature Review
@@ -23,7 +23,7 @@
       2.3.1. Canonical Effects & Behavioral Phenomena (e.g., [[Effects/PRP Effect]], [[Effects/Dual-Task Cost|Dual-Task Cost]], [[Effects/Backward Crosstalk Effect (BCE)|BCE]])
       2.3.2. Key Parameters (e.g., [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]], Task Difficulty)
    2.4. Literature on Relationships Between Phenomena Across Paradigms
-      2.4.1. [[Key Transitions Between Paradigms]] (e.g., PRP to Task Switching)
+      2.4.1. [[Transitions and Modulators]] (e.g., PRP to Task Switching)
       2.4.2. Shared vs. Distinct Mechanisms (e.g., [[Theoretical Concepts/Crosstalk|Crosstalk]], [[Theoretical Concepts/Bottleneck Theories|Bottlenecks]])
    2.5. Computational Models and Theoretical Frameworks (Optional/Selective)
 
@@ -46,7 +46,7 @@
       3.4.1. Rationale for using PCA
       3.4.2. Data preparation for PCA (handling NAs, scaling)
       3.4.3. Interpretation of components
-   3.5. Procedure for Identifying [[Key Transitions Between Paradigms|Transition Points]]
+   3.5. Procedure for Identifying [[Transitions and Modulators|Transition Points]]
    3.6. Procedure for Identifying Under-Represented Parameter Combinations (Gaps)
 
 ## 4. Results
@@ -67,7 +67,7 @@
       5.1.1. Success of the mapping effort
       5.1.2. Structure of the [[Parametric Design Space]] (from conceptual map and PCA)
       5.1.3. Key gaps and limitations identified
-   5.2. Discussion of [[Key Transitions Between Paradigms|Key Transitions Between Paradigms]] (parametric basis)
+   5.2. Discussion of [[Transitions and Modulators|Transitions and Modulators]] (parametric basis)
    5.3. Relationships Between Cognitive Phenomena (as illuminated by the map)
       5.3.1. E.g., Bottlenecks vs. Switch Costs vs. Interference
    5.4. Limitations of the Current Study

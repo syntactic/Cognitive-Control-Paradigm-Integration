@@ -63,7 +63,7 @@ A [[Dual-Task Performance & PRP|dual-task]] paradigm where participants responde
 
 ## Relevance to Thesis:
 
-*   **Directly Bridges Paradigms:** Explicitly designed to merge PRP and task-switching concepts ([[Key Transitions Between Paradigms]]).
+*   **Directly Bridges Paradigms:** Explicitly designed to merge PRP and task-switching concepts ([[Transitions and Modulators]]).
 *   **Highlights Task Uncertainty:** Demonstrates that task order uncertainty significantly impacts dual-task processing, introducing costs usually associated with task switching (e.g., affecting RT1).
 *   **Informs SE Mapping:**
     *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]] manipulation is central. SE handles positive and negative SOAs if `start_X` for S1 and S2 are set appropriately (though `trial.js` auto-adjusts `start_mov_2` and `start_or_2` based on `mov1.end` / `or1.end`, so negative SOAs in the traditional S1-S2 sense require S2 to be defined as "Task 1" in SE and S1 as "Task 2", or careful adjustment of `start_mov_2`/`start_or_2` to be negative relative to `mov1.end`).

@@ -7,7 +7,7 @@ The core idea of this thesis is to conceptualize standard cognitive control para
 1. Identify the relevant [[Derived Dimensions vs. Low-Level Parameters|derived dimensions]] based on literature.
 2. Map existing empirical studies onto this space using their parameter settings.
 3. Analyze the structure of this space (potentially using [[PCA]]) based on parameters definable within the [[Super Experiment Framework]].
-4. Identify [[Key Transitions Between Paradigms]].
+4. Identify [[Transitions and Modulators]].
 5. Identify gaps (unexplored regions) and limitations (dimensions outside the framework).
 
 **Dimensions Tentatively Identified:**

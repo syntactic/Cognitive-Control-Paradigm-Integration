@@ -8,8 +8,8 @@ This note lists the features intended for input into the Principal Component Ana
 2.  **`SOA_ms_PCA`** (Numeric: ms)
     *   From CSV `SOA`.
     * If `Number of Tasks` == 2: this is the standard interpretation for PRP, indicating the delay between stimulus for task 1 and stimulus for task 2.
-    *  If `Number of Tasks` == 1: this is a special case for single-task paradigms with interference. A distractor stimulus appears at this SOA but the subject is expected to only perform one task in the trial. This happens in [[Yeung & Monsell (2003)]].
-    *   Placeholder/Imputation for N/A: -1 because 0 indicates simultaneous stimulus onset.
+    *  If `Number of Tasks` == 1: this is a special case for single-task paradigms with interference. A distractor stimulus appears at this SOA but the subject is expected to only perform one task in the trial. This happens in [[Yeung & Monsell (2003)]]. This is `0` for bivalent stimuli with simultaneous features and a `+/-` value for asynchronous features.
+    *   Placeholder/Imputation for N/A: Code `N/A` as **-1**. It distinguishes univalent trials (where SOA is not applicable) from bivalent trials with simultaneous distractors (`SOA = 0`)
 3.  **`CSI_ms_PCA`** (Numeric: ms)
     *   From CSV `CSI`.
     *   Placeholder/Imputation for N/A: I don't think this would ever occur, so there shouldn't be a need to impute values. (implicit cue = 0 CSI).
