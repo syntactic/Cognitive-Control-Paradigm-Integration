@@ -30,3 +30,5 @@ Definition: A performance decrement (typically slower reaction times and/or incr
 - [[Kiesel et al. (2010)]] (Review)
 - [[Jersild (1927)]] (Early demonstration)
 - [[Rogers & Monsell (1995)]]
+- [[Allport el al. (1994)|Allport et al. 1994]]
+- [[Yeung & Monsell (2003)]]
