@@ -8,7 +8,6 @@ tags:
 aliases:
   - Schroeter et al. 2002
 ---
-
 ###### Core Goal
 The primary goal was methodological: to test the feasibility of using near-infrared spectroscopy (NIRS) to measure brain activity in a cognitive paradigm using an event-related design. The study used a color-word matching Stroop task to elicit interference effects.
 
