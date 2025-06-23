@@ -8,7 +8,6 @@ tags:
 aliases:
   - Simon 1969
 ---
-
 ###### Core Goal
 Simon (1969) aimed to investigate the fundamental nature of spatial stimulus-response (S-R) compatibility, specifically testing the hypothesis that there is a "natural" tendency to react *toward* the source of stimulation. This study sought to isolate this tendency by removing semantic content from the stimulus and directly manipulating the compatibility of the required S-R mapping.
 
