@@ -424,33 +424,13 @@ function drawTimeline(absoluteRow) {
     g.appendChild(soaLabel);
 }
 
-// Main dropdown event handler
-async function onExperimentChange() {
+async function runSelectedExperiment() {
     const select = document.getElementById('experiment-select');
+    select.blur() // remove focus from the dropdown
     const selectedIndex = parseInt(select.value);
-    
-    if (isNaN(selectedIndex)) {
-        // Reset to initial state
-        document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Select an experiment to begin</div>';
-        document.getElementById('info-panel').innerHTML = '<div class="placeholder">Experiment details will appear here</div>';
-        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Timeline will appear here</text>';
-        return;
-    }
-    
-    const condition = resolvedData[selectedIndex];
-    const conceptualRow = conceptualData.find(row => row.Experiment === condition.Experiment);
-    
-    // Update info panel
-    if (conceptualRow) {
-        updateInfoPanel(conceptualRow);
-    } else {
-        // Fallback info panel with condition data
-        updateInfoPanelFromCondition(condition);
-    }
-    
-    // Draw timeline
-    drawTimeline(condition);
-    
+
+    const condition = resolvedData[selectedIndex]
+
     // Generate trial sequence
     const trialSequence = createTrialSequence(condition, 10);
     
@@ -458,6 +438,7 @@ async function onExperimentChange() {
     
     // Clear canvas container and run experiment sequence
     const canvasContainer = document.getElementById('canvas-container');
+    canvasContainer.focus()
     canvasContainer.innerHTML = '<div>Starting experiment sequence...</div>';
     
     // Run the super experiment sequence
@@ -515,6 +496,35 @@ async function onExperimentChange() {
         }
     }
 }
+ 
+// Main dropdown event handler
+function updateUIForSelection() {
+    const select = document.getElementById('experiment-select');
+    const selectedIndex = parseInt(select.value);
+    
+    if (isNaN(selectedIndex)) {
+        // Reset to initial state
+        document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Select an experiment to begin</div>';
+        document.getElementById('info-panel').innerHTML = '<div class="placeholder">Experiment details will appear here</div>';
+        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Timeline will appear here</text>';
+        return;
+    }
+    
+    const condition = resolvedData[selectedIndex];
+    const conceptualRow = conceptualData.find(row => row.Experiment === condition.Experiment);
+    
+    // Update info panel
+    if (conceptualRow) {
+        updateInfoPanel(conceptualRow);
+    } else {
+        // Fallback info panel with condition data
+        updateInfoPanelFromCondition(condition);
+    }
+    
+    // Draw timeline
+    drawTimeline(condition);
+    
+}
 
 // Fallback info panel update when conceptual data is not available
 function updateInfoPanelFromCondition(condition) {
@@ -571,7 +581,9 @@ async function initializeApp() {
         });
         
         // Add event listener
-        select.addEventListener('change', onExperimentChange);
+        select.addEventListener('change', updateUIForSelection);
+	const startButton = document.getElementById('start-experiment');
+	startButton.addEventListener('click', runSelectedExperiment)
         
         console.log('App initialized successfully');
         

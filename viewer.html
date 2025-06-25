@@ -24,6 +24,9 @@
         }
         .controls {
             margin-bottom: 20px;
+	    display: flex;
+	    align-items: left;
+	    gap: 10px;
         }
         label {
             display: block;
@@ -80,6 +83,12 @@
             color: #666;
             font-style: italic;
         }
+	#experiment-select {
+	    flex-grow: 1;
+	}
+	#start-experiment {
+	    flex-shrink: 0;
+	}
         canvas {
             background: black;
         }
@@ -94,12 +103,13 @@
             <select id="experiment-select">
                 <option value="">-- Select an experiment --</option>
             </select>
+	    <button id="start-experiment">Start Experiment</button>
         </div>
         
         <div class="content">
             <div class="left-panel">
                 <h3>Experiment Canvas</h3>
-                <div id="canvas-container">
+                <div id="canvas-container" tabindex="-1">
                     <div class="placeholder">Select an experiment to begin</div>
                 </div>
                 
