@@ -101,7 +101,7 @@ def process_condition(row):
     # Default values can be overridden by the JSON in the notes column.
     TRIAL_START_OFFSET = 1000  # Default start time for the first event
     BASE_STIM_DURATION = get_param(row, notes, 'base_stim_duration', 2000)
-    BASE_CUE_GO_DURATION = get_param(row, notes, 'base_cue_go_duration', 5000) # Long duration to cover potential responses
+    BASE_CUE_GO_DURATION = get_param(row, notes, 'base_cue_go_duration', BASE_STIM_DURATION)
 
     # Allow separate duration overrides for T1 and T2
     t1_stim_duration = get_param(row, notes, 't1_stim_duration', BASE_STIM_DURATION)
@@ -120,6 +120,8 @@ def process_condition(row):
         'Switch_Rate_Percent': row['Switch Rate'].replace('%', '') if isinstance(row['Switch Rate'], str) else row['Switch Rate'],
         'Sequence_Type': notes.get('sequence_type', 'Random'),
         'ITI_ms': row.get('RSI'),
+        'ITI_Distribution_Type': notes.get('RSI_distribution', 'fixed'),
+        'ITI_Distribution_Params': str(notes.get('RSI_range', notes.get('RSI_values', []))),
         'coh_1': difficulty_to_coherence(row['Task 1 Difficulty']),
         'coh_2': difficulty_to_coherence(row['Task 2 Difficulty']),
     }
@@ -217,7 +219,8 @@ if __name__ == "__main__":
         final_column_order = [
             'Experiment', 'Task_1_Type', 'Task_2_Type',
             'Stimulus_Valency', 'Simplified_RSO', 'SRM',
-            'Switch_Rate_Percent', 'Sequence_Type', 'ITI_ms',
+            'Switch_Rate_Percent', 'Sequence_Type', 'ITI_Distribution_Type',
+            'ITI_Distribution_Params', 'ITI_ms',
             'coh_1', 'coh_2',
             'effective_start_cue1', 'effective_end_cue1', 'effective_start_go1', 'effective_end_go1',
             'effective_start_stim1_mov', 'effective_end_stim1_mov', 'effective_start_stim2_mov', 'effective_end_stim2_mov',
