@@ -2,22 +2,19 @@
 let resolvedData = [];
 let conceptualData = [];
 
-// Simple CSV parser
+// CSV parser using Papa Parse library
 function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',');
-    const data = [];
+    const result = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header) => header.trim() // Clean up header names
+    });
     
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',');
-        const row = {};
-        for (let j = 0; j < headers.length; j++) {
-            row[headers[j]] = values[j];
-        }
-        data.push(row);
+    if (result.errors.length > 0) {
+        console.warn('CSV parsing errors:', result.errors);
     }
     
-    return data;
+    return result.data;
 }
 
 // Convert absolute timing data to super-experiment parameters
@@ -76,6 +73,170 @@ function convertAbsoluteToSEParams(absoluteRow) {
     seParams.stimulusCongruency = 'neutral';
     
     return seParams;
+}
+
+// Generate trial directions based on condition metadata
+function generateTrialDirections(condition) {
+    // Parse stimulus valency and response set overlap to determine direction generation logic
+    const stimulusValency = condition.Stimulus_Valency || 'Univalent';
+    const responseSetOverlap = condition.Simplified_RSO || 'Identical';
+    
+    let mov_dir, or_dir;
+    
+    // For now, implement basic random direction generation
+    // This can be enhanced based on specific valency and congruency rules
+    if (stimulusValency.includes('Bivalent')) {
+        if (stimulusValency.includes('Congruent')) {
+            // Both stimuli should lead to same response
+            mov_dir = Math.random() < 0.5 ? 0 : 180;
+            or_dir = mov_dir; // Same direction for congruent
+        } else if (stimulusValency.includes('Incongruent')) {
+            // Stimuli should lead to opposite responses
+            mov_dir = Math.random() < 0.5 ? 0 : 180;
+            or_dir = mov_dir === 0 ? 180 : 0; // Opposite direction
+        } else if (stimulusValency.includes('Neutral')) {
+            // Neutral - stimuli should be orthogonal
+            mov_dir = Math.random() < 0.5 ? 0 : 180; // left/right movement
+            or_dir = Math.random() < 0.5 ? 90 : 270; // up/down orientation
+        } else {
+            // Plain "Bivalent" without specification - random directions
+            mov_dir = Math.random() < 0.5 ? 0 : 180;
+            or_dir = Math.random() < 0.5 ? 0 : 180;
+        }
+    } else {
+        // Univalent - random directions since there's no crosstalk
+        mov_dir = Math.random() < 0.5 ? 0 : 180;
+        or_dir = Math.random() < 0.5 ? 0 : 180;
+    }
+    
+    return { mov_dir, or_dir };
+}
+
+// Generate ITI for a trial based on distribution parameters
+function generateITI(condition) {
+    const distributionType = condition.ITI_Distribution_Type || 'fixed';
+    const baseITI = parseFloat(condition.ITI_ms) || 1000;
+    
+    if (distributionType === 'fixed') {
+        return baseITI;
+    }
+    
+    // Parse distribution parameters
+    let params = [];
+    try {
+        if (condition.ITI_Distribution_Params && condition.ITI_Distribution_Params !== '[]') {
+            params = JSON.parse(condition.ITI_Distribution_Params);
+        }
+    } catch (e) {
+        console.warn('Failed to parse ITI_Distribution_Params:', condition.ITI_Distribution_Params);
+        return baseITI;
+    }
+    
+    if (distributionType === 'uniform' && params.length >= 2) {
+        // Uniform distribution between min and max
+        const [min, max] = params;
+        return min + Math.random() * (max - min);
+    } else if (distributionType === 'choice' && params.length > 0) {
+        // Random choice from array of values
+        return params[Math.floor(Math.random() * params.length)];
+    }
+    
+    // Default to base ITI if distribution can't be processed
+    return baseITI;
+}
+
+// Generate task sequence based on sequence type
+function generateTaskSequence(sequenceType, numTrials, switchRate) {
+    const sequence = [];
+    
+    if (sequenceType === 'Random') {
+        // Random sequence with specified switch rate
+        let currentTask = 'mov'; // Start with movement task
+        sequence.push(currentTask);
+        
+        for (let i = 1; i < numTrials; i++) {
+            if (Math.random() < (switchRate / 100)) {
+                // Switch task
+                currentTask = currentTask === 'mov' ? 'or' : 'mov';
+            }
+            sequence.push(currentTask);
+        }
+    } else if (sequenceType === 'AABB') {
+        // AABB pattern: mov, mov, or, or, mov, mov, or, or, ...
+        for (let i = 0; i < numTrials; i++) {
+            const blockIndex = Math.floor(i / 2) % 2;
+            sequence.push(blockIndex === 0 ? 'mov' : 'or');
+        }
+    } else if (sequenceType === 'ABAB') {
+        // ABAB pattern: mov, or, mov, or, ...
+        for (let i = 0; i < numTrials; i++) {
+            sequence.push(i % 2 === 0 ? 'mov' : 'or');
+        }
+    } else if (sequenceType === 'AAAABBBB') {
+        // AAAABBBB pattern: mov, mov, mov, mov, or, or, or, or, ...
+        for (let i = 0; i < numTrials; i++) {
+            const blockIndex = Math.floor(i / 4) % 2;
+            sequence.push(blockIndex === 0 ? 'mov' : 'or');
+        }
+    } else {
+        // Default to alternating pattern
+        for (let i = 0; i < numTrials; i++) {
+            sequence.push(i % 2 === 0 ? 'mov' : 'or');
+        }
+    }
+    
+    return sequence;
+}
+
+// Advanced trial sequence generation
+function createTrialSequence(condition, numTrials = 10) {
+    const trialSequence = [];
+    
+    // Parse sequence parameters
+    const sequenceType = condition.Sequence_Type || 'Random';
+    const switchRate = parseFloat(condition.Switch_Rate_Percent) || 0;
+    
+    // Generate task sequence
+    const taskSequence = generateTaskSequence(sequenceType, numTrials, switchRate);
+    
+    // Get base parameters from condition
+    const baseParams = convertAbsoluteToSEParams(condition);
+    
+    // Generate trials
+    for (let i = 0; i < numTrials; i++) {
+        const currentTask = taskSequence[i];
+        const directions = generateTrialDirections(condition);
+        const iti = generateITI(condition);
+        
+        // Create trial parameters
+        const trialParams = {
+            ...baseParams,
+            // Set directions
+            dir_mov_1: directions.mov_dir,
+            dir_or_1: directions.or_dir,
+            dir_mov_2: 0, // Not used in dual-task paradigms
+            dir_or_2: 0,  // Not used in dual-task paradigms
+            
+            // Set coherence values
+            coh_mov_1: baseParams.coh_1,
+            coh_or_1: baseParams.coh_2,
+            coh_mov_2: 0,
+            coh_or_2: 0,
+            
+            // For single-task paradigms, adjust which pathway is active
+            // This logic may need refinement based on experimental design
+            currentTask: currentTask
+        };
+        
+        trialSequence.push({
+            seParams: trialParams,
+            regenTime: iti,
+            trialNumber: i + 1,
+            taskType: currentTask
+        });
+    }
+    
+    return trialSequence;
 }
 
 // Update info panel with experiment details
@@ -263,32 +424,6 @@ function drawTimeline(absoluteRow) {
     g.appendChild(soaLabel);
 }
 
-// Create a single trial from parameters (similar to createTrialSequence)
-function createSingleTrial(params) {
-    // Generate directions based on congruency settings
-    const mov_dir = Math.random() < 0.5 ? 0 : 180;
-    const or_dir = Math.random() < 0.5 ? 0 : 180;
-    
-    // Create trial with the paradigm's timing parameters
-    // This is a dual-task paradigm, so both tasks are active
-    const trial = {
-        ...params,
-        // Set directions and coherence for both tasks
-        dir_mov_1: mov_dir,
-        dir_or_1: or_dir,
-        dir_mov_2: mov_dir,
-        dir_or_2: or_dir,
-        
-        // Set coherence values
-        coh_mov_1: params.coh_1,
-        coh_or_1: params.coh_2,
-        coh_mov_2: params.coh_1,
-        coh_or_2: params.coh_2
-    };
-    
-    return trial;
-}
-
 // Main dropdown event handler
 async function onExperimentChange() {
     const select = document.getElementById('experiment-select');
@@ -302,53 +437,75 @@ async function onExperimentChange() {
         return;
     }
     
-    const absoluteRow = resolvedData[selectedIndex];
-    const conceptualRow = conceptualData.find(row => row.Experiment === absoluteRow.Experiment);
+    const condition = resolvedData[selectedIndex];
+    const conceptualRow = conceptualData.find(row => row.Experiment === condition.Experiment);
     
     // Update info panel
     if (conceptualRow) {
         updateInfoPanel(conceptualRow);
+    } else {
+        // Fallback info panel with condition data
+        updateInfoPanelFromCondition(condition);
     }
     
     // Draw timeline
-    drawTimeline(absoluteRow);
+    drawTimeline(condition);
     
-    // Convert parameters and create trial
-    const seParams = convertAbsoluteToSEParams(absoluteRow);
-    const trial = createSingleTrial(seParams);
+    // Generate trial sequence
+    const trialSequence = createTrialSequence(condition, 10);
     
-    console.log('Running experiment with parameters:', trial);
+    console.log('Running experiment with trial sequence:', trialSequence);
     
-    // Clear canvas container and run experiment
+    // Clear canvas container and run experiment sequence
     const canvasContainer = document.getElementById('canvas-container');
-    canvasContainer.innerHTML = '';
+    canvasContainer.innerHTML = '<div>Starting experiment sequence...</div>';
     
-    // Run the super experiment
+    // Run the super experiment sequence
     try {
         // Set key mappings based on response set relationship
+        const responseSetRelationship = condition.Simplified_RSO || 'Identical';
         const keyMappings = {
-            identical: {
+            'Identical': {
                 movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
                 orientationKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' }
+            },
+            'Disjoint': {
+                movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
+                orientationKeyMap: { 90: 'w', 270: 's', 180: 'a', 0: 'd' }
             }
         };
         
+        const mappingKey = responseSetRelationship.includes('Identical') ? 'Identical' : 'Disjoint';
         const config = {
-            movementKeyMap: keyMappings.identical.movementKeyMap,
-            orientationKeyMap: keyMappings.identical.orientationKeyMap
+            movementKeyMap: keyMappings[mappingKey].movementKeyMap,
+            orientationKeyMap: keyMappings[mappingKey].orientationKeyMap
         };
         
-        // End any previous block first
-        await superExperiment.endBlock();
+        // Run trial sequence
+        for (let i = 0; i < trialSequence.length; i++) {
+            const trial = trialSequence[i];
+            
+            // Update display for current trial
+            canvasContainer.innerHTML = `<div>Running trial ${trial.trialNumber}/${trialSequence.length} (${trial.taskType})</div>`;
+            
+            // Clean up previous trial
+            await superExperiment.endBlock();
+            
+            // Add a brief pause between trials to show progress
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Run trial with its specific regen time
+            const data = await superExperiment.block([trial.seParams], trial.regenTime, config, false, true, null, canvasContainer);
+            console.log(`Trial ${trial.trialNumber} completed. Data:`, data);
+        }
         
-        // Run single trial block (matching the pattern from experiment.js)
-        const data = await superExperiment.block([trial], 2000, config, false, true, null, canvasContainer);
-        console.log('Experiment completed. Data:', data);
+        console.log('Full experiment sequence completed');
+        canvasContainer.innerHTML = '<div style="color: green; padding: 20px;">Experiment sequence completed successfully!</div>';
         
     } catch (error) {
-        console.error('Error running experiment:', error);
+        console.error('Error running experiment sequence:', error);
         console.error('Error stack:', error.stack);
-        canvasContainer.innerHTML = '<div style="color: red; padding: 20px;">Error running experiment. Check console for details.</div>';
+        canvasContainer.innerHTML = '<div style="color: red; padding: 20px;">Error running experiment sequence. Check console for details.</div>';
         
         // Clean up on error
         try {
@@ -357,6 +514,25 @@ async function onExperimentChange() {
             console.error('Error during cleanup:', cleanupError);
         }
     }
+}
+
+// Fallback info panel update when conceptual data is not available
+function updateInfoPanelFromCondition(condition) {
+    const infoPanel = document.getElementById('info-panel');
+    
+    const info = `
+        <h3>Experiment Details</h3>
+        <p><strong>Experiment:</strong> ${condition.Experiment}</p>
+        <p><strong>Task 1 Type:</strong> ${condition.Task_1_Type || 'N/A'}</p>
+        <p><strong>Task 2 Type:</strong> ${condition.Task_2_Type || 'N/A'}</p>
+        <p><strong>Stimulus Valency:</strong> ${condition.Stimulus_Valency || 'N/A'}</p>
+        <p><strong>Response Set Overlap:</strong> ${condition.Simplified_RSO || 'N/A'}</p>
+        <p><strong>Sequence Type:</strong> ${condition.Sequence_Type || 'N/A'}</p>
+        <p><strong>Switch Rate:</strong> ${condition.Switch_Rate_Percent || 0}%</p>
+        <p><strong>ITI:</strong> ${condition.ITI_ms || 'N/A'}ms (${condition.ITI_Distribution_Type || 'fixed'})</p>
+    `;
+    
+    infoPanel.innerHTML = info;
 }
 
 // Initialize the application
@@ -380,12 +556,10 @@ async function initializeApp() {
         console.log(`Loaded ${resolvedData.length} resolved experiments`);
         console.log(`Loaded ${conceptualData.length} conceptual experiments`);
         
-        // Filter to only include Telford 1931 experiments (first 4 as requested)
-        resolvedData = resolvedData.filter(row => 
-            row.Experiment && row.Experiment.startsWith('Telford 1931')
-        ).slice(0, 12);
+        // Use all data from the CSV without filtering
+        resolvedData = resolvedData.filter(row => row.Experiment && row.Experiment.trim() !== '');
         
-        console.log(`Filtered to ${resolvedData.length} Telford 1931 experiments`);
+        console.log(`Using ${resolvedData.length} total experiments`);
         
         // Populate dropdown
         const select = document.getElementById('experiment-select');
