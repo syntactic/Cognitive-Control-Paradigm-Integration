@@ -15,8 +15,7 @@ This note lists the features intended for input into the Principal Component Ana
     *   Placeholder/Imputation for N/A: I don't think this would ever occur, so there shouldn't be a need to impute values. (implicit cue = 0 CSI).
 4.  **`RSI_ms_PCA`** (Numeric: ms)
     * From CSV `RSI`.
-    * If "Varied (Uniform: X, Y)": Use (X+Y)/2.
-    * If "Varied (choice: X, Y, ...)": Use mean of list values.
+    * The `Super_Experiment_Mapping_Notes` may indicate a more accurate idea of how RSI might have been manipulated in an experiment (see [[Stephan & Koch (2010)]] for example). It might indicate that the RSI is drawn from a distribution. In that case, the CSV's `RSI` value is the expected value of that distribution.
     * Placeholder/Imputation for N/A or "Not Specified": e.g., median of observed RSIs, or a fixed value representing a common ITI.
 5.  **`Switch_Rate_percent_PCA`** (Numeric: 0-100)
     *   From CSV `Switch Rate`.
