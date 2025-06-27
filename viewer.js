@@ -225,7 +225,8 @@ function createTrialSequence(condition, numTrials = 10) {
             
             // For single-task paradigms, adjust which pathway is active
             // This logic may need refinement based on experimental design
-            currentTask: currentTask
+            currentTask: currentTask,
+	    task_1: currentTask
         };
         
         trialSequence.push({
@@ -595,3 +596,15 @@ async function initializeApp() {
 
 // Start the app when page loads
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+module.exports = {
+    parseCSV,
+    convertAbsoluteToSEParams,
+    generateTrialDirections,
+    generateITI,
+    generateTaskSequence,
+    createTrialSequence,
+    updateInfoPanel,
+    drawTimeline
+    // Add any other functions you want to test
+};

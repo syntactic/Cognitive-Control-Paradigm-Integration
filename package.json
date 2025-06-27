@@ -1,0 +1,22 @@
+{
+  "name": "super-experiment-test",
+  "version": "1.0.0",
+  "main": "experiment.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "super-experiment": "github:syntactic/super-experiment"
+  },
+  "devDependencies": {
+    "jest": "^30.0.3",
+    "jest-environment-jsdom": "^30.0.2"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
+  }
+}
