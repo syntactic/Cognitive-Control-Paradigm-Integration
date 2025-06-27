@@ -21,10 +21,15 @@ function parseCSV(csvText) {
 function convertAbsoluteToSEParams(absoluteRow) {
     const seParams = {};
     
-    // Determine task types based on the conceptual data
-    // For Telford experiments, T1 maps to mov pathway, T2 maps to or pathway
+    // Determine if this is a dual-task condition based on available data
+    // Check if both cue2 and go2 have meaningful durations (indicators of second task)
+    const cue2Duration = parseInt(absoluteRow.effective_end_cue2) - parseInt(absoluteRow.effective_start_cue2);
+    const go2Duration = parseInt(absoluteRow.effective_end_go2) - parseInt(absoluteRow.effective_start_go2);
+    const isDualTask = cue2Duration > 0 && go2Duration > 0;
+    
+    // Determine task types based on the experimental condition
     seParams.task_1 = 'mov';  // T1 -> movement pathway
-    seParams.task_2 = 'or';   // T2 -> orientation pathway
+    seParams.task_2 = isDualTask ? 'or' : null;   // T2 -> orientation pathway (only for dual-task)
     
     // Convert absolute timings to relative timings for T1 (mov pathway)
     seParams.start_mov_1 = parseInt(absoluteRow.effective_start_stim1_mov);
