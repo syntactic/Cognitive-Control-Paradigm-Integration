@@ -77,8 +77,10 @@ describe('convertAbsoluteToSEParams', () => {
         const absoluteRow = {
             effective_start_stim1_mov: '100',
             effective_end_stim1_mov: '600',
-            effective_start_stim1_or: '200',
-            effective_end_stim1_or: '700',
+            effective_start_stim1_or: '0',  // Unused for dual-task
+            effective_end_stim1_or: '0',    // Unused for dual-task
+            effective_start_stim2_or: '200', // Channel 2 orientation task
+            effective_end_stim2_or: '700',   // Channel 2 orientation task
             effective_start_cue1: '0',
             effective_end_cue1: '50',
             effective_start_cue2: '150',
@@ -97,15 +99,18 @@ describe('convertAbsoluteToSEParams', () => {
         expect(result.task_1).toBe('mov');
         expect(result.task_2).toBe('or');
 
-        // Test duration calculations
-        expect(result.dur_mov_1).toBe(500); // 600 - 100
-        expect(result.dur_or_1).toBe(500);  // 700 - 200
+        // Test CORRECT dual-task architecture: 
+        // Channel 1 gets movement task, Channel 2 gets orientation task
+        expect(result.dur_mov_1).toBe(500); // 600 - 100 (Channel 1 movement)
+        expect(result.dur_or_1).toBe(0);    // Channel 1 orientation unused in dual-task
+        expect(result.dur_mov_2).toBe(0);   // Channel 2 movement unused in dual-task
+        expect(result.dur_or_2).toBe(500);  // 700 - 200 (Channel 2 orientation)
 
-        // Test that _2 pathway parameters are zero (this should pass with current implementation)
+        // Test stimulus start times
+        expect(result.start_mov_1).toBe(100);
+        expect(result.start_or_1).toBe(0);
         expect(result.start_mov_2).toBe(0);
-        expect(result.dur_mov_2).toBe(0);
-        expect(result.start_or_2).toBe(0);
-        expect(result.dur_or_2).toBe(0);
+        expect(result.start_or_2).toBe(200);
 
         // Test cue timings
         expect(result.start_1).toBe(0);
@@ -116,15 +121,21 @@ describe('convertAbsoluteToSEParams', () => {
         // Test coherence values
         expect(result.coh_1).toBe(0.8);
         expect(result.coh_2).toBe(0.6);
+        expect(result.coh_mov_1).toBe(0.8);
+        expect(result.coh_or_1).toBe(0);
+        expect(result.coh_mov_2).toBe(0);
+        expect(result.coh_or_2).toBe(0.6);
     });
 
-    test('should fail: _2 pathway parameters should be non-zero for proper dual-task implementation', () => {
-        // This test exposes the bug: second task should use _2 pathways
+    test('should correctly assign dual-task pathways with proper Channel 2 data', () => {
+        // This test verifies the CORRECT dual-task implementation
         const absoluteRow = {
             effective_start_stim1_mov: '100',
             effective_end_stim1_mov: '600',
-            effective_start_stim1_or: '200',
-            effective_end_stim1_or: '700',
+            effective_start_stim1_or: '0',  // Unused for dual-task
+            effective_end_stim1_or: '0',    // Unused for dual-task
+            effective_start_stim2_or: '200', // Channel 2 orientation task
+            effective_end_stim2_or: '700',   // Channel 2 orientation task
             effective_start_cue1: '0',
             effective_end_cue1: '50',
             effective_start_cue2: '150',
@@ -139,10 +150,10 @@ describe('convertAbsoluteToSEParams', () => {
 
         const result = convertAbsoluteToSEParams(absoluteRow);
 
-        // This assertion SHOULD FAIL with current implementation
-        // The second task (orientation) should be on the _2 pathway
-        expect(result.start_or_2).toBe(200); // Should be non-zero
-        expect(result.dur_or_2).toBe(500);   // Should be non-zero
+        // Verify the correct dual-task Channel 2 assignment
+        expect(result.start_or_2).toBe(200); // Channel 2 orientation start time
+        expect(result.dur_or_2).toBe(500);   // Channel 2 orientation duration
+        expect(result.task_2).toBe('or');    // Task 2 should be orientation
     });
 });
 
@@ -271,7 +282,7 @@ describe('generateTaskSequence', () => {
 });
 
 describe('createTrialSequence', () => {
-    test('EXPECTED TO FAIL: Standard Dual-Task (Telford Condition)', () => {
+    test('Standard Dual-Task (Telford Condition)', () => {
         const condition = {
             Experiment: 'Telford',
             N_Tasks: 2,
@@ -283,8 +294,10 @@ describe('createTrialSequence', () => {
             ITI_Distribution_Type: 'fixed',
             effective_start_stim1_mov: '100',
             effective_end_stim1_mov: '600',
-            effective_start_stim1_or: '200',
-            effective_end_stim1_or: '700',
+            effective_start_stim1_or: '0',   // Unused for dual-task
+            effective_end_stim1_or: '0',     // Unused for dual-task
+            effective_start_stim2_or: '200', // Channel 2 orientation task
+            effective_end_stim2_or: '700',   // Channel 2 orientation task
             effective_start_cue1: '0',
             effective_end_cue1: '50',
             effective_start_cue2: '150',
@@ -300,19 +313,21 @@ describe('createTrialSequence', () => {
         const result = createTrialSequence(condition, 1);
         const trial = result[0];
 
-        // Basic structure
+        // Basic structure - correct dual-task assignment
         expect(trial.seParams.task_1).toBe('mov');
         expect(trial.seParams.task_2).toBe('or');
 
-        // First task should be on pathway 1
+        // Channel 1: Movement task active
         expect(trial.seParams.dur_mov_1).toBeGreaterThan(0);
+        expect(trial.seParams.dur_or_1).toBe(0);  // Channel 1 orientation unused
 
-        // CRITICAL TEST THAT SHOULD FAIL: Second task should be on pathway 2
+        // Channel 2: Orientation task active
         expect(trial.seParams.dur_or_2).toBeGreaterThan(0);
-        
-        // Pathways that shouldn't be used should be 0
-        expect(trial.seParams.dur_or_1).toBe(0);
-        expect(trial.seParams.dur_mov_2).toBe(0);
+        expect(trial.seParams.dur_mov_2).toBe(0); // Channel 2 movement unused
+
+        // Verify both channels have active cues
+        expect(trial.seParams.dur_1).toBeGreaterThan(0);  // Channel 1 cue
+        expect(trial.seParams.dur_2).toBeGreaterThan(0);  // Channel 2 cue
     });
 
     test('EXPECTED TO FAIL: Task-Switching (Jersild Condition)', () => {

@@ -143,9 +143,9 @@ def process_condition(row):
 
     if n_tasks == 2:
         # Standard Dual-Task / PRP paradigm
-        # T1 -> mov pathway, T2 -> or pathway
+        # T1 -> Channel 1 mov pathway, T2 -> Channel 2 or pathway
         
-        # T1 Events
+        # T1 Events (Channel 1)
         t1_stim_start = TRIAL_START_OFFSET
         resolved_params['effective_start_stim1_mov'] = t1_stim_start
         resolved_params['effective_end_stim1_mov'] = t1_stim_start + t1_stim_duration
@@ -155,10 +155,10 @@ def process_condition(row):
         resolved_params['effective_start_go1'] = resolved_params['effective_start_cue1']
         resolved_params['effective_end_go1'] = resolved_params['effective_end_cue1']
 
-        # T2 Events
+        # T2 Events (Channel 2) - FIXED: Use stim2_or instead of stim1_or
         t2_stim_start = t1_stim_start + soa
-        resolved_params['effective_start_stim1_or'] = t2_stim_start
-        resolved_params['effective_end_stim1_or'] = t2_stim_start + t2_stim_duration
+        resolved_params['effective_start_stim2_or'] = t2_stim_start
+        resolved_params['effective_end_stim2_or'] = t2_stim_start + t2_stim_duration
         
         resolved_params['effective_start_cue2'] = t2_stim_start - csi
         resolved_params['effective_end_cue2'] = resolved_params['effective_start_cue2'] + t2_cue_go_duration

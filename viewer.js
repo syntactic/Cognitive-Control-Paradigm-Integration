@@ -27,53 +27,108 @@ function convertAbsoluteToSEParams(absoluteRow) {
     const go2Duration = parseInt(absoluteRow.effective_end_go2) - parseInt(absoluteRow.effective_start_go2);
     const isDualTask = cue2Duration > 0 && go2Duration > 0;
     
-    // Determine task types based on the experimental condition
-    seParams.task_1 = 'mov';  // T1 -> movement pathway
-    seParams.task_2 = isDualTask ? 'or' : null;   // T2 -> orientation pathway (only for dual-task)
+    // STEP 1: Determine task assignment to channels
+    seParams.task_1 = 'mov';  // Channel 1 always gets movement task
+    seParams.task_2 = isDualTask ? 'or' : null;   // Channel 2 gets orientation task only for dual-task
     
-    // Convert absolute timings to relative timings for T1 (mov pathway)
-    seParams.start_mov_1 = parseInt(absoluteRow.effective_start_stim1_mov);
-    seParams.dur_mov_1 = parseInt(absoluteRow.effective_end_stim1_mov) - parseInt(absoluteRow.effective_start_stim1_mov);
-    
-    // T2 uses or pathway
-    seParams.start_or_1 = parseInt(absoluteRow.effective_start_stim1_or);
-    seParams.dur_or_1 = parseInt(absoluteRow.effective_end_stim1_or) - parseInt(absoluteRow.effective_start_stim1_or);
-    
-    // Set _2 pathway parameters to 0 since these are dual-task on separate pathways
-    seParams.start_mov_2 = 0;
-    seParams.dur_mov_2 = 0;
-    seParams.start_or_2 = 0;
-    seParams.dur_or_2 = 0;
-    
-    // Convert cue timings (task-agnostic: _1 and _2)
+    // STEP 2: Convert cue and go signal timings (channel control signals)
     seParams.start_1 = parseInt(absoluteRow.effective_start_cue1);
     seParams.dur_1 = parseInt(absoluteRow.effective_end_cue1) - parseInt(absoluteRow.effective_start_cue1);
-    
     seParams.start_2 = parseInt(absoluteRow.effective_start_cue2);
     seParams.dur_2 = parseInt(absoluteRow.effective_end_cue2) - parseInt(absoluteRow.effective_start_cue2);
     
-    // Convert go signal timings (task-agnostic: _go_1 and _go_2)
     seParams.start_go_1 = parseInt(absoluteRow.effective_start_go1);
     seParams.dur_go_1 = parseInt(absoluteRow.effective_end_go1) - parseInt(absoluteRow.effective_start_go1);
-    
     seParams.start_go_2 = parseInt(absoluteRow.effective_start_go2);
     seParams.dur_go_2 = parseInt(absoluteRow.effective_end_go2) - parseInt(absoluteRow.effective_start_go2);
     
-    // Set stimulus parameters
+    // STEP 3: Calculate raw stimulus timings from the correct pathways
+    const mov_start = parseInt(absoluteRow.effective_start_stim1_mov);
+    const mov_end = parseInt(absoluteRow.effective_end_stim1_mov);
+    const mov_duration = mov_end - mov_start;
+    
+    // For dual-task, orientation task should come from Channel 2 (stim2_or)
+    // For single-task, orientation distractor comes from Channel 1 (stim1_or)
+    let or_start, or_end, or_duration;
+    if (isDualTask) {
+        or_start = parseInt(absoluteRow.effective_start_stim2_or);
+        or_end = parseInt(absoluteRow.effective_end_stim2_or);
+        or_duration = or_end - or_start;
+    } else {
+        or_start = parseInt(absoluteRow.effective_start_stim1_or);
+        or_end = parseInt(absoluteRow.effective_end_stim1_or);
+        or_duration = or_end - or_start;
+    }
+    
+    // STEP 4: Assign stimulus pathways based on paradigm type
+    if (isDualTask) {
+        // DUAL-TASK: Task 1 (mov) goes to Channel 1, Task 2 (or) goes to Channel 2
+        // Each channel gets its primary stimulus, and potentially distractors based on valency
+        
+        // Channel 1 (movement task): Primary movement stimulus
+        seParams.start_mov_1 = mov_start;
+        seParams.dur_mov_1 = mov_duration;
+        
+        // Channel 2 (orientation task): Primary orientation stimulus  
+        seParams.start_or_2 = or_start;
+        seParams.dur_or_2 = or_duration;
+        
+        // For dual-task, check if we need distractors (bivalent stimuli)
+        // This is a simplified approach - in reality, you'd check stimulus valency per channel
+        // For now, assume univalent stimuli in dual-task (no cross-channel distractors)
+        seParams.start_or_1 = 0;
+        seParams.dur_or_1 = 0;
+        seParams.start_mov_2 = 0;
+        seParams.dur_mov_2 = 0;
+        
+    } else {
+        // SINGLE-TASK: Only Channel 1 is used, Channel 2 is completely inactive
+        
+        // Channel 1 gets the primary task stimulus
+        seParams.start_mov_1 = mov_start;
+        seParams.dur_mov_1 = mov_duration;
+        
+        // For single-task, stimulus valency determines if we need distractors on Channel 1
+        // If stimulus is bivalent (like Stroop), both pathways of Channel 1 should be active
+        // Check if both stimulus types have similar timing (indicating bivalent stimulus)
+        const stimuliOverlap = Math.abs(mov_start - or_start) < 50 && Math.abs(mov_duration - or_duration) < 100;
+        
+        if (stimuliOverlap && or_duration > 0) {
+            // Bivalent stimulus: activate orientation pathway on Channel 1 as distractor
+            seParams.start_or_1 = or_start;
+            seParams.dur_or_1 = or_duration;
+        } else {
+            // Univalent stimulus: only movement pathway active
+            seParams.start_or_1 = 0;
+            seParams.dur_or_1 = 0;
+        }
+        
+        // Channel 2 completely inactive for single-task
+        seParams.start_mov_2 = 0;
+        seParams.dur_mov_2 = 0;
+        seParams.start_or_2 = 0;
+        seParams.dur_or_2 = 0;
+    }
+    
+    // STEP 5: Set stimulus parameters (coherence)
     seParams.coh_1 = parseFloat(absoluteRow.coh_1);
     seParams.coh_2 = parseFloat(absoluteRow.coh_2);
     
-    // Set default directions (can be random for demo)
-    seParams.dir_mov_1 = Math.random() < 0.5 ? 0 : 180;
-    seParams.dir_or_1 = Math.random() < 0.5 ? 0 : 180;
-    seParams.dir_mov_2 = 0;
-    seParams.dir_or_2 = 0;
+    // Map coherence to specific pathways
+    seParams.coh_mov_1 = seParams.dur_mov_1 > 0 ? parseFloat(absoluteRow.coh_1) : 0;
+    seParams.coh_or_1 = seParams.dur_or_1 > 0 ? parseFloat(absoluteRow.coh_2) : 0;
+    seParams.coh_mov_2 = seParams.dur_mov_2 > 0 ? parseFloat(absoluteRow.coh_1) : 0;
+    seParams.coh_or_2 = seParams.dur_or_2 > 0 ? parseFloat(absoluteRow.coh_2) : 0;
     
-    // Set key mappings for identical response sets
+    // STEP 6: Set default directions for active pathways
+    seParams.dir_mov_1 = seParams.dur_mov_1 > 0 ? (Math.random() < 0.5 ? 0 : 180) : 0;
+    seParams.dir_or_1 = seParams.dur_or_1 > 0 ? (Math.random() < 0.5 ? 0 : 180) : 0;
+    seParams.dir_mov_2 = seParams.dur_mov_2 > 0 ? (Math.random() < 0.5 ? 0 : 180) : 0;
+    seParams.dir_or_2 = seParams.dur_or_2 > 0 ? (Math.random() < 0.5 ? 0 : 180) : 0;
+    
+    // STEP 7: Set key mappings and response configuration
     seParams.movementKeyMap = { 180: 'a', 0: 'd' };
     seParams.orientationKeyMap = { 180: 'a', 0: 'd' };
-    
-    // Set response set relationship and stimulus congruency
     seParams.responseSetRelationship = 'identical';
     seParams.stimulusCongruency = 'neutral';
     
@@ -204,8 +259,10 @@ function createTrialSequence(condition, numTrials = 10) {
     // Generate task sequence
     const taskSequence = generateTaskSequence(sequenceType, numTrials, switchRate);
     
-    // Get base parameters from condition
-    const baseParams = convertAbsoluteToSEParams(condition);
+    // Determine paradigm type from condition
+    const cue2Duration = parseInt(condition.effective_end_cue2) - parseInt(condition.effective_start_cue2);
+    const go2Duration = parseInt(condition.effective_end_go2) - parseInt(condition.effective_start_go2);
+    const isDualTask = cue2Duration > 0 && go2Duration > 0;
     
     // Generate trials
     for (let i = 0; i < numTrials; i++) {
@@ -213,26 +270,72 @@ function createTrialSequence(condition, numTrials = 10) {
         const directions = generateTrialDirections(condition);
         const iti = generateITI(condition);
         
-        // Create trial parameters
-        const trialParams = {
-            ...baseParams,
-            // Set directions
-            dir_mov_1: directions.mov_dir,
-            dir_or_1: directions.or_dir,
-            dir_mov_2: 0, // Not used in dual-task paradigms
-            dir_or_2: 0,  // Not used in dual-task paradigms
+        let trialParams;
+        
+        if (isDualTask) {
+            // DUAL-TASK PARADIGM: Use base parameters from convertAbsoluteToSEParams
+            // Both channels are active with fixed task assignments
+            const baseParams = convertAbsoluteToSEParams(condition);
             
-            // Set coherence values
-            coh_mov_1: baseParams.coh_1,
-            coh_or_1: baseParams.coh_2,
-            coh_mov_2: 0,
-            coh_or_2: 0,
+            trialParams = {
+                ...baseParams,
+                // Override directions for active pathways
+                dir_mov_1: baseParams.dur_mov_1 > 0 ? directions.mov_dir : 0,
+                dir_or_1: baseParams.dur_or_1 > 0 ? directions.or_dir : 0,
+                dir_mov_2: baseParams.dur_mov_2 > 0 ? directions.mov_dir : 0,
+                dir_or_2: baseParams.dur_or_2 > 0 ? directions.or_dir : 0,
+            };
             
-            // For single-task paradigms, adjust which pathway is active
-            // This logic may need refinement based on experimental design
-            currentTask: currentTask,
-	    task_1: currentTask
-        };
+        } else {
+            // SINGLE-TASK/TASK-SWITCHING PARADIGM: Only Channel 1 active, task_1 varies
+            // Create base parameters but modify for the current task
+            const baseCondition = { ...condition };
+            const baseParams = convertAbsoluteToSEParams(baseCondition);
+            
+            // Override task assignment and stimulus pathways based on current task
+            trialParams = {
+                ...baseParams,
+                task_1: currentTask,  // Dynamic task assignment for task-switching
+                task_2: null,         // Channel 2 always inactive for single-task
+                
+                // Channel 2 completely inactive
+                start_2: 0,
+                dur_2: 0,
+                start_go_2: 0,
+                dur_go_2: 0,
+                start_mov_2: 0,
+                dur_mov_2: 0,
+                start_or_2: 0,
+                dur_or_2: 0,
+                coh_mov_2: 0,
+                coh_or_2: 0,
+                dir_mov_2: 0,
+                dir_or_2: 0,
+            };
+            
+            // Configure Channel 1 stimulus pathways based on current task and stimulus valency
+            if (currentTask === 'mov') {
+                // Movement task: primary movement stimulus
+                trialParams.dir_mov_1 = directions.mov_dir;
+                trialParams.dir_or_1 = trialParams.dur_or_1 > 0 ? directions.or_dir : 0; // distractor if bivalent
+            } else if (currentTask === 'or') {
+                // Orientation task: reconfigure Channel 1 for orientation as primary task
+                // Swap the pathways so orientation becomes primary
+                const temp_start = trialParams.start_mov_1;
+                const temp_dur = trialParams.dur_mov_1;
+                const temp_coh = trialParams.coh_mov_1;
+                
+                trialParams.start_mov_1 = trialParams.start_or_1;
+                trialParams.dur_mov_1 = trialParams.dur_or_1;
+                trialParams.coh_mov_1 = trialParams.coh_or_1;
+                trialParams.dir_mov_1 = directions.or_dir; // orientation direction goes to mov pathway
+                
+                trialParams.start_or_1 = temp_start;
+                trialParams.dur_or_1 = temp_dur;
+                trialParams.coh_or_1 = temp_coh;
+                trialParams.dir_or_1 = temp_dur > 0 ? directions.mov_dir : 0; // movement as distractor if bivalent
+            }
+        }
         
         trialSequence.push({
             seParams: trialParams,
