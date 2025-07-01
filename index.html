@@ -1,216 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Super Experiment Test</title>
-    <script src="package/dist/bundle.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Experiment Viewer</title>
     <style>
         body {
-            background-color: black;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: white;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
         }
-        #experiment-container {
-            width: 100%;
+        .container {
             max-width: 1200px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-        }
-        #paradigm-controls {
-            margin-bottom: 20px;
-        }
-        #timeline-container {
-            width: 100%;
-            max-width: 900px;
-            background: rgba(0, 0, 0, 0.15);
-            padding: 20px 50px 20px 20px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
             border-radius: 8px;
-            overflow-x: visible;
-            margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        #timeline-svg {
-            width: 100%;
-            height: 320px; /* Increased height to accommodate 4 axes */
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .controls {
+            margin-bottom: 20px;
+	    display: flex;
+	    align-items: left;
+	    gap: 10px;
+        }
+        label {
             display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .content {
+            display: flex;
+            gap: 20px;
+        }
+        .left-panel {
+            flex: 1;
+        }
+        .right-panel {
+            flex: 1;
         }
         #canvas-container {
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 20px;
+            margin-bottom: 20px;
             min-height: 400px;
-        }
-        .paradigm-button {
-            padding: 8px 16px;
-            margin: 0 5px;
-            border: none;
+            border: 2px solid #ddd;
             border-radius: 4px;
-            background: #eee;
-            cursor: pointer;
+            background-color: #fafafa;
         }
-        .paradigm-button:hover {
-            background: #ddd;
+        #info-panel {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
         }
+        #info-panel h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        #timeline-svg {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .placeholder {
+            color: #666;
+            font-style: italic;
+        }
+	#experiment-select {
+	    flex-grow: 1;
+	}
+	#start-experiment {
+	    flex-shrink: 0;
+	}
         canvas {
             background: black;
-        }
-        .paradigm-type {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        .paradigm-type label {
-            margin-right: 20px;
-            color: white;
-        }
-        
-        .parameter-sliders {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            color: white;
-        }
-        
-        .slider-container label {
-            margin-bottom: 5px;
-        }
-        
-        input[type="range"] {
-            width: 200px;
-        }
-        
-        #start-experiment {
-            padding: 8px 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        #start-experiment:hover {
-            background: #45a049;
         }
     </style>
 </head>
 <body>
-    <div id="experiment-container">
-        <div id="paradigm-controls">
-            <div class="paradigm-type">
-                <label>
-                    <input type="radio" name="paradigm-type" value="single-task" checked> Single-Task/Task-Switching
-                </label>
-                <label>
-                    <input type="radio" name="paradigm-type" value="dual-task"> Dual-Task/PRP
-                </label>
-            </div>
-            
-            <div class="paradigm-type">
-                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Response Set Relationship:</label>
-                <label>
-                    <input type="radio" name="response-set-relationship" value="identical" checked> Identical (shared response dimensions)
-                </label>
-                <label>
-                    <input type="radio" name="response-set-relationship" value="disjoint"> Disjoint (distinct response dimensions)
-                </label>
-                <div id="response-set-note" style="font-size: 11px; color: #ccc; margin-top: 5px; display: none;">
-                    Note: Dual-task paradigms require disjoint response sets to avoid ambiguous responses.
-                </div>
-            </div>
-            
-            <div class="paradigm-type" id="congruency-controls">
-                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Stimulus Congruency:</label>
-                <label>
-                    <input type="radio" name="stimulus-congruency" value="neutral" checked> Neutral (random/uncontrolled)
-                </label>
-                <label>
-                    <input type="radio" name="stimulus-congruency" value="congruent"> Congruent (same response)
-                </label>
-                <label>
-                    <input type="radio" name="stimulus-congruency" value="incongruent"> Incongruent (opposite response)
-                </label>
-            </div>
-            
-            <div class="paradigm-type">
-                <label style="font-weight: bold; display: block; margin-bottom: 10px;">S-R Mapping:</label>
-                <label>
-                    <input type="radio" name="sr-mapping" value="compatible" checked> Compatible
-                </label>
-                <label>
-                    <input type="radio" name="sr-mapping" value="incompatible"> Incompatible
-                </label>
-            </div>
-            
-            <div class="parameter-sliders" id="single-task-parameters">
-                <div class="slider-container">
-                    <label for="switch-rate">Switch Rate: <span id="switch-rate-value">0</span></label>
-                    <input type="range" id="switch-rate" min="0" max="4" step="1" value="0.0">
-                </div>
-                
-                <div class="slider-container">
-                    <label for="pre-cue">Pre-cue Duration: <span id="pre-cue-value">0</span></label>
-                    <input type="range" id="pre-cue" min="0" max="4" step="1" value="0.0">
-                </div>
-                
-                <div class="slider-container">
-                    <label for="distractor">Distractor Duration: <span id="distractor-value">0</span></label>
-                    <input type="range" id="distractor" min="0" max="4" step="1" value="0.0">
-                </div>
-            </div>
-            
-            <div class="parameter-sliders" id="dual-task-parameters" style="display: none;">
-                <div class="slider-container">
-                    <label for="temporal-separation">Temporal Separation (SOA): <span id="temporal-separation-value">0</span></label>
-                    <input type="range" id="temporal-separation" min="0" max="4" step="1" value="0.0">
-                </div>
-                
-                <div class="slider-container">
-                    <label for="second-task-cue-reduction">Second Task Cue Reduction: <span id="second-task-cue-reduction-value">0</span></label>
-                    <input type="range" id="second-task-cue-reduction" min="0" max="4" step="1" value="0.0">
-                </div>
-                
-                <div class="slider-container">
-                    <label for="dual-pre-cue">Pre-cue Duration: <span id="dual-pre-cue-value">0</span></label>
-                    <input type="range" id="dual-pre-cue" min="0" max="4" step="1" value="0.0">
-                </div>
-            </div>
-
-            <button id="start-experiment">Start Experiment</button>
+    <div class="container">
+        <h1>Super Experiment Viewer</h1>
+        
+        <div class="controls">
+            <label for="experiment-select">Select Experiment:</label>
+            <select id="experiment-select">
+                <option value="">-- Select an experiment --</option>
+            </select>
+	    <button id="start-experiment">Start Experiment</button>
         </div>
-
-        <div id="instruction-text">
-            <div id="compatible-sr-instructions">
-                <strong>Identical Response Set:</strong> Use a/d keys for both tasks (a=left, d=right). Motion task responds to movement direction, orientation task responds to object pointing direction.
+        
+        <div class="content">
+            <div class="left-panel">
+                <h3>Experiment Canvas</h3>
+                <div id="canvas-container" tabindex="-1">
+                    <div class="placeholder">Select an experiment to begin</div>
+                </div>
+                
+                <h3>Experiment Information</h3>
+                <div id="info-panel">
+                    <div class="placeholder">Experiment details will appear here</div>
+                </div>
             </div>
-            <div id="disjoint-instructions" style="display: none;">
-                <strong>Disjoint Response Set:</strong> Use a/d keys for motion task (left/right) and w/s keys for orientation task (up/down).
+            
+            <div class="right-panel">
+                <h3>Trial Timeline</h3>
+                <svg id="timeline-svg">
+                    <text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">
+                        Timeline will appear here
+                    </text>
+                </svg>
             </div>
-            <div id="incompatible-sr-instructions" style="display: none;">
-                <strong>Incompatible S-R Set:</strong> For the motion task, press 'd' for leftward movement and 'a' for rightward. For the orientation task, press 's' for upward orientation and 'w' for downward.
-            </div>
-        </div>
-
-        <div id="canvas-container"></div>
-        <div id="timeline-container">
-            <svg id="timeline-svg" width="800" height="200"></svg>
         </div>
     </div>
-    <script src="experiment.js?2"></script>
+
+    <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="node_modules/super-experiment/dist/bundle.js"></script><!-- the source of this repo is available inside the package/ folder -->
+    <script src="viewer.js"></script>
 </body>
 </html>
