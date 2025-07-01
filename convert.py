@@ -99,7 +99,7 @@ def process_condition(row):
 
     # --- 1. Determine base durations and offsets, allowing for overrides ---
     # Default values can be overridden by the JSON in the notes column.
-    TRIAL_START_OFFSET = 1000  # Default start time for the first event
+    TRIAL_START_OFFSET = 0  # Default start time for the first event
     BASE_STIM_DURATION = get_param(row, notes, 'base_stim_duration', 2000)
     BASE_CUE_GO_DURATION = get_param(row, notes, 'base_cue_go_duration', BASE_STIM_DURATION)
 
@@ -112,6 +112,7 @@ def process_condition(row):
     # --- 2. Pre-process conceptual info to be passed to the client ---
     resolved_params = {
         'Experiment': row['Experiment'],
+        'N_Tasks': int(row['Number of Tasks']),  # Add N_Tasks to resolved parameters
         'Task_1_Type': row['Task 1 Type'],
         'Task_2_Type': row['Task 2 Type'],
         'Stimulus_Valency': row['Stimulus Valency'],
@@ -217,7 +218,7 @@ if __name__ == "__main__":
         
         # Define the final column order for the output CSV
         final_column_order = [
-            'Experiment', 'Task_1_Type', 'Task_2_Type',
+            'Experiment', 'N_Tasks', 'Task_1_Type', 'Task_2_Type',  # Add N_Tasks to column order
             'Stimulus_Valency', 'Simplified_RSO', 'SRM',
             'Switch_Rate_Percent', 'Sequence_Type', 'ITI_Distribution_Type',
             'ITI_Distribution_Params', 'ITI_ms',

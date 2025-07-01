@@ -5,6 +5,7 @@ const {
     convertAbsoluteToSEParams, 
     generateTrialDirections, 
     generateTaskSequence, 
+    generateTaskAssignmentSequence,
     createTrialSequence 
 } = require('./viewer.js');
 
@@ -158,74 +159,183 @@ describe('convertAbsoluteToSEParams', () => {
 });
 
 describe('generateTrialDirections', () => {
-    test('should generate congruent directions for Bivalent-Congruent condition', () => {
+    test('should generate congruent directions for single-task Bivalent-Congruent condition', () => {
         const condition = {
+            N_Tasks: 1,
             Stimulus_Valency: 'Bivalent-Congruent',
             Simplified_RSO: 'Identical'
         };
+        const trialAssignment = { currentTask: 'mov' };
 
         // Run multiple times to test randomness and consistency
         for (let i = 0; i < 10; i++) {
-            const result = generateTrialDirections(condition);
+            const result = generateTrialDirections(condition, trialAssignment);
             
-            // Both directions should be the same for congruent condition
-            expect(result.mov_dir).toBe(result.or_dir);
-            expect([0, 180]).toContain(result.mov_dir);
-            expect([0, 180]).toContain(result.or_dir);
+            // Both Channel 1 directions should be the same for congruent condition
+            expect(result.dir_mov_1).toBe(result.dir_or_1);
+            expect([0, 180]).toContain(result.dir_mov_1);
+            expect([0, 180]).toContain(result.dir_or_1);
+            
+            // Channel 2 should be inactive
+            expect(result.dir_mov_2).toBeNull();
+            expect(result.dir_or_2).toBeNull();
         }
     });
 
-    test('should generate incongruent directions for Bivalent-Incongruent condition', () => {
+    test('should generate incongruent directions for single-task Bivalent-Incongruent condition', () => {
         const condition = {
+            N_Tasks: 1,
             Stimulus_Valency: 'Bivalent-Incongruent',
             Simplified_RSO: 'Identical'
         };
+        const trialAssignment = { currentTask: 'mov' };
 
         // Run multiple times to test randomness and consistency
         for (let i = 0; i < 10; i++) {
-            const result = generateTrialDirections(condition);
+            const result = generateTrialDirections(condition, trialAssignment);
             
-            // Directions should be opposite for incongruent condition
-            expect(result.mov_dir).not.toBe(result.or_dir);
-            expect([0, 180]).toContain(result.mov_dir);
-            expect([0, 180]).toContain(result.or_dir);
+            // Channel 1 directions should be opposite for incongruent condition
+            expect(result.dir_mov_1).not.toBe(result.dir_or_1);
+            expect([0, 180]).toContain(result.dir_mov_1);
+            expect([0, 180]).toContain(result.dir_or_1);
             
             // Specifically test opposition
-            if (result.mov_dir === 0) {
-                expect(result.or_dir).toBe(180);
+            if (result.dir_mov_1 === 0) {
+                expect(result.dir_or_1).toBe(180);
             } else {
-                expect(result.or_dir).toBe(0);
+                expect(result.dir_or_1).toBe(0);
             }
+            
+            // Channel 2 should be inactive
+            expect(result.dir_mov_2).toBeNull();
+            expect(result.dir_or_2).toBeNull();
         }
     });
 
-    test('should generate orthogonal directions for Bivalent-Neutral condition', () => {
+    test('should generate orthogonal directions for single-task Bivalent-Neutral condition', () => {
         const condition = {
+            N_Tasks: 1,
             Stimulus_Valency: 'Bivalent-Neutral',
             Simplified_RSO: 'Identical'
         };
+        const trialAssignment = { currentTask: 'mov' };
 
         // Run multiple times to test randomness
         for (let i = 0; i < 10; i++) {
-            const result = generateTrialDirections(condition);
+            const result = generateTrialDirections(condition, trialAssignment);
             
             // Movement should be horizontal (0 or 180)
-            expect([0, 180]).toContain(result.mov_dir);
+            expect([0, 180]).toContain(result.dir_mov_1);
             // Orientation should be vertical (90 or 270)
-            expect([90, 270]).toContain(result.or_dir);
+            expect([90, 270]).toContain(result.dir_or_1);
+            
+            // Channel 2 should be inactive
+            expect(result.dir_mov_2).toBeNull();
+            expect(result.dir_or_2).toBeNull();
         }
     });
 
-    test('should generate random directions for Univalent condition', () => {
+    test('should generate random directions for single-task Univalent condition', () => {
         const condition = {
+            N_Tasks: 1,
             Stimulus_Valency: 'Univalent',
             Simplified_RSO: 'Identical'
         };
+        const trialAssignment = { currentTask: 'mov' };
 
-        const result = generateTrialDirections(condition);
+        const result = generateTrialDirections(condition, trialAssignment);
         
-        expect([0, 180]).toContain(result.mov_dir);
-        expect([0, 180]).toContain(result.or_dir);
+        // Only movement pathway should be active for univalent mov task
+        expect([0, 180]).toContain(result.dir_mov_1);
+        expect(result.dir_or_1).toBeNull();
+        
+        // Channel 2 should be inactive
+        expect(result.dir_mov_2).toBeNull();
+        expect(result.dir_or_2).toBeNull();
+    });
+
+    test('should generate directions for dual-task with disjoint response sets', () => {
+        const condition = {
+            N_Tasks: 2,
+            Stimulus_Valency: 'Univalent',
+            Simplified_RSO: 'Disjoint'
+        };
+        const trialAssignment = { channel1_task: 'mov', channel2_task: 'or' };
+
+        const result = generateTrialDirections(condition, trialAssignment);
+        
+        // Channel 1 movement task should be active
+        expect([0, 180]).toContain(result.dir_mov_1);
+        expect(result.dir_or_1).toBeNull();
+        
+        // Channel 2 orientation task should be active with orthogonal directions
+        expect([90, 270]).toContain(result.dir_or_2);
+        expect(result.dir_mov_2).toBeNull();
+    });
+
+    test('should generate directions for dual-task with identical response sets', () => {
+        const condition = {
+            N_Tasks: 2,
+            Stimulus_Valency: 'Univalent',
+            Simplified_RSO: 'Identical'
+        };
+        const trialAssignment = { channel1_task: 'mov', channel2_task: 'or' };
+
+        const result = generateTrialDirections(condition, trialAssignment);
+        
+        // Channel 1 movement task should be active
+        expect([0, 180]).toContain(result.dir_mov_1);
+        expect(result.dir_or_1).toBeNull();
+        
+        // Channel 2 orientation task should be active with same response dimension
+        expect([0, 180]).toContain(result.dir_or_2);
+        expect(result.dir_mov_2).toBeNull();
+    });
+});
+
+describe('generateTaskAssignmentSequence', () => {
+    test('should generate fixed assignment with 0% switch rate', () => {
+        const result = generateTaskAssignmentSequence('mov', 'or', 4, 0);
+        
+        expect(result).toHaveLength(4);
+        result.forEach(assignment => {
+            expect(assignment.channel1_task).toBe('mov');
+            expect(assignment.channel2_task).toBe('or');
+        });
+    });
+
+    test('should generate alternating assignment with 100% switch rate', () => {
+        const result = generateTaskAssignmentSequence('mov', 'or', 4, 100);
+        
+        expect(result).toHaveLength(4);
+        expect(result[0].channel1_task).toBe('mov');
+        expect(result[0].channel2_task).toBe('or');
+        
+        // With 100% switch rate, should alternate each trial
+        expect(result[1].channel1_task).toBe('or');
+        expect(result[1].channel2_task).toBe('mov');
+        
+        expect(result[2].channel1_task).toBe('mov');
+        expect(result[2].channel2_task).toBe('or');
+        
+        expect(result[3].channel1_task).toBe('or');
+        expect(result[3].channel2_task).toBe('mov');
+    });
+
+    test('should generate random assignment with 50% switch rate', () => {
+        const result = generateTaskAssignmentSequence('mov', 'or', 10, 50);
+        
+        expect(result).toHaveLength(10);
+        // First trial should always be default assignment
+        expect(result[0].channel1_task).toBe('mov');
+        expect(result[0].channel2_task).toBe('or');
+        
+        // With randomness, we can't predict exact sequence, but all assignments should be valid
+        result.forEach(assignment => {
+            expect(['mov', 'or']).toContain(assignment.channel1_task);
+            expect(['mov', 'or']).toContain(assignment.channel2_task);
+            expect(assignment.channel1_task).not.toBe(assignment.channel2_task);
+        });
     });
 });
 
@@ -506,5 +616,189 @@ describe('createTrialSequence', () => {
 
         const result = createTrialSequence(condition, 1);
         expect(result[0].regenTime).toBe(1500);
+    });
+});
+
+// NEW TEST CASES - These should initially FAIL, exposing current implementation flaws
+describe('FAILING TESTS - N_Tasks Based Paradigm Differentiation', () => {
+    
+    test('SHOULD FAIL: Dual-Task (Hazeltine et al. 2006) - Disjoint Response Sets', () => {
+        const condition = {
+            Experiment: 'Hazeltine',
+            N_Tasks: 2,
+            Simplified_RSO: 'Disjoint', 
+            Stimulus_Valency: 'Univalent',
+            SOA: 0,
+            Sequence_Type: 'Random',
+            Switch_Rate_Percent: 0,
+            ITI_ms: 1000,
+            ITI_Distribution_Type: 'fixed',
+            // Dual-task timing pattern
+            effective_start_cue1: '0',
+            effective_end_cue1: '50',
+            effective_start_cue2: '100',    // Both cues active
+            effective_end_cue2: '150',      
+            effective_start_go1: '200',
+            effective_end_go1: '250', 
+            effective_start_go2: '300',     // Both go signals active
+            effective_end_go2: '350',
+            // Task 1: Movement (Channel 1)
+            effective_start_stim1_mov: '200',
+            effective_end_stim1_mov: '700',
+            effective_start_stim1_or: '0',  // Unused for dual-task
+            effective_end_stim1_or: '0',
+            // Task 2: Orientation (Channel 2) 
+            effective_start_stim2_mov: '0', // Unused for dual-task
+            effective_end_stim2_mov: '0',
+            effective_start_stim2_or: '300', // Channel 2 orientation task
+            effective_end_stim2_or: '800',   
+            coh_1: '0.8',
+            coh_2: '0.6'
+        };
+
+        const result = createTrialSequence(condition, 1);
+        const trial = result[0];
+
+        // CRITICAL TEST: Should be dual-task with both channels active
+        expect(trial.seParams.task_1).toBe('mov');
+        expect(trial.seParams.task_2).toBe('or');
+        
+        // Channel 1: Movement task active
+        expect(trial.seParams.dur_mov_1).toBeGreaterThan(0);
+        expect(trial.seParams.dur_or_1).toBe(0);  // No distractor for univalent dual-task
+        
+        // Channel 2: Orientation task active  
+        expect(trial.seParams.dur_or_2).toBeGreaterThan(0);  
+        expect(trial.seParams.dur_mov_2).toBe(0); // No distractor for univalent dual-task
+        
+        // Direction assignments for disjoint response sets
+        expect([0, 180]).toContain(trial.seParams.dir_mov_1);
+        expect([90, 270]).toContain(trial.seParams.dir_or_2); // Orthogonal for disjoint
+        
+        // Both channels should have active cues and go signals
+        expect(trial.seParams.dur_1).toBeGreaterThan(0);  // Channel 1 cue
+        expect(trial.seParams.dur_2).toBeGreaterThan(0);  // Channel 2 cue
+        expect(trial.seParams.dur_go_1).toBeGreaterThan(0); // Channel 1 go
+        expect(trial.seParams.dur_go_2).toBeGreaterThan(0); // Channel 2 go
+    });
+
+    test('SHOULD FAIL: Task-Switching (Rogers & Monsell, 1995) - AABB Pattern', () => {
+        const condition = {
+            Experiment: 'Rogers_Monsell',
+            N_Tasks: 1,
+            Sequence_Type: 'AABB',
+            Switch_Rate_Percent: 50,
+            Stimulus_Valency: 'Univalent',
+            Simplified_RSO: 'Identical',
+            ITI_ms: 1000,
+            ITI_Distribution_Type: 'fixed',
+            // Single-task timing pattern - only Channel 1 active
+            effective_start_cue1: '0',
+            effective_end_cue1: '50',
+            effective_start_cue2: '0',      // Inactive for single-task
+            effective_end_cue2: '0',        
+            effective_start_go1: '200',
+            effective_end_go1: '250',
+            effective_start_go2: '0',       // Inactive for single-task
+            effective_end_go2: '0',
+            // Primary task stimuli (timing same for both mov and or)
+            effective_start_stim1_mov: '200',
+            effective_end_stim1_mov: '700',
+            effective_start_stim1_or: '200',
+            effective_end_stim1_or: '700',
+            // Channel 2 completely inactive
+            effective_start_stim2_mov: '0',
+            effective_end_stim2_mov: '0',
+            effective_start_stim2_or: '0',
+            effective_end_stim2_or: '0',
+            coh_1: '0.8',
+            coh_2: '0.0'
+        };
+
+        const result = createTrialSequence(condition, 4);
+        
+        // AABB pattern: mov, mov, or, or
+        expect(result[0].seParams.task_1).toBe('mov');
+        expect(result[0].seParams.task_2).toBeNull();
+        
+        expect(result[1].seParams.task_1).toBe('mov'); 
+        expect(result[1].seParams.task_2).toBeNull();
+        
+        expect(result[2].seParams.task_1).toBe('or');
+        expect(result[2].seParams.task_2).toBeNull();
+        
+        expect(result[3].seParams.task_1).toBe('or');
+        expect(result[3].seParams.task_2).toBeNull();
+        
+        // All trials should have only Channel 1 active
+        result.forEach(trial => {
+            expect(trial.seParams.dur_1).toBeGreaterThan(0);  // Channel 1 cue active
+            expect(trial.seParams.dur_2).toBe(0);             // Channel 2 cue inactive
+            expect(trial.seParams.dur_go_1).toBeGreaterThan(0); // Channel 1 go active
+            expect(trial.seParams.dur_go_2).toBe(0);           // Channel 2 go inactive
+        });
+    });
+
+    test('SHOULD FAIL: Single-Task with Asynchronous Distractor (Kopp et al. 1996)', () => {
+        const condition = {
+            Experiment: 'Kopp',
+            N_Tasks: 1,
+            SOA: -100,  // Distractor appears 100ms before target
+            Stimulus_Valency: 'Bivalent-Incongruent',
+            Simplified_RSO: 'Identical',
+            Sequence_Type: 'Random',
+            Switch_Rate_Percent: 0,
+            ITI_ms: 1000,
+            ITI_Distribution_Type: 'fixed',
+            // Single-task with bivalent stimulus
+            effective_start_cue1: '0',
+            effective_end_cue1: '50',
+            effective_start_cue2: '0',      // Inactive
+            effective_end_cue2: '0',        
+            effective_start_go1: '200',
+            effective_end_go1: '250',
+            effective_start_go2: '0',       // Inactive
+            effective_end_go2: '0',
+            // Target: movement task
+            effective_start_stim1_mov: '200',
+            effective_end_stim1_mov: '700', 
+            // Distractor: orientation (earlier onset due to negative SOA)
+            effective_start_stim1_or: '100',  // 100ms before target
+            effective_end_stim1_or: '600',
+            // Channel 2 inactive
+            effective_start_stim2_mov: '0',
+            effective_end_stim2_mov: '0',
+            effective_start_stim2_or: '0',
+            effective_end_stim2_or: '0',
+            coh_1: '0.8',
+            coh_2: '0.6'
+        };
+
+        const result = createTrialSequence(condition, 1);
+        const trial = result[0];
+
+        // Should be single-task with task_1 = 'mov', task_2 = null
+        expect(trial.seParams.task_1).toBe('mov');
+        expect(trial.seParams.task_2).toBeNull();
+        
+        // Both pathways of Channel 1 should be active (bivalent stimulus)
+        expect(trial.seParams.dur_mov_1).toBeGreaterThan(0);  // Target
+        expect(trial.seParams.dur_or_1).toBeGreaterThan(0);   // Distractor
+        
+        // Distractor should start 100ms before target (negative SOA)
+        expect(trial.seParams.start_or_1).toBe(trial.seParams.start_mov_1 - 100);
+        
+        // Channel 2 should be completely inactive
+        expect(trial.seParams.dur_2).toBe(0);
+        expect(trial.seParams.dur_go_2).toBe(0);
+        expect(trial.seParams.dur_mov_2).toBe(0);
+        expect(trial.seParams.dur_or_2).toBe(0);
+        
+        // For incongruent condition, directions should be opposite
+        if (trial.seParams.dir_mov_1 === 0) {
+            expect(trial.seParams.dir_or_1).toBe(180);
+        } else {
+            expect(trial.seParams.dir_or_1).toBe(0);
+        }
     });
 });

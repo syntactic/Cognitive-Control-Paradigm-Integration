@@ -89,11 +89,10 @@ function convertAbsoluteToSEParams(absoluteRow) {
         seParams.dur_mov_1 = mov_duration;
         
         // For single-task, stimulus valency determines if we need distractors on Channel 1
-        // If stimulus is bivalent (like Stroop), both pathways of Channel 1 should be active
-        // Check if both stimulus types have similar timing (indicating bivalent stimulus)
-        const stimuliOverlap = Math.abs(mov_start - or_start) < 50 && Math.abs(mov_duration - or_duration) < 100;
+        // Use explicit stimulus valency metadata if available
+        const stimulusValency = absoluteRow.Stimulus_Valency || 'Univalent';
         
-        if (stimuliOverlap && or_duration > 0) {
+        if (stimulusValency.includes('Bivalent') && or_duration > 0) {
             // Bivalent stimulus: activate orientation pathway on Channel 1 as distractor
             seParams.start_or_1 = or_start;
             seParams.dur_or_1 = or_duration;
@@ -135,41 +134,95 @@ function convertAbsoluteToSEParams(absoluteRow) {
     return seParams;
 }
 
-// Generate trial directions based on condition metadata
-function generateTrialDirections(condition) {
-    // Parse stimulus valency and response set overlap to determine direction generation logic
+// Generate trial directions based on condition metadata and trial assignment
+function generateTrialDirections(condition, trialAssignment) {
+    // Parse condition properties
+    const nTasks = condition.N_Tasks || 1;
     const stimulusValency = condition.Stimulus_Valency || 'Univalent';
     const responseSetOverlap = condition.Simplified_RSO || 'Identical';
     
-    let mov_dir, or_dir;
+    // Initialize all directions to null
+    let dir_mov_1 = null, dir_or_1 = null, dir_mov_2 = null, dir_or_2 = null;
     
-    // For now, implement basic random direction generation
-    // This can be enhanced based on specific valency and congruency rules
-    if (stimulusValency.includes('Bivalent')) {
-        if (stimulusValency.includes('Congruent')) {
-            // Both stimuli should lead to same response
-            mov_dir = Math.random() < 0.5 ? 0 : 180;
-            or_dir = mov_dir; // Same direction for congruent
-        } else if (stimulusValency.includes('Incongruent')) {
-            // Stimuli should lead to opposite responses
-            mov_dir = Math.random() < 0.5 ? 0 : 180;
-            or_dir = mov_dir === 0 ? 180 : 0; // Opposite direction
-        } else if (stimulusValency.includes('Neutral')) {
-            // Neutral - stimuli should be orthogonal
-            mov_dir = Math.random() < 0.5 ? 0 : 180; // left/right movement
-            or_dir = Math.random() < 0.5 ? 90 : 270; // up/down orientation
-        } else {
-            // Plain "Bivalent" without specification - random directions
-            mov_dir = Math.random() < 0.5 ? 0 : 180;
-            or_dir = Math.random() < 0.5 ? 0 : 180;
+    if (nTasks == 2) {
+        // DUAL-TASK: Both channels active
+        // trialAssignment specifies which task goes to which channel
+        
+        const task1 = trialAssignment.channel1_task; // e.g., 'mov' or 'or'
+        const task2 = trialAssignment.channel2_task; // e.g., 'or' or 'mov'
+        
+        // Assume univalent stimuli for dual-task (no cross-channel distractors)
+        
+        // Generate directions for active pathways
+        if (task1 === 'mov') {
+            dir_mov_1 = Math.random() < 0.5 ? 0 : 180;
+        } else if (task1 === 'or') {
+            dir_or_1 = Math.random() < 0.5 ? 0 : 180;
         }
+        
+        if (task2 === 'mov') {
+            dir_mov_2 = Math.random() < 0.5 ? 0 : 180;
+        } else if (task2 === 'or') {
+            if (responseSetOverlap.includes('Disjoint')) {
+                // Disjoint response sets: use orthogonal directions
+                dir_or_2 = Math.random() < 0.5 ? 90 : 270;
+            } else {
+                // Identical response sets: use same response dimension 
+                dir_or_2 = Math.random() < 0.5 ? 0 : 180;
+            }
+        }
+        
     } else {
-        // Univalent - random directions since there's no crosstalk
-        mov_dir = Math.random() < 0.5 ? 0 : 180;
-        or_dir = Math.random() < 0.5 ? 0 : 180;
+        // SINGLE-TASK (N_Tasks == 1): Only Channel 1 active
+        // trialAssignment.currentTask determines which pathway is primary
+        const currentTask = trialAssignment.currentTask;
+        
+        if (stimulusValency.includes('Univalent')) {
+            // Only the primary pathway gets a direction
+            if (currentTask === 'mov') {
+                dir_mov_1 = Math.random() < 0.5 ? 0 : 180;
+            } else if (currentTask === 'or') {
+                dir_or_1 = Math.random() < 0.5 ? 0 : 180;
+            }
+            
+        } else if (stimulusValency.includes('Bivalent')) {
+            // Both pathways of Channel 1 get directions (target + distractor)
+            
+            let primary_dir, distractor_dir;
+            
+            if (stimulusValency.includes('Congruent')) {
+                // Both stimuli should lead to same response
+                primary_dir = Math.random() < 0.5 ? 0 : 180;
+                distractor_dir = primary_dir; // Same direction for congruent
+            } else if (stimulusValency.includes('Incongruent')) {
+                // Stimuli should lead to opposite responses
+                primary_dir = Math.random() < 0.5 ? 0 : 180;
+                distractor_dir = primary_dir === 0 ? 180 : 0; // Opposite direction
+            } else if (stimulusValency.includes('Neutral')) {
+                // Neutral - stimuli should be orthogonal
+                primary_dir = Math.random() < 0.5 ? 0 : 180; // left/right
+                distractor_dir = Math.random() < 0.5 ? 90 : 270; // up/down
+            } else {
+                // Plain "Bivalent" without specification - random directions
+                primary_dir = Math.random() < 0.5 ? 0 : 180;
+                distractor_dir = Math.random() < 0.5 ? 0 : 180;
+            }
+            
+            // Assign directions based on current task
+            if (currentTask === 'mov') {
+                dir_mov_1 = primary_dir;    // Movement is primary
+                dir_or_1 = distractor_dir;  // Orientation is distractor
+            } else if (currentTask === 'or') {
+                dir_or_1 = primary_dir;     // Orientation is primary  
+                dir_mov_1 = distractor_dir; // Movement is distractor
+            }
+        }
+        
+        // Channel 2 completely inactive for single-task
+        // dir_mov_2 = null, dir_or_2 = null (already set above)
     }
     
-    return { mov_dir, or_dir };
+    return { dir_mov_1, dir_or_1, dir_mov_2, dir_or_2 };
 }
 
 // Generate ITI for a trial based on distribution parameters
@@ -205,7 +258,7 @@ function generateITI(condition) {
     return baseITI;
 }
 
-// Generate task sequence based on sequence type
+// Generate task sequence for single-task paradigms
 function generateTaskSequence(sequenceType, numTrials, switchRate) {
     const sequence = [];
     
@@ -248,6 +301,31 @@ function generateTaskSequence(sequenceType, numTrials, switchRate) {
     return sequence;
 }
 
+// Generate task-to-channel assignment sequence for dual-task paradigms
+function generateTaskAssignmentSequence(task1Type, task2Type, numTrials, switchRate) {
+    const sequence = [];
+    
+    // Default assignment (switch rate = 0%)
+    let channel1_task = task1Type;  // e.g., 'mov'
+    let channel2_task = task2Type;  // e.g., 'or'
+    
+    for (let i = 0; i < numTrials; i++) {
+        if (i === 0) {
+            // First trial uses default assignment
+            sequence.push({ channel1_task, channel2_task });
+        } else {
+            // Subsequent trials: check if we should switch assignment
+            if (Math.random() < (switchRate / 100)) {
+                // Switch the task-to-channel assignment
+                [channel1_task, channel2_task] = [channel2_task, channel1_task];
+            }
+            sequence.push({ channel1_task, channel2_task });
+        }
+    }
+    
+    return sequence;
+}
+
 // Advanced trial sequence generation
 function createTrialSequence(condition, numTrials = 10) {
     const trialSequence = [];
@@ -256,49 +334,68 @@ function createTrialSequence(condition, numTrials = 10) {
     const sequenceType = condition.Sequence_Type || 'Random';
     const switchRate = parseFloat(condition.Switch_Rate_Percent) || 0;
     
-    // Generate task sequence
-    const taskSequence = generateTaskSequence(sequenceType, numTrials, switchRate);
+    // Determine paradigm type from N_Tasks (new approach)
+    const nTasks = condition.N_Tasks || 1;
+    const isDualTask = (nTasks == 2);
     
-    // Determine paradigm type from condition
-    const cue2Duration = parseInt(condition.effective_end_cue2) - parseInt(condition.effective_start_cue2);
-    const go2Duration = parseInt(condition.effective_end_go2) - parseInt(condition.effective_start_go2);
-    const isDualTask = cue2Duration > 0 && go2Duration > 0;
+    // Generate assignment sequence based on paradigm type
+    let assignmentSequence;
+    
+    if (isDualTask) {
+        // DUAL-TASK: Generate task-to-channel assignments using switch rate
+        // Default mapping: Task 1 -> 'mov', Task 2 -> 'or'
+        assignmentSequence = generateTaskAssignmentSequence(
+            'mov',  // Always map Task 1 to movement
+            'or',   // Always map Task 2 to orientation 
+            numTrials, 
+            switchRate
+        );
+    } else {
+        // SINGLE-TASK: Generate task sequence using switch rate
+        const taskSequence = generateTaskSequence(sequenceType, numTrials, switchRate);
+        // Convert to assignment format for consistency
+        assignmentSequence = taskSequence.map(task => ({ currentTask: task }));
+    }
     
     // Generate trials
     for (let i = 0; i < numTrials; i++) {
-        const currentTask = taskSequence[i];
-        const directions = generateTrialDirections(condition);
+        const assignment = assignmentSequence[i];
+        const directions = generateTrialDirections(condition, assignment);
         const iti = generateITI(condition);
+        
+        // Get base parameters from CSV data
+        const baseParams = convertAbsoluteToSEParams(condition);
         
         let trialParams;
         
         if (isDualTask) {
-            // DUAL-TASK PARADIGM: Use base parameters from convertAbsoluteToSEParams
-            // Both channels are active with fixed task assignments
-            const baseParams = convertAbsoluteToSEParams(condition);
-            
+            // DUAL-TASK: Both channels active, task assignment may vary per trial
             trialParams = {
                 ...baseParams,
-                // Override directions for active pathways
-                dir_mov_1: baseParams.dur_mov_1 > 0 ? directions.mov_dir : 0,
-                dir_or_1: baseParams.dur_or_1 > 0 ? directions.or_dir : 0,
-                dir_mov_2: baseParams.dur_mov_2 > 0 ? directions.mov_dir : 0,
-                dir_or_2: baseParams.dur_or_2 > 0 ? directions.or_dir : 0,
+                task_1: assignment.channel1_task,  // Dynamic assignment based on switch rate
+                task_2: assignment.channel2_task,  // Dynamic assignment based on switch rate
+                
+                // Apply generated directions to all four pathways
+                dir_mov_1: directions.dir_mov_1 || 0,
+                dir_or_1: directions.dir_or_1 || 0,
+                dir_mov_2: directions.dir_mov_2 || 0,
+                dir_or_2: directions.dir_or_2 || 0,
             };
             
         } else {
-            // SINGLE-TASK/TASK-SWITCHING PARADIGM: Only Channel 1 active, task_1 varies
-            // Create base parameters but modify for the current task
-            const baseCondition = { ...condition };
-            const baseParams = convertAbsoluteToSEParams(baseCondition);
-            
-            // Override task assignment and stimulus pathways based on current task
+            // SINGLE-TASK: Only Channel 1 active, task_1 varies
             trialParams = {
                 ...baseParams,
-                task_1: currentTask,  // Dynamic task assignment for task-switching
-                task_2: null,         // Channel 2 always inactive for single-task
+                task_1: assignment.currentTask,  // Dynamic task assignment for task-switching
+                task_2: null,                    // Channel 2 always inactive for single-task
                 
-                // Channel 2 completely inactive
+                // Apply generated directions (only Channel 1 pathways will have non-null values)
+                dir_mov_1: directions.dir_mov_1 || 0,
+                dir_or_1: directions.dir_or_1 || 0,
+                dir_mov_2: 0,  // Channel 2 always inactive
+                dir_or_2: 0,   // Channel 2 always inactive
+                
+                // Ensure Channel 2 is completely inactive
                 start_2: 0,
                 dur_2: 0,
                 start_go_2: 0,
@@ -309,39 +406,14 @@ function createTrialSequence(condition, numTrials = 10) {
                 dur_or_2: 0,
                 coh_mov_2: 0,
                 coh_or_2: 0,
-                dir_mov_2: 0,
-                dir_or_2: 0,
             };
-            
-            // Configure Channel 1 stimulus pathways based on current task and stimulus valency
-            if (currentTask === 'mov') {
-                // Movement task: primary movement stimulus
-                trialParams.dir_mov_1 = directions.mov_dir;
-                trialParams.dir_or_1 = trialParams.dur_or_1 > 0 ? directions.or_dir : 0; // distractor if bivalent
-            } else if (currentTask === 'or') {
-                // Orientation task: reconfigure Channel 1 for orientation as primary task
-                // Swap the pathways so orientation becomes primary
-                const temp_start = trialParams.start_mov_1;
-                const temp_dur = trialParams.dur_mov_1;
-                const temp_coh = trialParams.coh_mov_1;
-                
-                trialParams.start_mov_1 = trialParams.start_or_1;
-                trialParams.dur_mov_1 = trialParams.dur_or_1;
-                trialParams.coh_mov_1 = trialParams.coh_or_1;
-                trialParams.dir_mov_1 = directions.or_dir; // orientation direction goes to mov pathway
-                
-                trialParams.start_or_1 = temp_start;
-                trialParams.dur_or_1 = temp_dur;
-                trialParams.coh_or_1 = temp_coh;
-                trialParams.dir_or_1 = temp_dur > 0 ? directions.mov_dir : 0; // movement as distractor if bivalent
-            }
         }
         
         trialSequence.push({
             seParams: trialParams,
             regenTime: iti,
             trialNumber: i + 1,
-            taskType: currentTask
+            taskType: isDualTask ? `${assignment.channel1_task}+${assignment.channel2_task}` : assignment.currentTask
         });
     }
     
@@ -368,21 +440,49 @@ function updateInfoPanel(conceptualRow) {
     infoPanel.innerHTML = info;
 }
 
-// Draw timeline visualization
-function drawTimeline(absoluteRow) {
+// Draw timeline visualization from trial-specific data
+function drawTimeline(trialData) {
     const svg = document.getElementById('timeline-svg');
+    
+    // Optimization: Check if we need to redraw (compare with previous trial data)
+    const trialKey = JSON.stringify({
+        task_1: trialData.task_1,
+        task_2: trialData.task_2,
+        start_1: trialData.start_1,
+        dur_1: trialData.dur_1,
+        start_2: trialData.start_2,
+        dur_2: trialData.dur_2,
+        start_mov_1: trialData.start_mov_1,
+        dur_mov_1: trialData.dur_mov_1,
+        start_or_1: trialData.start_or_1,
+        dur_or_1: trialData.dur_or_1,
+        start_mov_2: trialData.start_mov_2,
+        dur_mov_2: trialData.dur_mov_2,
+        start_or_2: trialData.start_or_2,
+        dur_or_2: trialData.dur_or_2,
+        regenTime: trialData.regenTime || 0
+    });
+    
+    // Skip redraw if timeline structure is identical
+    if (svg.getAttribute('data-trial-key') === trialKey) {
+        return;
+    }
+    svg.setAttribute('data-trial-key', trialKey);
     
     // Clear previous timeline
     svg.innerHTML = '';
     
-    // Timeline settings
-    const timelineStart = 0;
+    // Calculate timeline end time from trial data
     const timelineEnd = Math.max(
-        parseInt(absoluteRow.effective_end_stim1_or),
-        parseInt(absoluteRow.effective_end_stim1_mov),
-        parseInt(absoluteRow.effective_end_go2),
-        parseInt(absoluteRow.effective_end_cue2)
-    ) + 500; // Add padding
+        (trialData.start_mov_1 || 0) + (trialData.dur_mov_1 || 0),
+        (trialData.start_or_1 || 0) + (trialData.dur_or_1 || 0),
+        (trialData.start_mov_2 || 0) + (trialData.dur_mov_2 || 0),
+        (trialData.start_or_2 || 0) + (trialData.dur_or_2 || 0),
+        (trialData.start_1 || 0) + (trialData.dur_1 || 0),
+        (trialData.start_2 || 0) + (trialData.dur_2 || 0),
+        (trialData.start_go_1 || 0) + (trialData.dur_go_1 || 0),
+        (trialData.start_go_2 || 0) + (trialData.dur_go_2 || 0)
+    ) + (trialData.regenTime || 500); // Add ITI and padding
     
     const margin = { left: 120, right: 20, top: 20, bottom: 30 };
     const width = svg.clientWidth - margin.left - margin.right;
@@ -486,51 +586,103 @@ function drawTimeline(absoluteRow) {
         }
     }
     
-    // Draw T1 components (using cue1 and stim1_mov data)
-    drawComponent(
-        parseInt(absoluteRow.effective_start_cue1),
-        parseInt(absoluteRow.effective_end_cue1),
-        yPositions.t1_cue,
-        "#4CAF50",
-        "T1 Cue"
-    );
+    // Determine what to draw based on actual trial structure
+    const isDualTask = (trialData.task_2 !== null);
     
-    drawComponent(
-        parseInt(absoluteRow.effective_start_stim1_mov),
-        parseInt(absoluteRow.effective_end_stim1_mov),
-        yPositions.t1_stim,
-        "#2196F3",
-        "T1 Stimulus"
-    );
+    // Draw Channel 1 components (always active)
+    if (trialData.dur_1 > 0) {
+        drawComponent(
+            trialData.start_1,
+            trialData.start_1 + trialData.dur_1,
+            yPositions.t1_cue,
+            "#4CAF50",
+            `${trialData.task_1.toUpperCase()} Cue`
+        );
+    }
     
-    // Draw T2 components (using cue2 and stim1_or data)
-    drawComponent(
-        parseInt(absoluteRow.effective_start_cue2),
-        parseInt(absoluteRow.effective_end_cue2),
-        yPositions.t2_cue,
-        "#FF9800",
-        "T2 Cue"
-    );
+    // Draw Channel 1 stimulus pathways based on what's active
+    if (trialData.dur_mov_1 > 0) {
+        drawComponent(
+            trialData.start_mov_1,
+            trialData.start_mov_1 + trialData.dur_mov_1,
+            yPositions.t1_stim,
+            trialData.task_1 === 'mov' ? "#2196F3" : "#90CAF9", // Darker if primary, lighter if distractor
+            `${trialData.task_1 === 'mov' ? 'Primary' : 'Distractor'} Movement`
+        );
+    }
     
-    drawComponent(
-        parseInt(absoluteRow.effective_start_stim1_or),
-        parseInt(absoluteRow.effective_end_stim1_or),
-        yPositions.t2_stim,
-        "#F44336",
-        "T2 Stimulus"
-    );
+    if (trialData.dur_or_1 > 0) {
+        drawComponent(
+            trialData.start_or_1,
+            trialData.start_or_1 + trialData.dur_or_1,
+            yPositions.t2_stim,
+            trialData.task_1 === 'or' ? "#2196F3" : "#90CAF9", // Darker if primary, lighter if distractor
+            `${trialData.task_1 === 'or' ? 'Primary' : 'Distractor'} Orientation`
+        );
+    }
     
-    // Add SOA indicator
-    const soa = parseInt(absoluteRow.effective_start_stim1_or) - parseInt(absoluteRow.effective_start_stim1_mov);
-    const soaLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    soaLabel.setAttribute("x", width - 10);
-    soaLabel.setAttribute("y", 20);
-    soaLabel.setAttribute("text-anchor", "end");
-    soaLabel.setAttribute("fill", "#333");
-    soaLabel.setAttribute("font-size", "12px");
-    soaLabel.setAttribute("font-weight", "bold");
-    soaLabel.textContent = `SOA: ${soa}ms`;
-    g.appendChild(soaLabel);
+    // Draw Channel 2 components (only if dual-task)
+    if (isDualTask) {
+        if (trialData.dur_2 > 0) {
+            drawComponent(
+                trialData.start_2,
+                trialData.start_2 + trialData.dur_2,
+                yPositions.t2_cue,
+                "#FF9800",
+                `${trialData.task_2.toUpperCase()} Cue`
+            );
+        }
+        
+        // Draw Channel 2 stimulus pathways based on what's active
+        if (trialData.dur_mov_2 > 0) {
+            drawComponent(
+                trialData.start_mov_2,
+                trialData.start_mov_2 + trialData.dur_mov_2,
+                yPositions.t1_stim, // Use different y-position if needed
+                "#F44336",
+                "T2 Movement"
+            );
+        }
+        
+        if (trialData.dur_or_2 > 0) {
+            drawComponent(
+                trialData.start_or_2,
+                trialData.start_or_2 + trialData.dur_or_2,
+                yPositions.t2_stim,
+                "#F44336",
+                "T2 Orientation"
+            );
+        }
+        
+        // Calculate SOA for dual-task (between the two primary stimuli)
+        let t1_stim_start = trialData.task_1 === 'mov' ? trialData.start_mov_1 : trialData.start_or_1;
+        let t2_stim_start = trialData.task_2 === 'mov' ? trialData.start_mov_2 : trialData.start_or_2;
+        
+        if (t1_stim_start && t2_stim_start) {
+            const soa = t2_stim_start - t1_stim_start;
+            const soaLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            soaLabel.setAttribute("x", width - 10);
+            soaLabel.setAttribute("y", 20);
+            soaLabel.setAttribute("text-anchor", "end");
+            soaLabel.setAttribute("fill", "#333");
+            soaLabel.setAttribute("font-size", "12px");
+            soaLabel.setAttribute("font-weight", "bold");
+            soaLabel.textContent = `SOA: ${soa}ms`;
+            g.appendChild(soaLabel);
+        }
+    } else if (trialData.dur_or_1 > 0 && trialData.dur_mov_1 > 0) {
+        // Single-task with distractor - calculate SOA between target and distractor
+        const soa = trialData.start_or_1 - trialData.start_mov_1;
+        const soaLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        soaLabel.setAttribute("x", width - 10);
+        soaLabel.setAttribute("y", 20);
+        soaLabel.setAttribute("text-anchor", "end");
+        soaLabel.setAttribute("fill", "#333");
+        soaLabel.setAttribute("font-size", "12px");
+        soaLabel.setAttribute("font-weight", "bold");
+        soaLabel.textContent = `SOA: ${soa}ms`;
+        g.appendChild(soaLabel);
+    }
 }
 
 async function runSelectedExperiment() {
@@ -630,8 +782,18 @@ function updateUIForSelection() {
         updateInfoPanelFromCondition(condition);
     }
     
-    // Draw timeline
-    drawTimeline(condition);
+    // Generate a sample trial to visualize
+    try {
+        const sampleTrials = createTrialSequence(condition, 1);
+        if (sampleTrials.length > 0) {
+            // Draw timeline using actual trial data
+            drawTimeline(sampleTrials[0].seParams);
+        }
+    } catch (error) {
+        console.error('Error generating sample trial for timeline:', error);
+        // Fall back to showing placeholder
+        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Error generating timeline</text>';
+    }
     
 }
 
@@ -711,6 +873,7 @@ module.exports = {
     generateTrialDirections,
     generateITI,
     generateTaskSequence,
+    generateTaskAssignmentSequence,
     createTrialSequence,
     updateInfoPanel,
     drawTimeline
