@@ -9,7 +9,18 @@ This note lists the features intended for input into the Principal Component Ana
     *   From CSV `SOA`.
     * If `Number of Tasks` == 2: this is the standard interpretation for PRP, indicating the delay between stimulus for task 1 and stimulus for task 2.
     *  If `Number of Tasks` == 1: this is a special case for single-task paradigms with interference. A distractor stimulus appears at this SOA but the subject is expected to only perform one task in the trial. This happens in [[Yeung & Monsell (2003)]]. This is `0` for bivalent stimuli with simultaneous features and a `+/-` value for asynchronous features.
-    *   Placeholder/Imputation for N/A: Code `N/A` as **-1**. It distinguishes univalent trials (where SOA is not applicable) from bivalent trials with simultaneous distractors (`SOA = 0`)
+	* a. **`SOA_is_NA`** (Binary Numeric: 0 or 1)
+	    - **Source:** erived from Number of Tasks and SOA value applicability.
+	    - **Value=1 ("SOA is Not Applicable"):** Assigned when SOA is not the primary manipulated temporal variable. This includes: 1) Single-task (N_Tasks=1) trials with Univalent stimuli, and 2) RSI-driven dual-task paradigms (N_Tasks=2) where SOA is explicitly not manipulated and RSI is the key variable.
+	    - **Value=0 ("SOA is Applicable"):** Assigned for all other cases where SOA is the relevant temporal parameter, including all classic PRP paradigms and single-task bivalent paradigms.
+	    - **Rationale:** This feature correctly partitions the design space, allowing the PCA to distinguish paradigms based on whether their core temporal logic is stimulus-to-stimulus (SOA-driven) or response-to-stimulus (RSI-driven).
+    - b. **`SOA_ms`**
+	    - **Source:** From CSV SOA
+	    - **Imputation for N/A:** When SOA_is_NA is 1, the corresponding SOA_ms value is imputed to **0**. This is a neutral choice because the SOA_is_NA feature already carries the critical information, preventing the imputed value from skewing the analysis. The analysis_utils.py script correctly implements this logic.
+	    - **Value Interpretation (when SOA_is_NA = 0):**
+		    - SOA = 0: Simultaneous target/distractor or S1/S2.
+		    - SOA > 0: Standard positive SOA (PRP or target-first interference).
+			* SOA < 0: Negative SOA (distractor-first interference).
 3.  **`CSI_ms_PCA`** (Numeric: ms)
     *   From CSV `CSI`.
     *   Placeholder/Imputation for N/A: I don't think this would ever occur, so there shouldn't be a need to impute values. (implicit cue = 0 CSI).

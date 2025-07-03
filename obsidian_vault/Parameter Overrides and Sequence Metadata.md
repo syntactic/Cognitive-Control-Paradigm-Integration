@@ -73,7 +73,8 @@ These keys provide structural information for the viewer client to use when gene
     -   **Description:** Defines a non-random trial sequence structure for task-switching paradigms. If this key is present, it overrides the simple `Switch_Rate_Percent`.
     -   **Possible Values:** `"AABB"`, `"ABAB"`, etc.
     -   **Default (if not present):** `"Random"`. The client will use `Switch_Rate_Percent` to generate trials.
-
+#### RSI Distribution Overrides
+These keys are used to document experiments where RSI is randomized on a trial-by-trial basis. For PCA compatibility, the main CSV column (RSI) should contain the expected value of this distribution (e.g., 0 for a symmetric range), while this metadata preserves the full experimental design for the viewer or deeper analysis.
 -   **`RSI_distribution`** (String)
     -   **Description:** Specifies the distribution from which the inter-trial interval (ITI/RSI) should be drawn. This works in conjunction with `RSI_range` or `RSI_values`.
     -   **Possible Values:** `"fixed"`, `"uniform"`, `"choice"`.
@@ -86,7 +87,17 @@ These keys provide structural information for the viewer client to use when gene
 -   **`RSI_values`** (Array of numbers)
     -   **Description:** Used when `RSI_distribution` is `"choice"`. Defines the discrete set of values from which to randomly sample.
     -   **Example:** `[600, 1600]`
-
+#### SOA Distribution Overrides
+These keys are used to document experiments where SOA is randomized on a trial-by-trial basis. For PCA compatibility, the main CSV column (SOA) should contain the expected value of this distribution (e.g., 0 for a symmetric range), while this metadata preserves the full experimental design for the viewer or deeper analysis.
+* **`SOA_distribution`** (String)
+	* **Description:** Specifies the distribution from which the SOA should be drawn.
+	* **Possible Values:** "uniform", "choice".
+	* **Default (if not present):** "fixed". The client will use the single numerical value from the SOA column.
+* **`SOA_range`** (Array of 2 numbers)
+	* **Description:** Used when SOA_distribution is "uniform". Defines the [min, max] values for the uniform distribution.
+	- **Example (from [[Sigman & Dehaene (2006)]]):** [-1000, 1000]
+- **`SOA_values`** (Array of numbers)
+	- **Description:** Used when `SOA_distribution` is "`choice`". Defines the discrete set of values from which to randomly sample.
 ## 4. Example Application: [[Hazeltine et al. (2006)]]
 
 In Hazeltine et al. (2006), the auditory tone stimulus (Task 1) lasted for **300ms**, while the visual word stimulus (Task 2) remained visible until a response was made. We can model this with overrides:
