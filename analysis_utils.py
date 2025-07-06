@@ -51,6 +51,39 @@ def classify_paradigm(row):
         return 'Interference'
     return 'Other'
 
+def map_valency(val):
+    val_str = str(val).lower()
+    if 'univalent' in val_str: return 'SBC_Univalent'
+    # CORRECTED BUG: 'incongruent' should map to Incongruent
+    if 'incongruent' in val_str: return 'SBC_Bivalent_Incongruent'
+    # CORRECTED BUG: 'congruent' should map to Congruent
+    if 'congruent' in val_str: return 'SBC_Bivalent_Congruent'
+    if 'neutral' in val_str: return 'SBC_Bivalent_Neutral'
+    return 'SBC_NA'
+
+def map_rso(val):
+    val_str = str(val).lower()
+    if 'identical' in val_str: return 'RSO_Identical'
+    if 'disjoint' in val_str: return 'RSO_Disjoint'
+    return 'RSO_NA'
+
+def map_srm(val):
+    val_str = str(val).lower()
+    if 'incompatible' in val_str: return 'SRM_Incompatible'
+    if 'compatible' in val_str: return 'SRM_Compatible'
+    if 'arbitrary' in val_str: return 'SRM_Arbitrary'
+    return 'SRM_NA'
+
+def map_tct(val):
+    """Maps the Task Cue Type column to simplified categories."""
+    val_str = str(val).lower()
+    if 'arbitrary' in val_str:
+        return 'TCT_Arbitrary'
+    if 'none/implicit' in val_str:
+        return 'TCT_Implicit'
+    # Default any other cases (like NaN or unexpected values) to Implicit
+    return 'TCT_Implicit'
+
 # =============================================================================
 # 2. Main Preprocessing Pipeline Function
 # =============================================================================
@@ -101,42 +134,9 @@ def preprocess_for_pca(df_raw):
     df['Task 2 Difficulty Norm'].fillna(0.5, inplace=True)
 
     # --- Step 4: Map Categorical Features ---
-    def map_valency(val):
-        val_str = str(val).lower()
-        if 'univalent' in val_str: return 'SBC_Univalent'
-        # CORRECTED BUG: 'incongruent' should map to Incongruent
-        if 'incongruent' in val_str: return 'SBC_Bivalent_Incongruent'
-        # CORRECTED BUG: 'congruent' should map to Congruent
-        if 'congruent' in val_str: return 'SBC_Bivalent_Congruent'
-        if 'neutral' in val_str: return 'SBC_Bivalent_Neutral'
-        return 'SBC_NA'
     df['Stimulus_Valency_Mapped'] = df['Stimulus Valency'].apply(map_valency)
-
-    def map_rso(val):
-        val_str = str(val).lower()
-        if 'identical' in val_str: return 'RSO_Identical'
-        if 'disjoint' in val_str: return 'RSO_Disjoint'
-        return 'RSO_NA'
     df['Response_Set_Overlap_Mapped'] = df['Response Set Overlap'].apply(map_rso)
-
-    def map_srm(val):
-        val_str = str(val).lower()
-        if 'incompatible' in val_str: return 'SRM_Incompatible'
-        if 'compatible' in val_str: return 'SRM_Compatible'
-        if 'arbitrary' in val_str: return 'SRM_Arbitrary'
-        return 'SRM_NA'
     df['Stimulus_Response_Mapping_Mapped'] = df['Stimulus Response Mapping'].apply(map_srm)
-
-    def map_tct(val):
-        """Maps the Task Cue Type column to simplified categories."""
-        val_str = str(val).lower()
-        if 'arbitrary' in val_str:
-            return 'TCT_Arbitrary'
-        if 'none/implicit' in val_str:
-            return 'TCT_Implicit'
-        # Default any other cases (like NaN or unexpected values) to Implicit
-        return 'TCT_Implicit'
-    
     df['Task_Cue_Type_Mapped'] = df['Task Cue Type'].apply(map_tct)
 
     # --- Step 5: Select final columns for the PCA pipeline ---
