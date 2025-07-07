@@ -3,8 +3,8 @@ To investigate whether dual-task limitations stem from generic central bottlenec
 
 **Paradigms Used:**
 
-- [[Dual-Task Performance & PRP|Dual Task]] paradigm, primarily comparing performance in pure single-task blocks vs. mixed blocks (containing single-task and dual-task trials at [[SOA (Stimulus Onset Asynchrony)|SOA]]=0ms).
-- Experiment 2b introduced [[SOA (Stimulus Onset Asynchrony)|SOA]] manipulation (+/- 50ms) within the dual-task trials after extensive practice.
+- [[Dual-Task Performance & PRP|Dual Task]] paradigm, primarily comparing performance in pure single-task blocks vs. mixed blocks (containing single-task and dual-task trials at [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]=0ms).
+- Experiment 2b introduced [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]] manipulation (+/- 50ms) within the dual-task trials after extensive practice.
 
 **Key Manipulations & Comparisons:**
 

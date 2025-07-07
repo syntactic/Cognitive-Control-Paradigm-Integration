@@ -21,7 +21,7 @@
       2.2.2. Key Parameters (e.g., [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]], [[Dimensions/Switch Rate|Switch Rate]], [[Dimensions/Task Cue Type|Task Cue Type]], [[Dimensions/Response Set Overlap|Response Set Overlap]])
    2.3. [[Dual-Task Performance & PRP]]
       2.3.1. Canonical Effects & Behavioral Phenomena (e.g., [[Effects/PRP Effect]], [[Effects/Dual-Task Cost|Dual-Task Cost]], [[Effects/Backward Crosstalk Effect (BCE)|BCE]])
-      2.3.2. Key Parameters (e.g., [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]], Task Difficulty)
+      2.3.2. Key Parameters (e.g., [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]], Task Difficulty)
    2.4. Literature on Relationships Between Phenomena Across Paradigms
       2.4.1. [[Transitions and Modulators]] (e.g., PRP to Task Switching)
       2.4.2. Shared vs. Distinct Mechanisms (e.g., [[Theoretical Concepts/Crosstalk|Crosstalk]], [[Theoretical Concepts/Bottleneck Theories|Bottlenecks]])
@@ -30,8 +30,8 @@
 ## 3. Methods
    3.1. The [[Super Experiment Framework]] as an Operational Language
    3.2. Defining the High-Level [[Derived Dimensions vs. Low-Level Parameters|Derived Dimensions]]
-      3.2.1. [[Dimensions/N_Tasks|N_Tasks]]
-      3.2.2. [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]] (and its dual meaning)
+      3.2.1. [[Number of Tasks|Number of Tasks]]
+      3.2.2. [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]] (and its dual meaning)
       3.2.3. [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]
       3.2.4. [[Dimensions/Task Cue Type|Task Cue Type]]
       3.2.5. [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]

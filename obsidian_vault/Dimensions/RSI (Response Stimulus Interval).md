@@ -19,7 +19,7 @@ Its manipulation and effects are central to understanding task-set inertia, task
 *   **In [[Dual-Task Performance & PRP|PRP]] / [[Dual-Task Performance & PRP|Dual-Task]] Paradigms (e.g., [[Telford (1931)]]):**
     *   **Definition (Inter-Trial Context):** `RSI_inter_trial = Onset(S1_Trial_N) - Offset(R2_Trial_N-1)`. This is often referred to as the **Inter-Trial Interval (ITI)**.
     *   **Function:** Represents the time between the completion of one dual-task episode and the beginning of the next.
-    *   **Effect:** While not always the primary manipulation in classic PRP (which focuses on intra-trial [[SOA (Stimulus Onset Asynchrony)|SOA]]), a very short ITI/RSI could lead to carry-over effects or insufficient recovery between complex dual-task trials. Longer ITIs allow for better disengagement and preparation for the next S1.
+    *   **Effect:** While not always the primary manipulation in classic PRP (which focuses on intra-trial [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]), a very short ITI/RSI could lead to carry-over effects or insufficient recovery between complex dual-task trials. Longer ITIs allow for better disengagement and preparation for the next S1.
     *   **Definition (Intra-Trial Context - Less Common as "RSI"):** Sometimes, `RSI_intra_trial = Onset(S2) - Offset(R1)` might be discussed. This is equivalent to `SOA - RT1`. It's an *outcome* measure reflecting processing overlap, not typically a manipulated "RSI" for preparation.
     *   **SE Mapping:** The `RSI_inter_trial` (ITI) maps to SE's `regen` parameter.
 

@@ -57,9 +57,9 @@ The core finding is the **Flanker Effect**: reaction times (RTs) are typically s
 
 ###### Key Parameters for Design Space Mapping:
 
-*   [[Dimensions/N_Tasks|N_Tasks]]: 1.
+*   [[Number of Tasks|Number of Tasks]]: 1.
 *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: Defines congruent/incongruent/neutral conditions.
 *   Flanker-Target Spacing (often mapped to [[Task Difficulty]] or an SE coherence parameter for the target/distractor interaction).
-*  [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (Standard case, as target and distractor dimensions are presented simultaneously). Non-zero SOAs can be used to manipulate distractor priming (e.g., [[Kopp et al. (1996)]]).
+*  [[Distractor SOA]]: 0 (Standard case, as target and distractor dimensions are presented simultaneously). Non-zero SOAs can be used to manipulate distractor priming (e.g., [[Kopp et al. (1996)]]).
 *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: Typically 0.
 *   [[Dimensions/Switch Rate|Switch Rate]]: Typically 0%.

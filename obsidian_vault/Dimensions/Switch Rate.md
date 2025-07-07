@@ -14,6 +14,6 @@ Definition: A parameter governing the between-trial task sequence structure. It 
 - A defining dimension of [[Task Switching]] paradigms.
 - Switch Rate = 0% characterizes [[Single Task]] and (most) [[Dual-Task Performance & PRP|PRP]]/[[Dual-Task Performance & PRP|Dual Task]] blocks.
 - Manipulating switch rate investigates how participants adapt preparatory strategies based on task predictability.
-- In **N_Tasks=2** paradigms, a non-zero switch rate (typically 50%) is used to represent **trial-to-trial uncertainty in task presentation order**. Instead of switching the task rule set itself, it models the randomization of which task appears as S1 and which as S2. This makes it a key parameter for representing "bridge" paradigms like [[Sigman & Dehaene (2006)]] that mix dual-task execution with scheduling uncertainty.
+- In **Number of Tasks=2** paradigms, a non-zero switch rate (typically 50%) is used to represent **trial-to-trial uncertainty in task presentation order**. Instead of switching the task rule set itself, it models the randomization of which task appears as S1 and which as S2. This makes it a key parameter for representing "bridge" paradigms like [[Sigman & Dehaene (2006)]] that mix dual-task execution with scheduling uncertainty.
 
 Super Exp. Mapping (Client-side - experiment.js): Implemented by the logic in createTrialSequence, which determines the task_1 (and potentially task_2) parameter for each trial based on the desired switch probability or sequence.

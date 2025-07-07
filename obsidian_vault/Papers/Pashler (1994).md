@@ -12,7 +12,7 @@ aliases:
 To provide a comprehensive review of dual-task interference, primarily using the [[Dual-Task Performance & PRP|Psychological Refractory Period (PRP)]] paradigm, and to argue for a specific, structural model of cognitive limitation. The paper's central thesis is that dual-task costs in simple, speeded tasks are not primarily caused by a graded sharing of limited "attentional resources," but rather by a serial, structural **[[Theoretical Concepts/Bottleneck Theories|processing bottleneck]]** at a central cognitive stage.
 
 ###### Paradigm(s) Discussed
-*   **Primary Focus:** The [[Dual-Task Performance & PRP|Psychological Refractory Period (PRP) paradigm]]. This involves two speeded choice-RT tasks (T1 and T2) presented in close temporal succession, with the [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]] being the key manipulated variable.
+*   **Primary Focus:** The [[Dual-Task Performance & PRP|Psychological Refractory Period (PRP) paradigm]]. This involves two speeded choice-RT tasks (T1 and T2) presented in close temporal succession, with the [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]] being the key manipulated variable.
 *   **Other Paradigms (for contrast/extension):** The review also discusses how the bottleneck model relates to:
     *   Probe RT tasks.
     *   Concurrent memory load tasks.
@@ -47,8 +47,8 @@ To provide a comprehensive review of dual-task interference, primarily using the
 ###### Relevance to Thesis & Mapping Notes
 *   **Foundational Review:** This paper is a cornerstone for the [[Dual-Task Performance & PRP]] section of the [[Parametric Design Space]]. It provides one of the most influential theoretical frameworks (the RSB model) and summarizes the key empirical evidence for it.
 *   **Dimensional Relevance:**
-    *   **[[Dimensions/N_Tasks|N_Tasks]]:** Defines the N_Tasks=2 paradigm space.
-    *   **[[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]:** The central independent variable for the entire PRP paradigm.
+    *   **[[Number of Tasks|Number of Tasks]]:** Defines the N_Tasks=2 paradigm space.
+    *   **[[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]:** The central independent variable for the entire PRP paradigm.
     *   **[[Dimensions/Task Difficulty|Task Difficulty]]:** Crucial for the locus-of-slack methodology. Manipulating difficulty at different stages (perceptual, central, motor) is how the bottleneck is identified.
     *   **[[Dimensions/Response Set Overlap|Response Set Overlap]]:** The paper notes that the PRP effect is robust across different stimulus and response modalities, suggesting the bottleneck is a general central mechanism, not one tied to specific effectors.
 *   **Theoretical Keystone:** Establishes the **[[Response Selection Bottleneck (RSB)|Response Selection Bottleneck (RSB)]]** model, which is a fundamental theoretical position the project must account for. It stands in contrast to capacity-sharing models and provides a strong, testable hypothesis about the architecture of cognitive control.

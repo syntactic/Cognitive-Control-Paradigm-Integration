@@ -51,7 +51,7 @@ The primary goal was to extend the [[Canonical Tasks/Simon Task|Simon Task]] to 
 *   **Complex Neutral Conditions:** This paper is an excellent example of how the definition of "neutral" (central visual stimulus, binaural auditory stimulus) and its interaction with other task-irrelevant dimensions can produce surprising RT patterns. It highlights that neutrality is not a simple absence of conflict.
 *   **Multimodal Interference:** Demonstrates the principle of cross-modal interference, but also a clear dominance of one modality (visual) over another (auditory) in a spatial task.
 *   **SE Mapping Considerations:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
+    *   [[Number of Tasks|Number of Tasks]]: 1.
     *   This is a single task with *two* simultaneous irrelevant dimensions (distractors). The SE framework is built for one target and one distractor. To map this, one would have to run separate, simplified experiments in SE. For example:
         1.  **Visual Simon:** Target=Letter ID (e.g., on `mov` pathway), Distractor=Visual Location (e.g., on `or` pathway).
         2.  **Auditory Simon:** Target=Letter ID (visual), Distractor=Auditory Location (would require SE to handle auditory stimuli, which it does not currently).

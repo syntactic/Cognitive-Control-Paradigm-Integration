@@ -9,7 +9,6 @@ tags:
 aliases:
   - Stroop Effect
 ---
-
 ###### Core Concept: The Stroop Task & Effect
 
 The **Stroop Task**, first described by John Ridley Stroop, is a classic paradigm demonstrating interference in reaction time when processing conflicting stimulus attributes. It highlights the difficulty of suppressing a highly learned or automatic process (e.g., word reading) when required to attend to a less automated feature (e.g., ink color).
@@ -60,9 +59,9 @@ The **Stroop Effect** is the robust finding that naming the ink color of a color
 
 ###### Key Parameters for Design Space Mapping:
 
-*   [[Dimensions/N_Tasks|N_Tasks]]: 1.
+*   [[Number of Tasks|Number of Tasks]]: 1.
 *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: Defines congruent/incongruent/neutral conditions.
 *   Response Modality (vocal, manual).
-*   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: Typically 0 (or N/A) as word and color are simultaneous attributes of one stimulus.
+*   [[Distractor SOA]]: Typically 0 (or N/A) as word and color are simultaneous attributes of one stimulus.
 *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: Typically 0.
 *   [[Dimensions/Switch Rate|Switch Rate]]: Typically 0%.

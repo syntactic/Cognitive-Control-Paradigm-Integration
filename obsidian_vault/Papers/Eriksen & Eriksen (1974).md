@@ -55,8 +55,8 @@ Eriksen & Eriksen (1974) investigated the impact of flanking "noise" letters on 
 *   **Parameter for Spacing:** Systematically varied letter spacing, a critical physical parameter.
 *   **Neutral Condition Varieties:** The "Heterogeneous-Similar" and "-Dissimilar" conditions exemplify early attempts to create neutral flankers based on feature overlap, distinct from simple unrelated symbols.
 *   **SE Mapping Considerations:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
-    *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (conceptual, flankers as simultaneous attribute) or N/A.
+    *   [[Number of Tasks|Number of Tasks]]: 1.
+    *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (conceptual, flankers as simultaneous attribute) or N/A.
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0.
     *   The effect of `Letter Spacing` is coded in the CSV using a float `Task 1 Difficulty`, which is then translated to influence `coh_mov_1` (target pathway coherence) in SE.
     *   Flanker presence and type are mapped to the `or` pathway in SE (`stim_or_1`, with `coh_or_1=1.0`). Congruency/incongruency arises from the S-R mapping of `stim_mov_1` vs. `stim_or_1`.

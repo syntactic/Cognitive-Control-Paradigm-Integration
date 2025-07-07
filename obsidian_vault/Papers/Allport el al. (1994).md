@@ -49,7 +49,7 @@ This paper is foundational for the thesis as it establishes one of the major the
 
 *   **Theoretical Keystone:** It provides the primary formulation of the **[[Task-Set Inertia]]** hypothesis, which is a direct theoretical competitor to the **Task-Set Reconfiguration** hypothesis of [[Rogers & Monsell (1995)]]. The [[Parametric Design Space]] can be used to frame the conditions under which each account seems more or less plausible.
 *   **Dimensional Relevance:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1
+    *   [[Number of Tasks|Number of Tasks]]: 1
     *   [[Dimensions/Switch Rate|Switch Rate]]: 100% (predictable alternation).
     *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: The stimuli are bivalent (e.g., a numeral has both value and group size; a colored word has both word and color attributes).
     *   [[Dimensions/Task Difficulty|Task Difficulty]]: This paper provides a crucial data point where manipulating this dimension had **no effect** on the switch cost.

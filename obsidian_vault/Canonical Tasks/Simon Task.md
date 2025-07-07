@@ -8,7 +8,6 @@ tags:
 aliases:
   - Simon Effect
 ---
-
 ###### Core Concept: The Simon Task & Effect
 
 The **Simon Task** is an experimental paradigm designed to investigate **stimulus-response (S-R) compatibility effects**, specifically how an irrelevant spatial feature of a stimulus can interfere with or facilitate a response to a non-spatial feature of that same stimulus. The robust finding from this task is known as the **Simon Effect**.
@@ -55,12 +54,12 @@ The **Simon Effect** refers to the observation that reaction times (RTs) are typ
 
 ###### Key Parameters for Design Space Mapping:
 
-*   [[Dimensions/N_Tasks|N_Tasks]]: Typically 1.
+*   [[Number of Tasks|Number of Tasks]]: Typically 1.
 *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: Crucial for defining congruent/incongruent trials in the classic Simon effect.
 *   [[Dimensions/Stimulus Response Mapping|Stimulus Response Mapping]]: Becomes the central manipulation in variants like Simon (1969).
 *   Stimulus Modality (visual, auditory).
 *   Response Modality (manual, vocal).
-*   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: Typically 0 (or N/A) as relevant and irrelevant features are part of one stimulus event.
+*   [[Distractor SOA]]: Typically 0 (or N/A) as relevant and irrelevant features are part of one stimulus event.
 *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: Typically 0.
 *   [[Dimensions/Switch Rate|Switch Rate]]: Typically 0%.
 

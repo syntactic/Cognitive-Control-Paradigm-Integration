@@ -44,7 +44,7 @@ The authors concluded that NIRS is a feasible and valuable tool for studying cog
 *   **Crucial Example of Task Design:** This study is a powerful example of how the specific task instructions (matching vs. naming) fundamentally alter the nature of the "neutral" and "congruent" conditions and the resulting RT patterns.
 *   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** It provides a clear operationalization of a neutral condition using a non-word stimulus ('XXXX'), which maps well to the `Bivalent-Neutral` category in the framework. The unusual RT pattern highlights that facilitation/interference is not just about stimulus features but their relationship to the required task.
 *   **SE Mapping Considerations:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
+    *   [[Number of Tasks|Number of Tasks]]: 1.
     *   The core manipulation between the three conditions maps directly to the `Stimulus Valency` dimension.
     *   SE cannot directly model the complex **matching** logic of this task. The mapping must abstract this away, treating it as a single S-R event whose type is defined by the congruency condition.
     *   The 100ms onset asynchrony between stimulus components within a single trial is a nuance that the SE framework is not designed to capture easily for a single-task event.

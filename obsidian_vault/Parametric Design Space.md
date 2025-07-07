@@ -12,8 +12,8 @@ The core idea of this thesis is to conceptualize standard cognitive control para
 
 **Dimensions Tentatively Identified:**
 
-- [[N_Tasks]]
-- [[SOA (Stimulus Onset Asynchrony)]]
+- [[Number of Tasks]]
+- [[Inter-task SOA (Stimulus Onset Asynchrony)]]
 - [[CSI (Cue-Stimulus Interval)]]
 - [[Switch Cost]]
 - [[Stimulus Bivalence & Congruency]]

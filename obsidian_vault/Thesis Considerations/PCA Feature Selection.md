@@ -4,7 +4,7 @@ Derived Conceptual Dimensions vs. Low-Level SE Parameters
 
 A critical decision in preparing data for Principal Component Analysis (PCA) within this thesis is the level of abstraction for the input features. The choice is between using:
 1.  **Low-Level Super Experiment (SE) Parameters:** These are the direct, numerous parameters required by the SE framework to instantiate a trial (e.g., `start_1`, `dur_1`, `start_mov_1`, `dur_mov_1`, `coh_mov_1`, `start_go_1`, `keyMap` settings, etc.).
-2.  **Higher-Level Derived Dimensions:** These are conceptual parameters abstracted from the literature and SE parameters, reflecting functional experimental manipulations (e.g., [[SOA (Stimulus Onset Asynchrony)|SOA]], [[CSI (Cue-Stimulus Interval)|CSI]], [[N_Tasks]], [[Response Set Overlap]], [[Task Difficulty]]).
+2.  **Higher-Level Derived Dimensions:** These are conceptual parameters abstracted from the literature and SE parameters, reflecting functional experimental manipulations (e.g., [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]], [[CSI (Cue-Stimulus Interval)|CSI]], [[Number of Tasks]], [[Response Set Overlap]], [[Task Difficulty]]).
 
 **Justification for using Higher-Level Derived Dimensions as the primary features for PCA:**
 

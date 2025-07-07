@@ -38,6 +38,6 @@ While powerful, the strict bottleneck model is challenged by some findings:
 
 ###### Relevance to Thesis
 Bottleneck theory is the foundational conceptual framework for the entire [[Dual-Task Performance & PRP]] region of the [[Parametric Design Space]].
-*   It provides a mechanistic explanation for the effects of manipulating [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]].
+*   It provides a mechanistic explanation for the effects of manipulating [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]].
 *   It highlights the importance of [[Dimensions/Task Difficulty|Task Difficulty]] as a diagnostic tool for identifying the locus of interference.
 *   The debate between structural bottlenecks and graded capacity sharing represents a key theoretical axis that the parametric mapping in this thesis seeks to explore and contextualize.

@@ -1,6 +1,6 @@
 #paradigm
 
-Refers to experimental situations where participants switch between **two or more task rule sets** applied sequentially across trials ([[N_Tasks]]=1 per trial, but multiple task sets active across the block).
+Refers to experimental situations where participants switch between **two or more task rule sets** applied sequentially across trials ([[Number of Tasks]]=1 per trial, but multiple task sets active across the block).
 
 **Key Features:**
 

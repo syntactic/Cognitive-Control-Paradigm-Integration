@@ -17,7 +17,7 @@ To investigate executive control, specifically response priming and inhibition, 
 *   **Paradigm:** An arrow-based Flanker task with ERP recording.
 *   **Task:** Participants responded with their left or right hand to the direction of a centrally presented target arrowhead.
 *   **Key Manipulations:**
-    1.  **Flanker-Target SOA:** A critical design choice was that the flanker stimuli appeared 100ms *before* the target stimulus. This creates a -100ms [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]] between the distractor and target, designed to maximize response priming from the flankers.
+    1.  **Flanker-Target SOA:** A critical design choice was that the flanker stimuli appeared 100ms *before* the target stimulus. This creates a -100ms [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]] between the distractor and target, designed to maximize response priming from the flankers.
     2.  **Flanker Compatibility (Stimulus Valency):**
         *   **Congruent:** Flanker arrows pointed in the same direction as the target.
         *   **Incongruent:** Flanker arrows pointed in the opposite direction.
@@ -48,7 +48,7 @@ The authors concluded that the N2c component is a neurobehavioral marker of exec
 
 ###### Relevance to Thesis & Mapping Notes
 
-*   **Blurring Paradigm Boundaries:** This study is a perfect example of a [[Transitions and Modulators|transition case]]. While it is a single-response [[Canonical Tasks/Flanker Task|Flanker task]] ([[Dimensions/N_Tasks|N_Tasks]]=1), it uses a non-zero [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]], a manipulation that is the hallmark of [[Dual-Task Performance & PRP|PRP]] paradigms. This highlights that SOA can be used to modulate distractor processing, not just second-task processing.
+*   **Blurring Paradigm Boundaries:** This study is a perfect example of a [[Transitions and Modulators|transition case]]. While it is a single-response [[Canonical Tasks/Flanker Task|Flanker task]] ([[Number of Tasks|Number of Tasks]]=1), it uses a non-zero [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]], a manipulation that is the hallmark of [[Dual-Task Performance & PRP|PRP]] paradigms. This highlights that SOA can be used to modulate distractor processing, not just second-task processing.
 *   **Neutral Stimulus:** Provides another clear example of a neutral stimulus (squares) that is visually distinct and has no inherent mapping to the left/right responses.
 *   **Spatial Distance as Difficulty:** The manipulation of flanker-target distance serves as a good proxy for task difficulty, as closer spacing increases interference and demands more cognitive control. This can be mapped to our [[Dimensions/Task Difficulty]] dimension.
 *   **SE Mapping Considerations:**

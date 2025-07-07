@@ -10,7 +10,7 @@ aliases:
 
 ## 1. Purpose and Rationale
 
-While the primary goal of the thesis is to map literature to a set of high-level [[Derived Dimensions vs. Low-Level Parameters|derived dimensions]] (like [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]] and [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]), some experimental designs in the literature have specific timing characteristics that cannot be captured by these dimensions alone. The `Super_Experiment_Mapping_Notes` column in the `super_experiment_design_space.csv` file provides a mechanism to handle these exceptions and special cases through a structured JSON object.
+While the primary goal of the thesis is to map literature to a set of high-level [[Derived Dimensions vs. Low-Level Parameters|derived dimensions]] (like [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]] and [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]), some experimental designs in the literature have specific timing characteristics that cannot be captured by these dimensions alone. The `Super_Experiment_Mapping_Notes` column in the `super_experiment_design_space.csv` file provides a mechanism to handle these exceptions and special cases through a structured JSON object.
 
 This system allows the Python conversion script (`convert.py`) to apply specific, hard-coded values for certain parameters on a per-condition basis, overriding the script's default calculations. This ensures maximum fidelity in translating a specific paper's methodology into the [[Super Experiment Framework]], especially when default assumptions (like a standard 2000ms stimulus duration) do not apply.
 

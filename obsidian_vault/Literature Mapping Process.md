@@ -3,7 +3,7 @@
 The process of mapping the existing literature onto the [[Parametric Design Space]] involves:
 
 1. **Identify Key Studies:** Using literature search (databases, reviews like [[Kiesel et al. (2010)]], citation tracking).
-2. **Select Derived Dimensions:** Define the core conceptual dimensions (e.g., [[SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[N_Tasks]], etc.).
+2. **Select Derived Dimensions:** Define the core conceptual dimensions (e.g., [[Inter-task SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[Number of Tasks]], etc.).
 3. **Code Studies:** For each relevant study/condition:
     - Determine its values along the chosen derived dimensions.
     - Represent the study as a point or trajectory on the conceptual map.

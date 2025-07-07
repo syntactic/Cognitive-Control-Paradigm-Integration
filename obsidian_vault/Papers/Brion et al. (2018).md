@@ -43,6 +43,6 @@ The authors' main conclusions focused on the clinical populations, suggesting di
 *   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** The study clearly operationalizes congruent, incongruent, and neutral conditions, making it a good candidate for coding. The `Bivalent-Neutral (Feature Similar)` classification from [[Eriksen & Eriksen (1974)]] could be argued for, as the gray cans are featurally similar (cans) but lack the specific identity of the target/distractor sets.
 *   **Go/No-Go Component:** The integration of a Go/No-Go logic is a common modification to interference tasks. While our framework focuses on the choice RT aspect, it's important to note this design feature.
 *   **SE Mapping Considerations:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
-    *   The core Flanker task (Go trials) can be mapped. The target identity (e.g., soda) would be represented on one SE pathway (e.g., `mov`), and the flanker identity (soda, beer, or gray can) would be on the other pathway (`or`), with [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]=0.
+    *   [[Number of Tasks|Number of Tasks]]: 1.
+    *   The core Flanker task (Go trials) can be mapped. The target identity (e.g., soda) would be represented on one SE pathway (e.g., `mov`), and the flanker identity (soda, beer, or gray can) would be on the other pathway (`or`), with [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]=0.
     *   The neutral condition (gray can flankers) would be modeled in SE by having the `or` pathway present a stimulus that does not map to either of the competing responses.

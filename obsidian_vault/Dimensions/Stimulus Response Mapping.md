@@ -15,8 +15,9 @@ While related to [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence
 ###### Key Values / Categories:
 
 *   **`Compatible`:**
-    *   The instructed S-R mapping aligns with a strong natural tendency, a highly overlearned association, or a direct, intuitive relationship between stimulus and response.
-    *   Often results in faster and more accurate performance.
+    *  The instructed S-R mapping aligns with a strong natural tendency, a highly overlearned association, or a direct, intuitive relationship between stimulus and response.
+    *  Often results in faster and more accurate performance.
+    * Compatibility can be defined relative to the proximal motor action (e.g., keypress location) or a distal action goal (e.g., the location of a resulting visual effect, as in [[Hommel (1993)]]). However for this study I'm focusing strictly on the relationship between the relevant attribute of the stimulus and the response in its most proximal form - not a distal action goal / effect of a response.
     *   *Example:* Responding with a right-hand key to a stimulus appearing on the right (spatial compatibility, as in the "Toward" condition of [[Simon (1969)|Simon 1969]]).
     *   *Example:* Pressing an "up arrow" key when the word "UP" is displayed.
 
@@ -52,5 +53,3 @@ While related to [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence
 *   **Compatible Mapping:** The `keyMap` links stimulus values to responses in a "natural" or direct way (e.g., stimulus 'left_ear_tone' maps to 'left_key').
 *   **Incompatible Mapping:** The `keyMap` links stimulus values to responses in a "crossed" or counter-intuitive way (e.g., stimulus 'left_ear_tone' maps to 'right_key').
 *   **Arbitrary Mapping:** The `keyMap` links stimulus values to response keys based on arbitrary assignment for the experiment.
-
-This new dimension should be very helpful for classifying experiments like Simon (1969) and distinguishing different sources of processing costs!

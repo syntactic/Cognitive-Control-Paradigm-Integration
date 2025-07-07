@@ -49,8 +49,8 @@ Simon & Rudell (1967) aimed to demonstrate the existence of a strong auditory S-
 *   **Foundational Simon Effect Study:** This paper is a key early demonstration of the Simon effect, illustrating interference from an irrelevant spatial stimulus feature on a non-spatial task.
 *   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Provides a clear example of `Bivalent-Congruent` and `Bivalent-Incongruent` conditions based on the alignment of the irrelevant spatial cue (ear) with the relevant semantic cue (word meaning).
 *   **Mapping to SE:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
-    *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (conceptual, as ear and word are part of the same auditory event) or N/A.
+    *   [[Number of Tasks|Number of Tasks]]: 1.
+    *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (conceptual, as ear and word are part of the same auditory event) or N/A.
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0.
     *   Relevant dimension (word meaning) maps to one SE pathway (e.g., `mov`). Irrelevant dimension (ear of presentation) maps to the other SE pathway (e.g., `or`).
     *   Congruency in SE arises if `stim_mov_1` (e.g., representing "word right" -> "respond right") and `stim_or_1` (e.g., representing "right ear" -> "respond right") map to the same response. Incongruency occurs if they map to different responses. Both pathways would have `coh=1.0`.

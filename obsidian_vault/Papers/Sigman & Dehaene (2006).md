@@ -18,7 +18,7 @@ A [[Dual-Task Performance & PRP|dual-task]] paradigm where participants responde
 
 ## Key Manipulations & Design Features:
 
-1.  **[[SOA (Stimulus Onset Asynchrony)|SOA:]]** Varied randomly from -1000ms (T_num first) to +1000ms (T_tone first), including SOA=0ms (simultaneous). This means S2 could precede S1.
+1.  **[[Inter-task SOA (Stimulus Onset Asynchrony)|SOA:]]** Varied randomly from -1000ms (T_num first) to +1000ms (T_tone first), including SOA=0ms (simultaneous). This means S2 could precede S1.
 2.  **Task Order Unpredictability:** The order of stimulus presentation was random, so participants could not prepare for a specific task to be T1.
 3.  **Free Response Order:** Participants were instructed to respond to each stimulus as fast as possible and could *freely choose* which task to respond to first.
 4.  **Number Task Difficulty (within T_num):**
@@ -66,13 +66,13 @@ A [[Dual-Task Performance & PRP|dual-task]] paradigm where participants responde
 *   **Directly Bridges Paradigms:** Explicitly designed to merge PRP and task-switching concepts ([[Transitions and Modulators]]).
 *   **Highlights Task Uncertainty:** Demonstrates that task order uncertainty significantly impacts dual-task processing, introducing costs usually associated with task switching (e.g., affecting RT1).
 *   **Informs SE Mapping:**
-    * **Coding as a Bridge Paradigm:** This study is uniquely coded as a single experimental condition with N_Tasks=2 and Switch_Rate=50%. This is a crucial abstraction:
+    * **Coding as a Bridge Paradigm:** This study is uniquely coded as a single experimental condition with Number of Tasks=2 and Switch_Rate=50%. This is a crucial abstraction:
 	    - The 50% switch rate doesn't represent a switch between task types (which are fixed) but the **trial-to-trial uncertainty of task presentation order**.
 	    - This coding creates a unique point in the design space that explicitly bridges the Dual-Task/PRP and Task Switching domains, highlighting the study's novel contribution.
     *   [[Dimensions/Task Cue Type|Task Cue Type]] = None/Implicit (stimuli are the cues).
     *   [[Dimensions/Response Set Overlap|Response Set Overlap]] = Disjoint-Effector (left/right hands for different tasks).
     * **Handling Randomized SOA:** Since SOA was randomized trial-to-trial from -1000ms to +1000ms, the condition is coded using the mean SOA (0ms) in the main CSV column for PCA compatibility. The full distribution is documented in the Super_Experiment_Mapping_Notes JSON override.
-    * **Leveraging viewer.js Logic:** The viewer.js client's generateTaskAssignmentSequence function is designed to handle this exact case. When it sees N_Tasks=2 and Switch_Rate > 0, it correctly interprets this as randomizing the assignment of the two tasks to the two Super Experiment channels on each trial, thus simulating the task order uncertainty.
+    * **Leveraging viewer.js Logic:** The viewer.js client's generateTaskAssignmentSequence function is designed to handle this exact case. When it sees Number of Tasks=2 and Switch_Rate > 0, it correctly interprets this as randomizing the assignment of the two tasks to the two Super Experiment channels on each trial, thus simulating the task order uncertainty.
 *   **Challenges Simple Bottleneck Models:** Shows that RT1 is not always immune in PRP contexts, especially with added uncertainty.
 *   **Introduces Control Stages:** The concepts of "task setting" and "task disengagement" are important for understanding the executive components of multitasking.
 

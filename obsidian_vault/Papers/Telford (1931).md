@@ -17,7 +17,7 @@ To investigate whether a "refractory phase"—a period of decreased excitability
 3.  Tendencies to repeat associative responses.
 
 **Paradigm(s) Used & Key Manipulations:**
-Telford conducted three main sets of experiments, all ofwhich can be conceptualized as [[Dual-Task Performance & PRP|PRP-like paradigms]] where [[Dimensions/N_Tasks|N_Tasks=2]] (two sequential S-R episodes). The primary manipulation was the [[Dimensions/SOA (Stimulus Onset Asynchrony)|Stimulus Onset Asynchrony (SOA)]] between the first stimulus (S1) and the second stimulus (S2).
+Telford conducted three main sets of experiments, all ofwhich can be conceptualized as [[Dual-Task Performance & PRP|PRP-like paradigms]] where [[Number of Tasks|Number of Tasks=2]] (two sequential S-R episodes). The primary manipulation was the [[Inter-task SOA (Stimulus Onset Asynchrony)|Stimulus Onset Asynchrony (SOA)]] between the first stimulus (S1) and the second stimulus (S2).
 
 **Experiment I: Reaction Time to Auditory Stimuli**
 *   **Task:** Simple reaction time (keypress) to an auditory click.
@@ -92,4 +92,4 @@ Telford conducted three main sets of experiments, all ofwhich can be conceptuali
 *   **Task Definition:** Useful for thinking about how to define an "S-R episode" or "task instance" in sequential performance. Each judgment or association here is treated as such.
 *   **Mapping to Super Experiment:** All three experimental types are fundamentally mappable to SE by using its two task channels to represent S1-R1 and S2-R2, with SOA being the delay between `start_stim1` and `start_stim2` (and their respective cues/go signals). The tasks themselves (auditory RT, line judgment, number association) would be abstractly represented by SE's 'mov'/'or' placeholders, with the *timing* being the crucial aspect mapped.
 *   **Phenomena:** Demonstrates the basic PRP effect on RT, and extends the idea of a "refractory period" to accuracy and response choice, which is conceptually broader than just RT-based bottlenecks.
-*   **Dimensions:** Clearly fits [[Dimensions/N_Tasks]]=2, variable [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]], [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]=0, [[Dimensions/Switch Rate|Switch Rate]]=0, [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]=Univalent, [[Dimensions/Response Set Overlap|Response Set Overlap]]=Identical, and [[Dimensions/Task Cue Type|Task Cue Type]]=None/Implicit.
+*   **Dimensions:** Clearly fits [[Number of Tasks]]=2, variable [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]], [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]=0, [[Dimensions/Switch Rate|Switch Rate]]=0, [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]=Univalent, [[Dimensions/Response Set Overlap|Response Set Overlap]]=Identical, and [[Dimensions/Task Cue Type|Task Cue Type]]=None/Implicit.

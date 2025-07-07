@@ -1,6 +1,6 @@
 #dimension #response_property
 
-Definition: Describes the relationship between the sets of possible motor responses required by the two (or more) active tasks in a multi-task context ([[N_Tasks]] >= 2).
+Definition: Describes the relationship between the sets of possible motor responses required by the two (or more) active tasks in a multi-task context ([[Number of Tasks]] >= 2).
 
 **Values:**
 
@@ -8,7 +8,7 @@ Definition: Describes the relationship between the sets of possible motor respon
 - **Partially Overlapping:** Tasks share some, but not all, responses or response dimensions. (e.g., T1 uses Left/Middle/Right keys, T2 uses Left/Right keys).
 - **Disjoint-Effector (Same Modality):** Tasks use different effectors within the same modality (e.g., T1 = Left Hand keypress, T2 = Right Hand keypress; or T1 = Index Finger, T2 = Middle Finger of same hand).
 - **Disjoint-Modality:** Tasks use entirely different response modalities (e.g., T1 = Manual Keypress, T2 = Vocal Response).
-- **NA:** Not applicable if [[N_Tasks]]=1 (no second task for the response set to overlap with).
+- **NA:** Not applicable if [[Number of Tasks]]=1 (no second task for the response set to overlap with).
 
 **Relevance to Design Space:**
 

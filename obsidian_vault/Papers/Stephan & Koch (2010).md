@@ -5,7 +5,7 @@ To investigate whether the compatibility between input (stimulus) and output (re
 
 - [[Task Switching]] using an **explicit task-cuing paradigm** with random task sequencing ([[Switch Rate]]=50%).
 - Tasks involved responding to the spatial location (Left/Right) of either a visual stimulus (diamond) or an auditory stimulus (tone).    
-- [[N_Tasks|N_Tasks=1]] per trial.
+- [[Number of Tasks|Number of Tasks=1]] per trial.
 - **Responses:** Either manual keypresses (left/right keys) or vocal responses ("links"/[left], "rechts"/[right]).
 
 **Key Manipulations:**

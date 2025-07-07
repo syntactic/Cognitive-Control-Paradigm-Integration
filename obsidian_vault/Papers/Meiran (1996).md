@@ -4,7 +4,7 @@ To provide strong evidence for an active, time-consuming process of task-set rec
 **Experiment Definition:**
 
 - **Explicit Task-Cuing Paradigm:** Participants switched between two spatial judgment tasks (Up/Down vs. Left/Right) based on an explicit cue (arrow direction) presented before the target stimulus (a dot in one of four locations).
-- [[N_Tasks|N_Tasks=1]] per trial, [[Switch Rate]] typically 50% (random cuing).
+- [[Number of Tasks|Number of Tasks=1]] per trial, [[Switch Rate]] typically 50% (random cuing).
 - [[Response Set Overlap]] = Identical (Left/Right keypresses for both tasks).
 - [[Stimulus Bivalence & Congruency|Stimulus Bivalence]] = Bivalent-Neutral (Target location affords judgments on both dimensions).
 - [[Task Cue Type]] = Arbitrary (arrow direction maps to spatial judgment axis).
@@ -32,5 +32,5 @@ To provide strong evidence for an active, time-consuming process of task-set rec
 **Relevance to Thesis:**
 
 - **Methodological Importance:** Introduces the explicit **task-cuing paradigm with variable CSI** as a primary tool for studying preparation effects in task switching, contrasting with the alternating runs/RSI manipulation in [[Rogers & Monsell (1995)]].
-- **Dimensional Relevance:** Directly informs the [[CSI (Cue-Stimulus Interval)]] dimension and its impact on [[Switch Cost]]. Also relevant to [[N_Tasks]], [[Switch Rate]] (typically 50% random), [[Stimulus Bivalence & Congruency]] (uses bivalent), [[Response Set Overlap]] (uses identical), and [[Task Cue Type]] (uses arbitrary).
+- **Dimensional Relevance:** Directly informs the [[CSI (Cue-Stimulus Interval)]] dimension and its impact on [[Switch Cost]]. Also relevant to [[Number of Tasks]], [[Switch Rate]] (typically 50% random), [[Stimulus Bivalence & Congruency]] (uses bivalent), [[Response Set Overlap]] (uses identical), and [[Task Cue Type]] (uses arbitrary).
 - **Theoretical Importance:** Provides strong evidence for **active preparation (reconfiguration)** in task switching. Reinforces the concept of a **residual switch cost** that preparation time alone cannot eliminate, a key phenomenon the theoretical map needs to accommodate. Sets the stage for debates about the nature of this residual cost (incomplete endogenous reconfiguration vs. stimulus-driven completion vs. inertia).

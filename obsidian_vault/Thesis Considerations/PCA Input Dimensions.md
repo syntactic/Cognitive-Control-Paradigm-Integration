@@ -3,8 +3,8 @@ This note lists the features intended for input into the Principal Component Ana
 
 **I. Numerical PCA Features (Standardized - e.g., Z-scored):**
 
-1.  **`N_Tasks_PCA`** (Numeric: 1 or 2)
-    *   Directly from CSV `Number of Tasks`.
+1.  **`Task_2_Response_Probability_PCA`** (Numeric: 0 - 1)
+    *   Directly from CSV `Task 2 Response Probability`.
 2.  **`SOA_ms_PCA`** (Numeric: ms)
     *   From CSV `SOA`.
     * If `Number of Tasks` == 2: this is the standard interpretation for PRP, indicating the delay between stimulus for task 1 and stimulus for task 2.

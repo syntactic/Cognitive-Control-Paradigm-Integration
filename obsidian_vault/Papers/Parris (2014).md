@@ -47,6 +47,6 @@ The study aimed to demonstrate that Stroop interference and facilitation can be 
 *   **Dissociation of Interference & Facilitation:** Provides one of the cleanest demonstrations of a dissociation between Stroop interference and facilitation, underlining the importance of including a neutral condition to measure them separately.
 *   **Dynamic R-Value:** Shows that the R-value is not a fixed property of a task but can be systematically modulated by control context (here, induced by RSI). This is a critical nuance for the theoretical map.
 *   **SE Mapping Considerations:**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1.
-    *   The core Stroop task is mappable: Target=Ink Color (`or` pathway), Distractor=Word Meaning (`mov` pathway), [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]=0. The three valency conditions are directly mappable.
+    *   [[Number of Tasks|Number of Tasks]]: 1.
+    *   The core Stroop task is mappable: Target=Ink Color (`or` pathway), Distractor=Word Meaning (`mov` pathway), [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]=0. The three valency conditions are directly mappable.
     *   The central manipulation of `RSI` is a major limitation for direct SE instantiation. SE's trial structure is stimulus-onset driven, and the interval after a response is not an independent parameter. We would map RSI to the `regen` (ITI) parameter in SE, but acknowledge this is an approximation and SE is not designed to study RSI effects *per se*. This is a critical point for the [[Study Limitations]] section.

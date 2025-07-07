@@ -12,13 +12,13 @@ Definition: Describes the **relational property between a stimulus and the set o
     *   **Univalent Stimulus:** A stimulus that affords processing by only *one* of the active task rule sets.
         *   *Example:* In a block switching between a "Letter Task" and a "Digit Task," the stimulus "7" is univalent.
         *   *Inference Task Example:* A pure color patch in a Stroop experiment where word reading is also a possible task. The patch has no word feature, so it only affords the color-naming task.
-        *   **Rule:** Univalent stimuli in an `N_Tasks=1` paradigm have `SOA = N/A`.
+        *   **Rule:** Univalent stimuli in an `Number of Tasks=1` paradigm have `SOA = N/A`.
     *   **Bivalent (or Multivalent) Stimulus:** A stimulus that either 1) affords processing by *two or more* of the active task rule sets, or 2) has an irrelevant feature that is the target for another highly-practiced or experimentally-relevant task. This feature **affords** the activation of the competing task-set, even if that set is not explicitly instructed for the current block. This is the case for classic interference paradigms where baseline blocks instruct participants to only do one task.
-	    *  Classic Example 1: A task-switching paradigm where the participant sees a colored shape and must switch between naming the color or naming the shape. (`N_Tasks=1`, `Switch_Rate=100%`, `Task_1_Type=Color Naming`, `Task_2_Type=Shape Naming`)
-	    *  Classic Example 2: A task-switching paradigm of a Stroop task where the participant switches between ink color naming and color word reading. (`N_Tasks=1`, `Switch_Rate=100%`, `Task_1_Type=Word Reading`, `Task_2_Type=Color Naming`)
-	    *  Super Experiment Example: A dual-task paradigm where triangles are primarily moving to the left or right, and are primarily oriented up or down, and the participant must concurrently determine the motion of the triangles and their orientation. (`N_Tasks=2`, `Task_1_Type=Movement Identification`, `Task_2_Type=Orientation Identification`)
-	    *  Pure Block With Interference Example: A baseline Stroop task where the participant must only name the ink color of color words. (`N_Tasks=1`, `Switch_Rate=0%`, `Task_1_Type=Color Naming`, `Task_2_Type=N/A`, `Response_Set_Overlap=N/A`)
-        *   **Rule:** Bivalent stimuli in an `N_Tasks=1` paradigm have a numerical `SOA` value (typically `0` for simultaneous feature presentation).
+	    *  Classic Example 1: A task-switching paradigm where the participant sees a colored shape and must switch between naming the color or naming the shape. (`Number of Tasks=1`, `Switch_Rate=100%`, `Task_1_Type=Color Naming`, `Task_2_Type=Shape Naming`)
+	    *  Classic Example 2: A task-switching paradigm of a Stroop task where the participant switches between ink color naming and color word reading. (`Number of Tasks=1`, `Switch_Rate=100%`, `Task_1_Type=Word Reading`, `Task_2_Type=Color Naming`)
+	    *  Super Experiment Example: A dual-task paradigm where triangles are primarily moving to the left or right, and are primarily oriented up or down, and the participant must concurrently determine the motion of the triangles and their orientation. (`Number of Tasks=2`, `Task_1_Type=Movement Identification`, `Task_2_Type=Orientation Identification`)
+	    *  Pure Block With Interference Example: A baseline Stroop task where the participant must only name the ink color of color words. (`Number of Tasks=1`, `Switch_Rate=0%`, `Task_1_Type=Color Naming`, `Task_2_Type=N/A`, `Response_Set_Overlap=N/A`)
+        *   **Rule:** Bivalent stimuli in an `Number of Tasks=1` paradigm have a numerical `SOA` value (typically `0` for simultaneous feature presentation).
 ###### Types of Bivalence:
 
 *   **1. Attribute-Based Bivalence (Decomposable Stimulus):** Conflict arises from multiple, separable perceptual attributes of a single object.
@@ -70,5 +70,5 @@ Definition: Describes the **relational property between a stimulus and the set o
 
 *   Central to all [[Interference Control]] paradigms (Stroop, Flanker, Simon).
 *   Important for understanding [[Effects/Mixing Cost]] and some aspects of [[Effects/Switch Cost]] in [[Task Switching]] when bivalent stimuli are used.
-*   SE models bivalence/congruency primarily through its two task pathways (`mov`, `or`). A single-task interference paradigm (like Flanker) is mapped by assigning the target to one pathway and the distractor/flanker information to the other, with [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]=0. Congruency then depends on how the stimuli for these two pathways map to responses (often via shared `keyMap`s).
+*   SE models bivalence/congruency primarily through its two task pathways (`mov`, `or`). A single-task interference paradigm (like Flanker) is mapped by assigning the target to one pathway and the distractor/flanker information to the other, with [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]=0. Congruency then depends on how the stimuli for these two pathways map to responses (often via shared `keyMap`s).
 *   The specific *type* of neutrality (orthogonal, feature-based) can be difficult to distinguish with SE's current abstract parameters, often requiring simplification to a general "orthogonal/non-competing distractor" model.

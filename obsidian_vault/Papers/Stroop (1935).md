@@ -25,8 +25,8 @@ To investigate and quantify the interference effects observed when there is a co
     *   **Condition 2 (RCNb - Reading Color Names black):** Color names printed in black ink (control).
 *   **Dependent Variable:** Time taken to read 100 color names.
 *   **Derived Dimensions (for mapping this condition):**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1 (Reading words)
-    *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: N/A (or 0, if considering the ink color as an attribute presented simultaneously with the word form)
+    *   [[Number of Tasks|Number of Tasks]]: 1 (Reading words)
+    *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: N/A (or 0, if considering the ink color as an attribute presented simultaneously with the word form)
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0
     *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]:
@@ -42,8 +42,8 @@ To investigate and quantify the interference effects observed when there is a co
     *   **Condition 2 (NC - Naming Color):** Solid squares of color (control – later revised to swastikas in Exp 3 to better match visual complexity).
 *   **Dependent Variable:** Time taken to name 100 ink colors.
 *   **Derived Dimensions (for mapping this condition):**
-    *   [[Dimensions/N_Tasks|N_Tasks]]: 1 (Naming colors)
-    *   [[Dimensions/SOA (Stimulus Onset Asynchrony)|SOA]]: N/A (or 0)
+    *   [[Number of Tasks|Number of Tasks]]: 1 (Naming colors)
+    *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: N/A (or 0)
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0
     *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]:
@@ -83,7 +83,7 @@ To investigate and quantify the interference effects observed when there is a co
 *   **Foundational Interference Study:** This is the seminal paper defining the [[Effects/Stroop Effect|Stroop effect]], a cornerstone phenomenon in [[Interference Control]] and [[Attention]].
 *   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Perfectly exemplifies Bivalent-Incongruent stimuli and their comparison to Univalent (control) stimuli.
 *   **Mapping to Super Experiment:**
-    *   Both Exp 1 and Exp 2 are [[Dimensions/N_Tasks|N_Tasks]]=1 paradigms.
+    *   Both Exp 1 and Exp 2 are [[Number of Tasks|Number of Tasks]]=1 paradigms.
     *   SE can model these by using one task channel for the "target" dimension (e.g., 'mov' for word form, 'or' for ink color) and the other channel to present the "distractor" dimension simultaneously (`start_mov_1 = start_or_1`, `dur_mov_1 = dur_or_1`).
     *   For the target task, `coh_` would be 1. For the distractor dimension, `coh_` would also be 1 (to represent its presence) in incongruent conditions, and `coh_` = 0 (or stimulus set to neutral) in univalent/control conditions.
     *   The SOA would be 0 here, as attributes are simultaneous.

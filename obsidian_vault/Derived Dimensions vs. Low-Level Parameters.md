@@ -6,7 +6,7 @@ A key methodological choice in this thesis is how to represent experimental para
     
     - Pros: Precise, directly implementable/simulatable, suitable for quantitative analysis like [[PCA]].
     - Cons: Too numerous, often specific to stimulus/response types making comparison across diverse literature difficult, may obscure underlying functional similarities.
-- **Derived Dimensions:** These are higher-level, conceptual dimensions abstracted from the low-level parameters (e.g., [[SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[N_Tasks]], [[Response Set Overlap]]).
+- **Derived Dimensions:** These are higher-level, conceptual dimensions abstracted from the low-level parameters (e.g., [[Inter-task SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[Number of Tasks]], [[Response Set Overlap]]).
     
     - Pros: Capture functional manipulations, align better with how literature describes experiments, facilitate conceptual mapping and identification of transitions/gaps across different specific tasks.
     - Cons: Require careful definition and consistent application, less direct input for simulation or PCA (translation needed).

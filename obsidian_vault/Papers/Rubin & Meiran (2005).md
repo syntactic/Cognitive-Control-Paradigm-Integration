@@ -13,7 +13,7 @@ To investigate the origins of the [[Effects/Mixing Cost|Mixing Cost (MC)]] in cu
 **Paradigm(s) Used:**
 Cued [[Task Switching]] paradigm.
 -   **Tasks:** Color discrimination vs. Shape discrimination. Stimuli were colored shapes.
--   [[Dimensions/N_Tasks|N_Tasks=1]] per trial.
+-   [[Number of Tasks|Number of Tasks=1]] per trial.
 -   [[Dimensions/Task Cue Type|Task Cue Type]]: Explicit instructional word cues ("color" or "shape").
 -   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: Varied randomly (100ms or 1000ms).
 -   [[Dimensions/Switch Rate|Switch Rate]]: Random task sequencing within mixed blocks (implies 50% switch rate).

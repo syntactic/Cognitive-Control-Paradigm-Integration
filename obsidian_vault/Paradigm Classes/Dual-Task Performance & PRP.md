@@ -1,11 +1,11 @@
 #paradigm
 
-Refers to experimental situations where participants perform **two distinct tasks (T1 and T2)** requiring responses within close temporal proximity ([[N_Tasks]]=2).
+Refers to experimental situations where participants perform **two distinct tasks (T1 and T2)** requiring responses within close temporal proximity ([[Number of Tasks]]=2, [[Task 2 Response Probability]]=1).
 
 **Psychological Refractory Period (PRP):**
 
 - The canonical paradigm within this category.
-- Manipulates the [[SOA (Stimulus Onset Asynchrony)]] between S1 and S2.
+- Manipulates the [[Inter-task SOA (Stimulus Onset Asynchrony)]] between S1 and S2.
 - Key finding: [[PRP Effect]] - RT2 increases as SOA decreases (often with slope ~ -1 at short SOA). RT1 is often assumed stable but can show [[Dual-Task Cost]].
 - Often interpreted via [[Bottleneck Theories]] (e.g., [[Response Selection Bottleneck (RSB)]]) or strategic scheduling ([[EPIC-SRD]]).
 

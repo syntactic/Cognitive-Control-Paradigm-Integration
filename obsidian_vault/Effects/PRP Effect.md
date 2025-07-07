@@ -1,6 +1,6 @@
 #effect #phenomenon
 
-Definition: The Psychological Refractory Period (PRP) effect is the slowing of the reaction time to the second task (RT2) when two tasks (Task 1 and Task 2) are performed in close temporal succession. The effect is most pronounced when the Stimulus Onset Asynchrony ([[SOA (Stimulus Onset Asynchrony)]]) between the stimuli for T1 and T2 is short.
+Definition: The Psychological Refractory Period (PRP) effect is the slowing of the reaction time to the second task (RT2) when two tasks (Task 1 and Task 2) are performed in close temporal succession. The effect is most pronounced when the Stimulus Onset Asynchrony ([[Inter-task SOA (Stimulus Onset Asynchrony)]]) between the stimuli for T1 and T2 is short.
 
 **Key Characteristics:**
 
