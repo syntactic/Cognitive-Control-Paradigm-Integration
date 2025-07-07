@@ -42,12 +42,12 @@ def clean_switch_rate(value):
 
 def classify_paradigm(row):
     """Classifies each experimental condition into a broader paradigm class."""
-    if row['Number of Tasks'] == 2:
+    if row['Task 2 Response Probability'] == 1:
         return 'Dual-Task/PRP'
     if row['Switch Rate'] > 0:
         return 'Task Switching'
     # Use a more robust check for 'Interference'
-    if row['Number of Tasks'] == 1 and 'Bivalent' in str(row['Stimulus Valency']):
+    if row['Task 2 Response Probability'] == 0 and 'Bivalent' in str(row['Stimulus Valency']):
         return 'Interference'
     return 'Other'
 
@@ -100,8 +100,12 @@ def preprocess_for_pca(df_raw):
     df = df_raw.copy()
 
     # --- Step 1: General Cleaning ---
-    df['Number of Tasks'] = pd.to_numeric(df['Number of Tasks'], errors='coerce')
-    df['SOA'] = pd.to_numeric(df['SOA'], errors='coerce')
+    # These columns are part of the new schema
+    df['Task 2 Response Probability'] = pd.to_numeric(df['Task 2 Response Probability'], errors='coerce')
+    df['Inter-task SOA'] = pd.to_numeric(df['Inter-task SOA'], errors='coerce')
+    df['Distractor SOA'] = pd.to_numeric(df['Distractor SOA'], errors='coerce')
+    
+    # These columns are from the old schema but still needed
     df['CSI'] = pd.to_numeric(df['CSI'], errors='coerce')
     df['Task 1 Difficulty'] = pd.to_numeric(df['Task 1 Difficulty'], errors='coerce')
     df['Task 2 Difficulty'] = pd.to_numeric(df['Task 2 Difficulty'], errors='coerce')
@@ -109,29 +113,32 @@ def preprocess_for_pca(df_raw):
     df['Switch Rate'] = df['Switch Rate'].apply(clean_switch_rate)
 
     rsi_median = df['RSI'].median()
-    df['RSI'].fillna(rsi_median, inplace=True)
-
+    df['RSI'] = df['RSI'].fillna(rsi_median)
 
     # --- Step 2: Add Paradigm Classification for Difficulty Placeholder and Plotting ---
     df['Paradigm'] = df.apply(classify_paradigm, axis=1)
 
     # --- Step 3: Create PCA-specific features ---
-    # Create a binary indicator for whether SOA was applicable
-    df['SOA_is_NA'] = df['SOA'].isna().astype(int)
-    # Impute N/A SOAs with 0, as this is the most neutral value
-    df['SOA'].fillna(0, inplace=True)
-    df['CSI'].fillna(0, inplace=True)
+    # Generate Applicability Flags DIRECTLY from NaN status, as per user clarification.
+    # This is done BEFORE imputation.
+    df['Inter_task_SOA_is_NA'] = df['Inter-task SOA'].isna().astype(int)
+    df['Distractor_SOA_is_NA'] = df['Distractor SOA'].isna().astype(int)
+
+    # Impute Main SOA Columns and other numeric columns. This is now safe.
+    df['Inter-task SOA'] = df['Inter-task SOA'].fillna(0)
+    df['Distractor SOA'] = df['Distractor SOA'].fillna(0)
+    df['CSI'] = df['CSI'].fillna(0)
 
     # Normalize Task Difficulty (1-5 scale to 0-1)
     df['Task 1 Difficulty Norm'] = (df['Task 1 Difficulty'] - 1) / 4
     df['Task 2 Difficulty Norm'] = (df['Task 2 Difficulty'] - 1) / 4
-    df['Task 1 Difficulty Norm'].fillna(0.5, inplace=True) # Impute missing T1 difficulty
+    df['Task 1 Difficulty Norm'] = df['Task 1 Difficulty Norm'].fillna(0.5) # Impute missing T1 difficulty
+    
     # Set to placeholder (-1) ONLY if it's NOT a Task-Switching or Dual-Task paradigm.
-    # For Interference tasks, there is truly no 'Task 2'.
     is_true_single_task = ~df['Paradigm'].isin(['Task Switching', 'Dual-Task/PRP'])
     df.loc[is_true_single_task, 'Task 2 Difficulty Norm'] = -1.0
     # For any remaining NaNs (e.g., in TS or DT where it wasn't specified), impute with moderate difficulty.
-    df['Task 2 Difficulty Norm'].fillna(0.5, inplace=True)
+    df['Task 2 Difficulty Norm'] = df['Task 2 Difficulty Norm'].fillna(0.5)
 
     # --- Step 4: Map Categorical Features ---
     df['Stimulus_Valency_Mapped'] = df['Stimulus Valency'].apply(map_valency)
@@ -140,7 +147,14 @@ def preprocess_for_pca(df_raw):
     df['Task_Cue_Type_Mapped'] = df['Task Cue Type'].apply(map_tct)
 
     # --- Step 5: Select final columns for the PCA pipeline ---
-    numerical_cols = ['Number of Tasks', 'SOA_is_NA', 'SOA', 'CSI', 'RSI', 'Switch Rate', 'Task 1 Difficulty Norm', 'Task 2 Difficulty Norm']
+    numerical_cols = [
+        'Task 2 Response Probability',
+        'Inter-task SOA',
+        'Distractor SOA',
+        'Inter_task_SOA_is_NA',
+        'Distractor_SOA_is_NA',
+        'CSI', 'RSI', 'Switch Rate', 'Task 1 Difficulty Norm', 'Task 2 Difficulty Norm'
+    ]
     categorical_cols = ['Stimulus_Valency_Mapped', 'Response_Set_Overlap_Mapped', 'Stimulus_Response_Mapping_Mapped', 'Task_Cue_Type_Mapped']
     
     df_pca_features = df[numerical_cols + categorical_cols]
@@ -150,7 +164,15 @@ def preprocess_for_pca(df_raw):
         'Task 1 Difficulty Norm': 'Task 1 Difficulty',
         'Task 2 Difficulty Norm': 'Task 2 Difficulty'
     })
-    numerical_cols = ['Number of Tasks', 'SOA_is_NA', 'SOA', 'CSI', 'RSI', 'Switch Rate', 'Task 1 Difficulty', 'Task 2 Difficulty']
+    # Update the list of numerical columns to match the renamed columns
+    numerical_cols = [
+        'Task 2 Response Probability',
+        'Inter-task SOA',
+        'Distractor SOA',
+        'Inter_task_SOA_is_NA',
+        'Distractor_SOA_is_NA',
+        'CSI', 'RSI', 'Switch Rate', 'Task 1 Difficulty', 'Task 2 Difficulty'
+    ]
 
     return df_pca_features, numerical_cols, categorical_cols, df
 
@@ -298,39 +320,3 @@ def inverse_transform_point(point_pc, pipeline):
     final_params['Task 2 Difficulty'] = (final_params['Task 2 Difficulty'] * 4) + 1
 
     return final_params
-    
-    """# Get the feature names from the preprocessor step
-    preprocessor = pipeline.named_steps['preprocessor']
-    num_features = preprocessor.named_transformers_['num'].get_feature_names_out()
-    cat_features = preprocessor.named_transformers_['cat'].get_feature_names_out()
-    
-    # Create a DataFrame to hold the results
-    result_df = pd.DataFrame(original_space_point, columns=list(num_features) + list(cat_features))
-    
-    # --- Decode the one-hot encoded columns ---
-    decoded_params = {}
-    
-    # Decode each categorical variable by finding the argmax
-    for original_col_name in preprocessor.named_transformers_['cat'].feature_names_in_:
-        # Find all columns related to this original categorical variable
-        related_cols = [c for c in cat_features if c.startswith(original_col_name)]
-        
-        # Get the values for these columns
-        values = result_df[related_cols].iloc[0]
-        
-        # Find the column with the max value (this is our predicted category)
-        if not values.empty:
-            best_category_col = values.idxmax()
-            # Extract the category name from the column name
-            decoded_params[original_col_name] = best_category_col.split('_', 1)[1]
-        else:
-            # Handle binary 'drop=if_binary' case
-            # If the column was dropped, we check if the remaining one is > 0.5
-            # This logic is complex, simpler to just report the one column for now
-            pass
-            
-    # Combine numerical and decoded categorical results
-    final_params = result_df[list(num_features)].iloc[0].to_dict()
-    final_params.update(decoded_params)
-    
-    return pd.Series(final_params)"""
