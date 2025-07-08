@@ -9,9 +9,11 @@
 
 *   **Mapping & Coding Limitations:**
     *   **Literature Scope:** Cannot be exhaustive; selection bias possible.
+	    * In Task-Switching, I did not look into Voluntary Task Switching by Arrington & Logan (2004). In such a case, there's no way of defining a SE parameter override to do voluntary task switching, and I don't know how I'd code it in the dimensions other than creating a new [[Task Cue Type]]. 
     *   **Stimulus Response Mapping:** If there are two tasks, it assumes the mapping type is the same for both tasks. So it is impossible to have one arbitrary mapping for one task and one compatible mapping for another.
     *  **Overloading of the SOA Parameter:** Previously, a limitation was the overloading of the SOA parameter. This has been resolved by separating it into [[Inter-task SOA (Stimulus Onset Asynchrony)]] and [[Dimensions/Distractor SOA]]. This ensures that paradigms like [[Allport el al. (1994)]] Exp. 5 (an RSI-driven dual-task) and [[Kopp et al. (1996)]] (a distractor-SOA interference task) are no longer conflated under a single ambiguous dimension, strengthening the analytical framework.
     *   **Implicit Cues:** Mapping "implicit" cues from literature (e.g., sequence-based) to SE's explicit (though internal) cueing mechanism requires careful interpretation.
+    * **Task Difficulty**: The _source_ of difficulty is critical. A task that is difficult due to high perceptual demands may tax the control system differently than a task that is difficult due to a high working memory load. Read Vandierendonck, Liefooghe, and Verbruggen (2010). 
 
 *   **Conceptual Limitations:**
     *   Focus on structural/timing parameters; less on learning, strategy, or individual differences beyond what parameters might induce.
