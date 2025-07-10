@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "experiment.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "quartz:install": "npm install --prefix ./quartz",
+    "quartz:build": "npx --prefix ./quartz quartz build",
+    "quartz:serve": "npx --prefix ./quartz quartz build --serve"
   },
   "keywords": [],
   "author": "",
