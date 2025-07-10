@@ -5,8 +5,8 @@
   "scripts": {
     "test": "jest",
     "quartz:install": "npm install --prefix ./quartz",
-    "quartz:build": "npx --prefix ./quartz quartz build",
-    "quartz:serve": "npx --prefix ./quartz quartz build --serve"
+    "quartz:build": "cd quartz && node quartz/bootstrap-cli.mjs build --directory ../content --output ../public",
+    "quartz:serve": "cd quartz && node quartz/bootstrap-cli.mjs build --directory ../content --serve --output ../public"
   },
   "keywords": [],
   "author": "",
