@@ -1,3 +1,7 @@
+---
+aliases:
+  - RSI
+---
 #dimension 
 
 **Core Definition:** The time interval between the completion of a response in one processing episode and the onset of the critical stimulus (or task cue, if applicable) for the *next* processing episode.

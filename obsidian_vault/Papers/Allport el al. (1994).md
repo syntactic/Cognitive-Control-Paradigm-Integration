@@ -60,4 +60,12 @@ This paper is foundational for the thesis as it establishes one of the major the
     *   The list-completion time method used in Exps 1-4 is different from the discrete trial structure of SE. To map it, each item in the list would be considered a single "trial" with an implicit RSI.
     *   The RSVP paradigms (Exp 6-7) are outside the scope of what SE can directly model. This is a good example for the "SE Limitations" section of the thesis.
 
+#### Mapping Experiment 5: A Parametrically Distinct Paradigm
+ 
+ While Allport et al. frame Experiment 5 in the language of "task shifting," its parametric structure is critically different from the list-based experiments and from modern task-cuing paradigms. It should be coded as a **dual-task paradigm** (Number of Tasks: 2 or Task 2 Response Probability: 1).
+ 
+ **Rationale:**
+- Each trial pair (e.g., color naming -> word reading) constitutes two distinct, sequential S-R episodes.
+- The core independent variable is the **Response-Stimulus Interval (RSI)** between R1 and S2. This makes it an **RSI-driven dual-task**, which is parametrically distinct from classic PRP (which is SOA-driven).
+
 This paper is essential for coding because it provides clear examples of varying multiple core dimensions and offers a strong theoretical interpretation that has shaped the field for decades.

@@ -83,3 +83,12 @@ Compared performance in:
 -   **Interaction with Preparation:** Shows how [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]] interacts with stimulus bivalence in determining MC.
 -   **Mapping:** The conditions (Uni, Uni+F, Biv+F in Exp1; MBC, MWC, AMWBC, UMWBC in Exp2) provide excellent, nuanced points for the [[Parametric Design Space]] map, particularly for [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] and its interaction with the number of tasks held in memory (though the latter seems less impactful on MC here). The explicit use of cues and CSI makes it mappable to Super Experiment's timing parameters.
 -   The finding that bivalence did not affect SC with disjoint response sets is an important detail when considering [[Dimensions/Response Set Overlap]].
+
+### Coding & Mapping Notes
+ 
+ A key methodological decision for this paper is how to handle the different stimulus valency conditions within pure vs. mixed blocks.
+ 
+ - **Pure Blocks:** The concept of stimulus-response congruency is not meaningful within a pure block, as only one task set is intentionally active. Therefore, the pure blocks for all three groups (Uni NoFilt, Uni+F, and Biv+F) should each be coded as a **single row per CSI condition**.
+     - For the Biv+F group, the pure block should be coded with Stimulus Valency: Bivalent-neutral. This captures that a competing task set is afforded by the stimulus, but there is no specific response conflict to measure.
+  - **Mixed Blocks:** In the mixed blocks, both task sets are active, so S-R congruency effects are a primary variable. For the Biv+F group, it is correct to have separate rows for Switch-Congruent, Switch-Incongruent, Repeat-Congruent, and Repeat-Incongruent trials, as these represent distinct experimental conditions.
+>

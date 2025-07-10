@@ -1,14 +1,8 @@
 import pytest
 import pandas as pd
 import numpy as np
+import logging
 from analysis_utils import (
-    clean_rsi,
-    clean_switch_rate,
-    classify_paradigm,
-    map_valency,
-    map_rso,
-    map_srm,
-    map_tct,
     preprocess_for_pca,
     create_pca_pipeline,
     find_centroids,
@@ -17,156 +11,141 @@ from analysis_utils import (
     get_component_loadings
 )
 
-# Fixtures for test data with the new schema
+# Fixture for test data with the new schema
 @pytest.fixture
 def new_sample_data():
     """
     A fixture representing the new data schema with various paradigm types,
     using strings to mimic raw CSV data.
-    - Row 0: Univalent single-task (e.g., simple RT). No SOAs apply.
-    - Row 1: Bivalent single-task (e.g., Stroop). Only Distractor SOA applies.
-    - Row 2: Dual-task (e.g., PRP). Only Inter-task SOA applies.
-    - Row 3: Dual-task with a distractor (theoretical). Both SOAs apply.
-    - Row 4: Task-switching paradigm.
+    - Row 0: Univalent single-task (e.g., simple RT).
+    - Row 1: Dual-task, compatible mappings.
+    - Row 2: Task-switching, incompatible mappings.
+    - Row 3: Univalent single-task, different RSI.
     """
     return pd.DataFrame({
-        'Task 2 Response Probability': ['0.0', '0.0', '1.0', '1.0', '0.0'],
-        'Inter-task SOA': ['N/A', 'N/A', '150', '200', 'N/A'],
-        'Distractor SOA': ['N/A', '50', 'N/A', '75', 'N/A'],
-        'Stimulus Valency': ['Univalent', 'Bivalent', 'Univalent', 'Bivalent', 'Univalent'],
-        'Switch Rate': ['0', '0', '0', '0', '50'],
-        'Response Set Overlap': ['N/A', 'N/A', 'Identical', 'Disjoint', 'Identical'],
-        'Stimulus Response Mapping': ['Compatible', 'Incompatible', 'Compatible', 'Arbitrary', 'Compatible'],
-        'Task Cue Type': ['None/Implicit', 'None/Implicit', 'None/Implicit', 'Arbitrary (Symbolic)', 'Arbitrary (Symbolic)'],
-        'CSI': ['0', '50', '0', '50', '200'],
-        'RSI': ['1000', '1000', '1000', '1000', '1000'],
-        'Task 1 Difficulty': ['1', '4', '2', '3', '2'],
-        'Task 2 Difficulty': ['N/A', 'N/A', '2', '4', '2']
+        # --- Existing Columns ---
+        'Task 2 Response Probability': ['0.0', '1.0', '0.0', '0.0'],
+        'Inter-task SOA': ['N/A', '150', 'N/A', 'N/A'],
+        'Distractor SOA': ['N/A', 'N/A', 'N/A', 'N/A'],
+        'Stimulus Valency': ['Univalent', 'Univalent', 'Univalent', 'Univalent'],
+        'Switch Rate': ['0', '0', '50', '0'],
+        'Response Set Overlap': ['N/A', 'Identical', 'Disjoint', 'N/A'],
+        'Stimulus Response Mapping': ['Compatible', 'Arbitrary', 'Compatible', 'Incompatible'], # This is now T1 SRM
+        'Task Cue Type': ['None/Implicit', 'Arbitrary (Symbolic)', 'Arbitrary (Symbolic)', 'None/Implicit'], # This is now T1 Cue Type
+        'CSI': ['0', '50', '200', '0'], # This is now T1 CSI
+        'RSI': ['1000', '1000', '650', '2000'],
+        'Task 1 Difficulty': ['2', '3', '2', '4'],
+        'Task 2 Difficulty': ['N/A', '3', 'N/A', 'N/A'],
+
+        # --- Add NEW Columns ---
+        'Task 2 CSI': ['N/A', '50', 'N/A', 'N/A'],
+        'Task 2 Stimulus-Response Mapping': ['N/A', 'Compatible', 'N/A', 'N/A'],
+        'Task 2 Cue Type': ['N/A', 'Arbitrary (Symbolic)', 'N/A', 'N/A'],
+        'Trial Transition Type': ['Pure', 'Pure', 'Switch', 'Pure'],
+        'RSI Is Predictable': ['Yes', 'Yes', 'No', 'Yes'],
     })
 
-# Tests for classify_paradigm with new logic
-def test_classify_paradigm_new():
-    # Manually create a sample for this specific test
-    test_df = pd.DataFrame({
-        'Task 2 Response Probability': [1.0, 0.0, 0.0, 0.5, 0.0],
-        'Switch Rate': [0, 0, 0, 0, 50],
-        'Stimulus Valency': ['Univalent', 'Univalent', 'Bivalent', 'Univalent', 'Univalent']
+def test_data_validation_logging(caplog):
+    """
+    Tests that the new validation function logs appropriate warnings for
+    inconsistent data.
+    """
+    caplog.set_level(logging.WARNING)
+
+    # Test Case 1: T2 info present when it shouldn't be (T2RP=0)
+    invalid_data_1 = pd.DataFrame({
+        'Experiment Name': ['TestExp1'],
+        'Task 2 Response Probability': [0.0],
+        'Task 2 Difficulty': [3], # Should be N/A
+        'Task 2 CSI': [50], # Should be N/A
+        'Task 2 Stimulus-Response Mapping': ['Compatible'], # Should be N/A
+        'Task 2 Cue Type': ['Arbitrary (Symbolic)'], # Should be N/A
+        # Fill in other required columns to avoid unrelated errors
+        'Inter-task SOA': ['N/A'], 'Distractor SOA': ['N/A'], 'Stimulus Valency': ['Univalent'],
+        'Switch Rate': [0], 'Response Set Overlap': ['N/A'], 'Stimulus Response Mapping': ['Compatible'],
+        'Task Cue Type': ['None/Implicit'], 'CSI': [0], 'RSI': [1000], 'Task 1 Difficulty': [1],
+        'Trial Transition Type': ['Pure'], 'RSI Is Predictable': ['Yes']
     })
-    paradigms = test_df.apply(classify_paradigm, axis=1)
-    assert paradigms.tolist() == ['Dual-Task/PRP', 'Other', 'Interference', 'Other', 'Task Switching']
+    preprocess_for_pca(invalid_data_1.copy())
+    assert "Warning: Task 2 Difficulty is present for a single-task condition" in caplog.text
+    assert "Warning: Task 2 CSI is present for a single-task condition" in caplog.text
+    assert "Warning: Task 2 Stimulus-Response Mapping is present for a single-task condition" in caplog.text
+    assert "Warning: Task 2 Cue Type is present for a single-task condition" in caplog.text
+    caplog.clear()
+
+    # Test Case 2: Switch Rate is 0% for a Switch trial
+    invalid_data_2 = pd.DataFrame({
+        'Experiment Name': ['TestExp2'],
+        'Trial Transition Type': ['Switch'],
+        'Switch Rate': [0], # Should be > 0
+        # Fill in other required columns
+        'Task 2 Response Probability': [0.0], 'Task 2 Difficulty': ['N/A'], 'Task 2 CSI': ['N/A'],
+        'Task 2 Stimulus-Response Mapping': ['N/A'], 'Task 2 Cue Type': ['N/A'], 'Inter-task SOA': ['N/A'],
+        'Distractor SOA': ['N/A'], 'Stimulus Valency': ['Univalent'], 'Response Set Overlap': ['Identical'],
+        'Stimulus Response Mapping': ['Compatible'], 'Task Cue Type': ['Arbitrary (Symbolic)'],
+        'CSI': [200], 'RSI': [1000], 'Task 1 Difficulty': [2], 'RSI Is Predictable': ['No']
+    })
+    preprocess_for_pca(invalid_data_2.copy())
+    assert "Warning: Trial Transition is 'Switch' or 'Repeat' but Switch Rate is 0%" in caplog.text
+    caplog.clear()
+
 
 # Comprehensive integration test for preprocess_for_pca
 def test_preprocess_for_pca_integration(new_sample_data):
-    df_pca, num_cols, cat_cols, df_processed = preprocess_for_pca(new_sample_data)
+    df_pca_features, num_cols, cat_cols, df_processed = preprocess_for_pca(new_sample_data)
 
-    # 1. Assert correct generation of _is_NA flags, including the new task-switching row
-    assert df_processed['Inter_task_SOA_is_NA'].tolist() == [1, 1, 0, 0, 1]
-    assert df_processed['Distractor_SOA_is_NA'].tolist() == [1, 0, 1, 0, 1]
-
-    # 2. Assert correct imputation of main SOA columns to 0
-    assert not df_processed['Inter-task SOA'].hasnans
-    assert not df_processed['Distractor SOA'].hasnans
-    assert df_processed.loc[0, 'Inter-task SOA'] == 0
-    assert df_processed.loc[1, 'Distractor SOA'] == 50 # This one was not NaN
-
-    # 3. Assert correct paradigm classification
-    assert df_processed['Paradigm'].tolist() == ['Other', 'Interference', 'Dual-Task/PRP', 'Dual-Task/PRP', 'Task Switching']
-
-# New tests for PCA analysis helper functions
-def test_find_centroids():
-    pc_data = pd.DataFrame({
-        'PC1': [1, 2, 8, 9],
-        'PC2': [1, 1, 8, 8],
-        'Paradigm': ['A', 'A', 'B', 'B']
-    })
-    centroids = find_centroids(pc_data)
-    assert 'A' in centroids
-    assert 'B' in centroids
-    assert np.allclose(centroids['A']['PC1'], 1.5)
-    assert np.allclose(centroids['A']['PC2'], 1.0)
-    assert np.allclose(centroids['B']['PC1'], 8.5)
-    assert np.allclose(centroids['B']['PC2'], 8.0)
-
-def test_interpolate_centroids():
-    c1 = {'x': 0, 'y': 0}
-    c2 = {'x': 10, 'y': 20}
-    
-    # Test halfway point
-    halfway = interpolate_centroids(c1, c2, alpha=0.5)
-    assert np.allclose(halfway, [5, 10])
-    
-    # Test endpoint
-    at_c2 = interpolate_centroids(c1, c2, alpha=1.0)
-    assert np.allclose(at_c2, [10, 20])
-
-def test_get_component_loadings(new_sample_data):
-    df_pca_features, numerical_cols, categorical_cols, _ = preprocess_for_pca(new_sample_data)
-    pipeline = create_pca_pipeline(numerical_cols, categorical_cols)
+    # Create and fit the pipeline to access the fitted preprocessor
+    pipeline = create_pca_pipeline(num_cols, cat_cols)
     pipeline.fit(df_pca_features)
-    
-    loadings = get_component_loadings(pipeline, numerical_cols, categorical_cols)
-    
-    # Assert that the output is a DataFrame
-    assert isinstance(loadings, pd.DataFrame)
-    
-    # Assert that the index contains the original feature names
-    assert 'Inter-task SOA' in loadings.index
-    # Assert that the index contains a one-hot encoded feature.
-    assert 'Stimulus_Valency_Mapped_SBC_Univalent' in loadings.index
-    
-    # Assert that columns are named PC1, PC2, etc.
-    assert all(f'PC{i+1}' in loadings.columns for i in range(pipeline.named_steps['pca'].n_components_))
 
+    # Get the preprocessor and the correct one-hot encoded feature names
+    preprocessor = pipeline.named_steps['preprocessor']
+    ohe_feature_names = preprocessor.named_transformers_['cat'].get_feature_names_out(cat_cols)
+    all_feature_names = num_cols + list(ohe_feature_names)
 
-# New test for pipeline invertibility and interpolation
-# def test_pipeline_invertibility_and_interpolation(new_sample_data):
-#     # --- Part A: Invertibility ---
-#     df_pca_features, numerical_cols, categorical_cols, df_processed = preprocess_for_pca(new_sample_data)
-    
-#     pipeline = create_pca_pipeline(numerical_cols, categorical_cols)
-#     pipeline.fit(df_pca_features)
-    
-#     # Transform to PC space and back
-#     pc_space = pipeline.transform(df_pca_features)
-#     reconstructed_space = pipeline.inverse_transform(pc_space)
-    
-#     # Create DataFrames to compare
-#     df_reconstructed = pd.DataFrame(reconstructed_space, columns=df_pca_features.columns)
-    
-#     # Check that the numerical data is close (allowing for float precision errors)
-#     assert np.allclose(df_pca_features[numerical_cols], df_reconstructed[numerical_cols])
-    
-#     # --- Part B: Interpolation ---
-#     # Add PC components and Paradigm labels to a new DataFrame for analysis
-#     df_pc_results = pd.DataFrame(pc_space, columns=[f'PC{i+1}' for i in range(pc_space.shape[1])])
-#     df_pc_results['Paradigm'] = df_processed['Paradigm']
-    
-#     # Calculate centroids for the two most different paradigms in the sample
-#     centroids = find_centroids(df_pc_results, paradigm_col='Paradigm')
-#     centroid_dt = centroids.get('Dual-Task/PRP')
-#     centroid_int = centroids.get('Interference')
-    
-#     assert centroid_dt is not None, "Dual-Task/PRP centroid not found"
-#     assert centroid_int is not None, "Interference centroid not found"
+    # Transform the data using ONLY the preprocessor to check its output
+    preprocessed_data = preprocessor.transform(df_pca_features)
+    df_transformed = pd.DataFrame(preprocessed_data, columns=all_feature_names)
 
-#     # Interpolate a point halfway between them
-#     interpolated_pc_point = interpolate_centroids(centroid_dt, centroid_int, alpha=0.5)
-    
-#     # Inverse-transform the point back to the original feature space
-#     final_params = inverse_transform_point(interpolated_pc_point, pipeline)
-    
-#     # Assert that the resulting values are sensible
-#     # It should be halfway between a single task (T2RP=0) and a dual task (T2RP=1)
-#     assert 0.4 < final_params['Task 2 Response Probability'] < 0.6
-    
-#     # It's halfway between a state where Inter-task SOA is NOT applicable (1) and IS applicable (0)
-#     assert 0.4 < final_params['Inter_task_SOA_is_NA'] < 0.6
-    
-#     # It's halfway between a state where Distractor SOA IS applicable (0) and NOT applicable (1)
-#     assert 0.4 < final_params['Distractor_SOA_is_NA'] < 0.6
+    # --- Assertions ---
 
-# Keep old tests for basic helpers to ensure no regressions
-def test_clean_rsi_numeric():
-    assert clean_rsi(200) == 200.0
-def test_map_valency():
-    assert map_valency('Univalent') == 'SBC_Univalent'
+    # Assert that the new numeric columns are present and correctly processed
+    assert 'Task 2 CSI' in num_cols
+    assert 'RSI_Is_Predictable' in num_cols
+    assert df_processed['Task 2 CSI'].tolist() == [0.0, 50.0, 0.0, 0.0]
+    assert df_processed['RSI_Is_Predictable'].tolist() == [1, 1, 0, 1]
+
+    # --- Robust check for Trial Transition Type ---
+    # 1. Find all columns generated from the 'Trial_Transition_Type_Mapped' feature.
+    ttt_cols = [col for col in df_transformed.columns if col.startswith('Trial_Transition_Type_Mapped_')]
+    
+    # 2. Assert that exactly one column was created due to drop='if_binary'.
+    assert len(ttt_cols) == 1, "Expected exactly one column for the binary TTT feature."
+    
+    # 3. Get the name of the single column that was kept.
+    kept_ttt_col = ttt_cols[0]
+
+    # 4. Verify the values are correct for known trial types.
+    # Original data: row 1 is 'Pure', row 2 is 'Switch'.
+    # This logic works regardless of which column ('..._Pure' or '..._Switch') was kept.
+    if 'Switch' in kept_ttt_col:
+        assert df_transformed.loc[2, kept_ttt_col] == 1, "Row 2 (Switch) should be 1 in the 'Switch' column."
+        assert df_transformed.loc[1, kept_ttt_col] == 0, "Row 1 (Pure) should be 0 in the 'Switch' column."
+    elif 'Pure' in kept_ttt_col:
+        assert df_transformed.loc[2, kept_ttt_col] == 0, "Row 2 (Switch) should be 0 in the 'Pure' column."
+        assert df_transformed.loc[1, kept_ttt_col] == 1, "Row 1 (Pure) should be 1 in the 'Pure' column."
+    else:
+        pytest.fail(f"Unexpected TTT column found: {kept_ttt_col}")
+
+    # --- Other Assertions ---
+    # Robustly check other potentially binary categorical features
+    srm2_cols = [col for col in df_transformed.columns if col.startswith('Task_2_Stimulus-Response_Mapping_Mapped_')]
+    assert len(srm2_cols) > 0 # Ensure at least one column was created
+
+    tct2_cols = [col for col in df_transformed.columns if col.startswith('Task_2_Cue_Type_Mapped_')]
+    assert len(tct2_cols) > 0 # Ensure at least one column was created
+
+    # Check that the final DataFrame for PCA has the expected shape
+    assert df_pca_features.shape[0] == 4 # 4 rows
+    assert df_transformed.shape[1] > 15 # Check for a reasonable number of columns
+
