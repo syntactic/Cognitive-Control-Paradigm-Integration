@@ -12,6 +12,8 @@ Refers to experimental situations where participants switch between **two or mor
 - **Task-Set Inertia / Priming:** Carry-over activation/interference from the previous task set.
 - **Reconfiguration:** Active control process to change the current task set.
 - **N-2 Repetition Cost / Backward Inhibition:** Performance cost when returning to a recently abandoned task (e.g., ABA vs CBA).
+- **Baseline Conditions:** Task-switching experiments often compare performance in mixed-task blocks to performance in **pure blocks**, where only a single task is performed repeatedly (Switch Rate = 0%, Trial Transition Type = Pure). This comparison is essential for measuring the [[Effects/Mixing Cost]].
+>
 
 **Common Manipulations:**
 
