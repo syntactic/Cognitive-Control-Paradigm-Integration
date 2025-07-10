@@ -1,5 +1,8 @@
-#methodology #thesis_concept
-
+---
+tags:
+  - methodology
+  - thesis_concept
+---
 The process of mapping the existing literature onto the [[Parametric Design Space]] is a core methodological component of this thesis. It involves a systematic procedure for translating published experimental designs into a consistent, analyzable format.
 
 ## 1. High-Level Process
