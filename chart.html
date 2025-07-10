@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Altair Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+    <style>
+      /* Optional: Add some basic styling */
+      body {
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+      }
+    </style>
+</head>
+<body>
+
+    <div id="vis"></div>
+
+    <script type="text/javascript">
+      // 3. Write the script to embed the chart
+      const specUrl = 'chart.json'; // Path to your JSON file
+
+      vegaEmbed('#vis', specUrl)
+        .then(result => console.log(result))
+        .catch(console.error);
+    </script>
+
+</body>
+</html>
