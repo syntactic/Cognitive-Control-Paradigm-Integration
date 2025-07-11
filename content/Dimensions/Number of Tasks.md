@@ -1,4 +1,7 @@
-#dimension
+---
+tags:
+  - dimension
+---
 
 Definition: The number of distinct stimulus-response (S-R) episodes that the participant is instructed to complete **within a single trial presentation** or very close temporal proximity, typically triggered by temporally distinct stimuli (S1, S2).
 

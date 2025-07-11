@@ -1,4 +1,8 @@
-#tool #framework
+---
+tags:
+  - tool
+  - framework
+---
 
 The Super Experiment library serves as the operational framework for defining and potentially simulating paradigms within the [[Parametric Design Space]].
 

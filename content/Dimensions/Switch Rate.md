@@ -1,4 +1,7 @@
-#dimension
+---
+tags:
+  - dimension
+---
 
 Definition: A parameter governing the between-trial task sequence structure. It refers to the probability that the task required on the current trial (N) will be different from the task required on the previous trial (N-1).
 

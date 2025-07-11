@@ -1,4 +1,7 @@
-#concept
+---
+tags:
+  - concept
+---
 
 Refers to the ability to focus on task-relevant information and suppress or ignore irrelevant information that could impede performance. Studied using paradigms where irrelevant stimulus features conflict with relevant ones.
 

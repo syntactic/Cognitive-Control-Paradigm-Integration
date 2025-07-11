@@ -1,4 +1,8 @@
-#dimension #cue_property
+---
+tags:
+  - dimension
+  - cue_property
+---
 
 Definition: Describes the nature of the signal provided to the participant (if any) that specifies which task rule set should be active for an upcoming imperative stimulus.
 

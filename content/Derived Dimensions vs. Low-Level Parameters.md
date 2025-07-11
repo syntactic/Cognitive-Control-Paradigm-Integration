@@ -1,4 +1,8 @@
-#methodology #thesis_concept
+---
+tags:
+  - methodology
+  - thesis_concept
+---
 
 A key methodological choice in this thesis is how to represent experimental paradigms for mapping and analysis.
 

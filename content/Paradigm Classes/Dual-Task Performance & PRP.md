@@ -1,4 +1,7 @@
-#paradigm
+---
+tags:
+  - paradigm
+---
 
 Refers to experimental situations where participants perform **two distinct tasks (T1 and T2)** requiring responses within close temporal proximity ([[Number of Tasks]]=2, [[Task 2 Response Probability]]=1).
 

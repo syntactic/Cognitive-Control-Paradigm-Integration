@@ -1,4 +1,7 @@
-#dimension 
+---
+tags:
+  - dimension
+---
 
 **Definition:** An inclusive measure reflecting the overall processing demands required to successfully perform a single task instance, encompassing perceptual load, cognitive load (e.g., rule complexity, working memory, transformations), and response selection demands.
 

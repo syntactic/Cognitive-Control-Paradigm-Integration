@@ -1,4 +1,8 @@
-#thesis_concept #design_space
+---
+tags:
+  - thesis_concept
+  - design_space
+---
 
 The power of the parametric design space is in its ability to show how canonical paradigms are not isolated islands, but are regions connected by the systematic manipulation of core parameters. The two most powerful dimensions for revealing these connections are **Number of Tasks (N_Tasks)** and **Stimulus Onset Asynchrony (SOA)**. The key transitions can be understood by how these dimensions are manipulated.
 

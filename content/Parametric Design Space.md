@@ -1,4 +1,8 @@
-#thesis_concept #methodology
+---
+tags:
+  - thesis_concept
+  - methodology
+---
 
 The core idea of this thesis is to conceptualize standard cognitive control paradigms not as discrete categories, but as regions within a multi-dimensional space defined by underlying experimental parameters.
 

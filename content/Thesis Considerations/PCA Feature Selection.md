@@ -1,4 +1,8 @@
-#methodology #pca 
+---
+tags:
+  - methodology
+  - pca
+---
 
 Derived Conceptual Dimensions vs. Low-Level SE Parameters
 

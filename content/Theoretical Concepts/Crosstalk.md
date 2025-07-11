@@ -1,4 +1,9 @@
-#concept #mechanism #interference
+---
+tags:
+  - concept
+  - mechanism
+  - interference
+---
 
 Definition: Crosstalk refers to the unwanted transmission of information or processing influence between concurrently active or closely sequential cognitive tasks or processing streams. It occurs when processing intended for one task affects the processing of another task, typically leading to interference but sometimes facilitation.
 

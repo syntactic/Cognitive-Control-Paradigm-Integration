@@ -1,4 +1,7 @@
-#dimension 
+---
+tags:
+  - dimension
+---
 
 #### Definition
 A continuous dimension from 0 to 1 representing the probability that a participant is required to make a response to a second task/stimulus within a trial. It functionally replaces the discrete Number of Tasks dimension to allow for more coherent interpolation in the parametric space.

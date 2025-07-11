@@ -1,4 +1,9 @@
-#methodology #pca 
+---
+tags:
+  - methodology
+  - pca
+---
+
 This note lists the features intended for input into the Principal Component Analysis (PCA). These features are derived from the master literature coding CSV file. Derived dimensions from the literature are mapped to a reduced set of categories that reflect distinctions achievable or most relevant within the Super Experiment (SE) framework. This mapping is an explicit step in the data processing pipeline.
 
 **I. Numerical PCA Features (Standardized - e.g., Z-scored):**

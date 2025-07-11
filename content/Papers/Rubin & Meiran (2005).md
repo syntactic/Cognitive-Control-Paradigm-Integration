@@ -1,4 +1,7 @@
-#paper
+---
+tags:
+  - paper
+---
 
 **Full Title:** On the Origins of the Task Mixing Cost in the Cuing Task-Switching Paradigm
 **Authors:** Orit Rubin, Nachshon Meiran

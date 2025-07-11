@@ -1,4 +1,14 @@
-#review_paper #multitasking #dual_task #task_switching #cognitive_control #structure #flexibility #plasticity
+---
+tags:
+  - review_paper
+  - multitasking
+  - dual_task
+  - task_switching
+  - cognitive_control
+  - structure
+  - flexibility
+  - plasticity
+---
 
 **Core Argument/Goal:**  
 This comprehensive review argues that research on [[Dual-Task Performance & PRP|dual-task performance]] (especially PRP) and [[Task Switching]] has largely proceeded in separate silos, despite both investigating fundamental aspects of human multitasking. The authors advocate for an integrative perspective, organizing the complex literature around three complementary themes:

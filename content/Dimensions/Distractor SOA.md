@@ -1,4 +1,7 @@
-#dimension 
+---
+tags:
+  - dimension
+---
 
 Definition: In single-task ([[Dimensions/Task 2 Response Probability|Task 2 Response Probability]] = 0) paradigms with [[Dimensions/Stimulus Bivalence & Congruency|Bivalent]] stimuli, Distractor SOA is the time interval between the onset of the target feature and the onset of the distractor feature.
 

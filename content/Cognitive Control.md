@@ -1,4 +1,7 @@
-#concept
+---
+tags:
+  - concept
+---
 
 Cognitive control refers to the set of mechanisms that allow the brain to flexibly configure information processing and guide thoughts and actions based on current goals, especially in the face of conflict or complexity.
 

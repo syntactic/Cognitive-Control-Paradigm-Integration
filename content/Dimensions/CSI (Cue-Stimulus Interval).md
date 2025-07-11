@@ -1,4 +1,7 @@
-#dimension
+---
+tags:
+  - dimension
+---
 
 Definition: The time interval between the onset of a cue indicating the upcoming task/stimulus and the onset of the imperative stimulus itself.
 

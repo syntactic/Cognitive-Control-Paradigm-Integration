@@ -1,4 +1,8 @@
-#dimension #response_property
+---
+tags:
+  - dimension
+  - response_property
+---
 
 Definition: Describes the relationship between the sets of possible motor responses required by the two (or more) active tasks in a multi-task context ([[Number of Tasks]] >= 2).
 

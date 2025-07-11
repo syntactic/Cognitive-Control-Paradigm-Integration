@@ -1,4 +1,8 @@
-#effect #phenomenon
+---
+tags:
+  - effect
+  - phenomenon
+---
 
 Definition: A performance decrement (typically slower reaction times and/or increased error rates) on task-repeat trials when they occur within a block of mixed tasks (where task switching is possible), compared to performance on the same task when it is performed in a pure block (only one task performed throughout).
 
