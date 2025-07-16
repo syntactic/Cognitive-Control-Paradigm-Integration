@@ -53,7 +53,7 @@ The core finding is the **Flanker Effect**: reaction times (RTs) are typically s
 
 *   Measures the efficiency of **selective attention** in filtering out distractors.
 *   Probes mechanisms of **response selection** and **inhibition** of prepotent but incorrect responses.
-*   Used to study **conflict monitoring and adaptation**.
+*   Used to study **conflict monitoring and adaptation** ([[Theoretical Concepts/Conflict Monitoring Theory]]).
 
 ###### Key Parameters for Design Space Mapping:
 

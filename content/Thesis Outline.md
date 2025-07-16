@@ -1,4 +1,4 @@
-## Title: Control Paradigms Into a Unified Experimental Design Space: A Parametric Analysis
+## Title: Integrating Control Paradigms Into a Unified Experimental Design Space: A Parametric Analysis
 
 ## 1. Introduction
    1.1. The Challenge of [[Cognitive Control]]: Managing Multiple Tasks and Goals

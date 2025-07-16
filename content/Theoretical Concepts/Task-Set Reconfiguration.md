@@ -24,6 +24,7 @@ This is a "top-down" view of task switching, where the cost arises from the exec
 *   **Residual Switch Cost:** The standard reconfiguration model has more difficulty explaining the [[Residual Switch Cost]] that remains after long preparation. This has led to several hypotheses:
     1.  The reconfiguration process is not purely endogenous and requires the arrival of the stimulus to be completed (a "stimulus-triggered" component).
     2.  The residual cost is not due to reconfiguration at all, but rather to a separate mechanism, such as **[[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia]]**.
+    3.  Another major explanation, the Failure-to-Engage hypothesis ([[De Jong (2000)]]), posits that the residual cost is strategic, arising from trials where no preparation is attempted.
 
 ###### Contrast with Task-Set Inertia
 Task-Set Reconfiguration emphasizes the active, preparatory control processes needed to prepare for the *upcoming* task. This contrasts with the **[[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia]]** account, which emphasizes the passive, carry-over interference from the *previous* task. Most modern theories acknowledge that both mechanisms likely contribute to overall task-switching performance.

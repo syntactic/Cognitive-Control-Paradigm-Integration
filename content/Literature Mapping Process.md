@@ -64,3 +64,34 @@ The decision to simplify a dimension at Level 2, or to add a new granular dimens
         - **Example 2:** The fine-grained neutral flanker conditions of [[Eriksen & Eriksen (1974)]] (Feature Similar vs. Feature Dissimilar) are recorded faithfully in the source CSV (Level 1). However, because SE does not model abstract feature similarity, these are **collapsed into a single SBC_Bivalent_Neutral category for the PCA (Level 2).**
 
 By rigorously applying this three-step rubric, we ensure that the final feature set for the PCA is maximally informative, non-redundant, and operationally sound, providing a solid foundation for analyzing the parametric design space.
+
+## Bottom-Up Coding and Consistency Checking
+
+To maintain the integrity and logical coherence of the parametric design space, all experimental conditions must be coded from the "bottom-up." This means the assignment of dimensional values is determined by the fundamental features of a single trial, independent of any high-level, pre-conceived paradigm label. This principle is enforced through the following workflow:
+
+**Step A: Code Trial Features First**
+For any given experimental condition, begin by analyzing the properties of a single trial instance. Answer these questions first:
+*   How many S-R episodes are required? (Determines `Task 2 Response Probability`).
+*   Is the stimulus `Univalent` or `Bivalent`?
+*   If `Bivalent`, are the target and distractor features presented simultaneously or asynchronously?
+*   Is there a cue? Is it presented before the stimulus?
+*   Is the RSI fixed or variable?
+
+**Step B: Assign Dimensional Values Based on Features**
+The answers from Step A directly determine the values in the CSV.
+*   If a stimulus is `Bivalent` and its features are simultaneous, `Stimulus Valency` must be coded as `Bivalent-*` and `Distractor SOA` **must** be coded as `0`. It cannot be `N/A`.
+*   If `Task 2 Response Probability` is `1` and there is a delay between S1 and S2, `Inter-task SOA` **must** have a numerical value.
+*   The high-level "Paradigm" label (e.g., Task Switching, Interference) is a descriptive *output* of this coding process, not an input that constrains it.
+
+**Step C: Perform a Consistency Check**
+Before finalizing the coding for a new, complex paper, it is mandatory to perform a consistency check.
+1.  Identify 2-3 already-coded studies in the vault that are structurally similar (e.g., other task-switching studies with bivalent stimuli, other PRP studies with unusual mappings).
+2.  Create a small comparison table, like the one used for the De Jong (2000) analysis, comparing the proposed coding of the new paper against the established coding of the old ones across key, shared dimensions.
+
+**Step D: Resolve Discrepancies**
+If the consistency check reveals a discrepancy, it must be resolved before proceeding. The discrepancy signals one of three possibilities:
+1.  The proposed coding for the new paper is incorrect and must be revised to align with precedent.
+2.  The coding for the older, precedent-setting papers was incorrect and must be revised.
+3.  The new paper introduces a genuinely novel manipulation that our current dimensional framework cannot account for, which may require adding a new dimension or making a note in `[[Study Limitations]]`.
+
+By adhering to this bottom-up workflow, we ensure that the design space is built on a foundation of logically consistent, trial-level features, which is essential for the validity of any subsequent analysis.

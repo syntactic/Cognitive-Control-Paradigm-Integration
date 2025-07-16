@@ -19,6 +19,7 @@ Definition: A performance decrement (typically slower reaction times and/or incr
 - **Task-Set Reconfiguration:** The active process of changing the cognitive system's settings to suit the new task (e.g., [[Rogers & Monsell (1995)]]).
 - **Task-Set Inertia / Proactive Interference:** Lingering activation of the previous task set interferes with the current one (e.g., [[Allport et al. (1994)]]).
 - **Inhibition:** Inhibition of the recently abandoned task set.
+- **Failure-to-Engage (FTE):** The residual cost is a statistical artifact arising from intermittent, strategic failures to engage in advance preparation. On any given trial, a participant is either fully prepared or fully unprepared, and the switch cost reflects the average of this mixture ([[De Jong (2000)]]).
 
 **Relevance to Design Space:**
 

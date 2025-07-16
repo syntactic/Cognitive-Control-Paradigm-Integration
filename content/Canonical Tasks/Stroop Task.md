@@ -49,6 +49,7 @@ The **Stroop Effect** is the robust finding that naming the ink color of a color
 *   **Automaticity:** Word reading is a highly automatized skill that is difficult to inhibit once initiated by the presence of a word.
 *   **Parallel Distributed Processing (PDP) / Connectionist Models:** Both word and color pathways are activated in parallel. Stronger connections for the reading pathway lead to its output dominating or creating conflict with the color pathway. (e.g., [[Cohen et al. (1990)]]).
 *   **Selective Attention & Response Competition:** The task requires selectively attending to the ink color dimension and inhibiting the response associated with the word dimension.
+*   **Conflict Monitoring:** Modern theories like [[Theoretical Concepts/Conflict Monitoring Theory]] propose that the ACC detects the high level of response conflict on incongruent trials and signals for increased top-down control.
 
 ###### Relevance to Cognitive Control:
 

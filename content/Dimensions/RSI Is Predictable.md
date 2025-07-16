@@ -24,13 +24,12 @@ A binary dimension describing whether the Response-Stimulus Interval (RSI) is co
 
 ### Rationale and Importance
 
-The inclusion of `RSI Predictability` as a first-class dimension is theoretically essential:
+The inclusion of `RSI Predictability` as a dimension is theoretically essential:
 
-1.  **Tests Core Theories:** It directly operationalizes the distinction between active preparation and passive decay. Theories based on [[Theoretical Concepts/Task-Set Reconfiguration|Task-Set Reconfiguration]] predict that switch costs should only be reduced when RSI is predictable. In contrast, simple decay-based theories like [[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia]] would predict that any increase in average RSI duration, regardless of predictability, should allow more time for interference to dissipate. The empirical results ([[Rogers & Monsell (1995)]]) strongly support the former, making this dimension a powerful tool for theory testing.
-
-2.  **Disambiguates the `RSI` Dimension:** It adds a crucial qualitative layer to the quantitative `RSI` dimension. Two experiments might both have a mean RSI of 700ms, but if one is predictable and the other is not, they represent vastly different psychological contexts. This binary feature ensures the PCA does not mistakenly treat these distinct conditions as identical.
-
-3.  **Strengthens the Framework:** By explicitly coding for predictability, the design space can more accurately capture the subtle but powerful ways in which temporal context modulates cognitive control.
+1.  **Tests Core Theories:** It creates a direct experimental test of competing theories of the switch cost. The **[[Theoretical Concepts/Task-Set Reconfiguration|Task-Set Reconfiguration]]** account predicts that switch costs should only be reduced when the preparation interval is predictable, as this allows for the timely initiation of an active control process. In contrast, a simple **[[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia]]** account based on passive decay would predict that any increase in average RSI, regardless of predictability, should reduce interference. The empirical results ([[Rogers & Monsell (1995)]]) strongly support the former, making this dimension a powerful tool for theory testing.
+2.  **Disambiguates the `RSI` Dimension:** It distinguishes preparation for what (the task) from preparation for when (the timing). The [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]] provides a dedicated interval to prepare for what the task will be. The predictability of the RSI determines whether participants can also prepare for when the stimulus will arrive, allowing them to time-lock their preparatory processes.
+3. **Prevents Analytical Artifacts:** It ensures the PCA does not mistakenly treat two experiments with the same mean RSI as identical if one is predictable and the other is not. These represent vastly different psychological contexts, and this binary feature preserves that crucial distinction.
+4.  **Strengthens the Framework:** By explicitly coding for predictability, the design space can more accurately capture the subtle but powerful ways in which temporal context modulates cognitive control.
 
 ### PCA Coding
 

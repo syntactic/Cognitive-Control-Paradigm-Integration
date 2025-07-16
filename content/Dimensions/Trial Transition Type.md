@@ -21,16 +21,16 @@ A categorical dimension that describes the relationship between the cognitive pr
     *   **Relevance:** These trials serve as the intra-block baseline for calculating the [[Effects/Switch Cost]]. This condition also only exists in blocks where `Switch Rate > 0%`.
 
 *   **`Pure`**
-    *   **Description:** The trial occurs within a single-task or single-procedure block, where the same cognitive set is applied repeatedly without any possibility of switching to another task.
+    *   **Description:** The trial occurs within a block where the same cognitive procedure is applied repeatedly without any possibility of switching to another.
     *   **Relevance:**
-        *   In **[[Task Switching]]**, these trials form the "pure block" baseline used to calculate the [[Effects/Mixing Cost]]. Coded with `Switch Rate = 0%`.
-        *   In standard **[[Dual-Task Performance & PRP|PRP/dual-task]]** paradigms (e.g., [[McCann & Johnston (1992)|McCann & Johnston 1992]]), the high-level procedure ("do T1, then do T2") is identical on every trial. This procedural stability is analogous to a pure task-switching block. **Therefore, these conditions are coded as `Pure`**.
+        * In **[[Task Switching]]**, these trials form the "pure block" baseline (Switch Rate = 0%) used to calculate the [[Effects/Mixing Cost]].
+        * In standard **[[Dual-Task Performance & PRP|PRP]]** paradigms (e.g., [[McCann & Johnston (1992)]]), the high-level procedure ("do Task 1, then do Task 2") is identical on every trial. This procedural stability is conceptually analogous to a pure task-switching block. **Therefore, these conditions are also coded as Pure**, creating a crucial bridge between the paradigm classes.
 
 *   **`N/A` (Not Applicable)**
-    *   **Description:** Used for conditions where the concept of a trial-to-trial transition is not the primary manipulation or is ambiguous.
+    *   **Description:** Used for conditions where the concept of a trial-to-trial procedural switch is not the primary manipulation.
     *   **Relevance:**
-        *   The very first trial of any block.
-        *   Paradigms with a block-level manipulation of uncertainty, where the distinction between a transition "repeat" and "switch" is not the focus of the analysis. The primary example is **[[Sigman & Dehaene (2006)]]**, where the block-level uncertainty is already captured by `Number of Tasks = 2` and `Switch Rate = 50%`.
+        *  The very first trial of any block.
+        *  Paradigms like **[[Sigman & Dehaene (2006)]]**. Here, while the task order is uncertain (Switch Rate = 50%), the set of two tasks is constant. The core manipulation is Inter-task SOA, not the cost of switching task rules. Coding this as N/A prevents conflating task-order uncertainty with task-rule switching.
 
 ### Rationale and Importance
 

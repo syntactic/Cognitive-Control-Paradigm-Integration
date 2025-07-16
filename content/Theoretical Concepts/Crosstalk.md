@@ -27,7 +27,7 @@ Definition: Crosstalk refers to the unwanted transmission of information or proc
 
 - Challenges theories assuming strict modularity or complete encapsulation of processing streams.
 - Provides evidence for parallel processing and shared representations.
-- Highlights the need for [[Cognitive Control]] mechanisms to manage and minimize detrimental crosstalk.
+- Highlights the need for [[Cognitive Control]] mechanisms, such as those proposed by [[Theoretical Concepts/Conflict Monitoring Theory]], to manage and minimize detrimental crosstalk.
 - Often modeled via shared connections or spreading activation in computational models.
 
 **Key Literature:**

@@ -8,78 +8,53 @@ This note lists the features intended for input into the Principal Component Ana
 
 **I. Numerical PCA Features (Standardized - e.g., Z-scored):**
 
-1.  **`Task_2_Response_Probability_PCA`** (Numeric: 0 - 1)
-    *   Directly from CSV `Task 2 Response Probability`.
-2.  **`SOA_ms_PCA`** (Numeric: ms)
-    *   From CSV `SOA`.
-    * If `Number of Tasks` == 2: this is the standard interpretation for PRP, indicating the delay between stimulus for task 1 and stimulus for task 2.
-    *  If `Number of Tasks` == 1: this is a special case for single-task paradigms with interference. A distractor stimulus appears at this SOA but the subject is expected to only perform one task in the trial. This happens in [[Yeung & Monsell (2003)]]. This is `0` for bivalent stimuli with simultaneous features and a `+/-` value for asynchronous features.
-	* a. **`SOA_is_NA`** (Binary Numeric: 0 or 1)
-	    - **Source:** erived from Number of Tasks and SOA value applicability.
-	    - **Value=1 ("SOA is Not Applicable"):** Assigned when SOA is not the primary manipulated temporal variable. This includes: 1) Single-task (N_Tasks=1) trials with Univalent stimuli, and 2) RSI-driven dual-task paradigms (N_Tasks=2) where SOA is explicitly not manipulated and RSI is the key variable.
-	    - **Value=0 ("SOA is Applicable"):** Assigned for all other cases where SOA is the relevant temporal parameter, including all classic PRP paradigms and single-task bivalent paradigms.
-	    - **Rationale:** This feature correctly partitions the design space, allowing the PCA to distinguish paradigms based on whether their core temporal logic is stimulus-to-stimulus (SOA-driven) or response-to-stimulus (RSI-driven).
-    - b. **`SOA_ms`**
-	    - **Source:** From CSV SOA
-	    - **Imputation for N/A:** When SOA_is_NA is 1, the corresponding SOA_ms value is imputed to **0**. This is a neutral choice because the SOA_is_NA feature already carries the critical information, preventing the imputed value from skewing the analysis. The analysis_utils.py script correctly implements this logic.
-	    - **Value Interpretation (when SOA_is_NA = 0):**
-		    - SOA = 0: Simultaneous target/distractor or S1/S2.
-		    - SOA > 0: Standard positive SOA (PRP or target-first interference).
-			* SOA < 0: Negative SOA (distractor-first interference).
-3.  **`CSI_ms_PCA`** (Numeric: ms)
-    *   From CSV `CSI`.
-    *   Placeholder/Imputation for N/A: I don't think this would ever occur, so there shouldn't be a need to impute values. (implicit cue = 0 CSI).
-4.  **`RSI_ms_PCA`** (Numeric: ms)
-    * From CSV `RSI`.
+1.  **`Task 2 Response Probability`**: (Numeric: 0-1) The core dimension separating single-task from dual-task paradigms.
+2.  **`Inter-task SOA`**: (Numeric: ms) The delay between S1 and S2 in `N_Tasks=2` paradigms. Imputed to 0 when not applicable.
+3.  **`Distractor SOA`**: (Numeric: ms) The delay between target and distractor features in `N_Tasks=1`, bivalent paradigms. Imputed to 0 when not applicable.
+4.  **`Inter_task_SOA_is_NA`**: (Binary: 0 or 1) A flag indicating if `Inter-task SOA` is the relevant temporal variable for the paradigm.
+5.  **`Distractor_SOA_is_NA`**: (Binary: 0 or 1) A flag indicating if `Distractor SOA` is the relevant temporal variable for the paradigm.
+6.  **`Task 1 CSI`**: (Numeric: ms) The Cue-Stimulus Interval for the first task.
+7. **`Task 2 CSI`**: (Numeric: ms) The Cue-Stimulus Interval for the second task. Imputed to 0 for single-task paradigms.
+8.  **`RSI`**: (Numeric: ms) The Response-Stimulus Interval.
     * The `Super_Experiment_Mapping_Notes` may indicate a more accurate idea of how RSI might have been manipulated in an experiment (see [[Stephan & Koch (2010)]] for example). It might indicate that the RSI is drawn from a distribution. In that case, the CSV's `RSI` value is the expected value of that distribution.
     * Placeholder/Imputation for N/A or "Not Specified": e.g., median of observed RSIs, or a fixed value representing a common ITI.
-5.  **`Switch_Rate_percent_PCA`** (Numeric: 0-100)
-    *   From CSV `Switch Rate`.
-    *   Placeholder/Imputation for N/A: 0. This shouldn't practically be N/A. If we're in a single-task paradigm there either is a switch (mixed block) or never a switch. If we're in a dual-task paradigm then the task order could switch such as in [[Sigman & Dehaene (2006)]].
-6.  **`Task1_Difficulty_Normalized_PCA`** (Numeric: 0-1)
+9.  **`RSI_Is_Predictable`**: (Binary: 0 or 1) Captures whether the RSI is fixed (`1`) or variable (`0`), a critical distinction for preparation theories.
+10. **`Switch Rate`**: (Numeric: 0-100) The probability of a task switch.
+    *  Placeholder/Imputation for N/A: 0. This shouldn't practically be N/A. If we're in a single-task paradigm there either is a switch (mixed block) or never a switch. If we're in a dual-task paradigm then the task order could switch such as in [[Sigman & Dehaene (2006)]].
+11. **`Task 1 Difficulty`**: (Numeric: 0-1) Normalized difficulty score for the first task.
     *   Derived from CSV `Task 1 Difficulty` (1-5 ordinal) -> (value-1)/4.
     *   Placeholder/Imputation for N/A: e.g., 0.5 (moderate difficulty).
-7.  **`Task2_Difficulty_Normalized_PCA`** (Numeric: 0-1)
+12.  **`Task 2 Difficulty`**: (Numeric: 0-1 or -1) Normalized difficulty for the second task in the repertoire. A value of `-1` is used as a placeholder for true single-task paradigms where no alternative task exists.
     *   Derived from CSV `Task 2 Difficulty` (1-5 ordinal) -> (value-1)/4.
     *   If `Number of Tasks` = 1 (for that row/condition), this feature is set to a distinct placeholder (e.g., -1) or imputed based on context (e.g. if it's a TS paradigm, it's the difficulty of the *other* task in repertoire). *Current preference: Use actual difficulty of T2 in repertoire for TS; use placeholder -1 if truly no T2.*
     *   Placeholder/Imputation for N/A (if N_Tasks=2 but difficulty unspecified): e.g., 0.5.
 
 **II. Categorical PCA Features (One-Hot Encoded from SE-Mappable Categories):**
 
-For each categorical dimension, literature values are first mapped to an SE-Mappable category, then one-hot encoded.
+*Note: The `_Mapped` suffix indicates that these are the final categories used by the PCA pipeline after being processed by the mapping functions in `analysis_utils.py`.*
 
-A.  **`Stimulus_Bivalence_Congruency` (from CSV `Stimulus Valency`) -> SE-Mappable for PCA:**
-    *   Literature Categories: "Univalent", "Bivalent-Congruent", "Bivalent-Neutral", "Bivalent-Incongruent", "N/A"
-    *   SE-Mappable PCA Categories (these are all distinct and SE can generally model the stimulus side; response conflict depends on RSO):
-        *   `SBC_Univalent`
-        *   `SBC_Bivalent_Congruent`
-        *   `SBC_Bivalent_Neutral`
-        *   `SBC_Bivalent_Incongruent`
-        *   (`SBC_NA` column will exist if NAs are present after mapping, or NAs result in all zeros for other SBC columns).
-    *   One-Hot Encoded PCA Features: `SBC_Univalent`, `SBC_Bivalent_Congruent`, `SBC_Bivalent_Neutral`, `SBC_Bivalent_Incongruent`.
+A. **`Stimulus_Valency_Mapped`**: Derived from `Stimulus Valency`. Categories: `SBC_Univalent`, `SBC_Bivalent_Congruent`, `SBC_Bivalent_Incongruent`, `SBC_Bivalent_Neutral`.
 
-B.  **`Response_Set_Overlap` -> SE-Mappable for PCA:**
+B. **`Response_Set_Overlap_Mapped`**: Derived from `Response Set Overlap`. Categories: `RSO_Identical`, `RSO_Disjoint`.
     *   Literature Categories (examples): "Identical", "Disjoint - Category (Same Modality)", "Disjoint - Effector (Same Modality)", "Disjoint - Modality (Standard/Non-Standard)", "N/A"
     *   SE-Mappable PCA Categories:
         *  `RSO_SE_Identical` (Maps from Lit: "Identical")
         *  `RSO_SE_Disjoint` (Maps from Lit: "`Disjoint - Category (Same Modality)`", "`Disjoint - Effector (Same Modality)`", "`Disjoint - Modality (Standard/Non-Standard)`" (This category acknowledges SE *cannot* do true modality disjoint like vocal vs manual. This PCA category would group all literature cases where responses are fundamentally different in modality/effector beyond simple key choices. For SE instantiation, these would *all* be mapped to different key groups, e.g., `a/d` vs `w/s`). This is a compromise.
         *  `RSO_SE_NA` (Maps from Lit: "N/A")
-    *   One-Hot Encoded PCA Features: `RSO_SE_Identical`, `RSO_SE_Disjoint`
 
-C.  **`Task_Cue_Type` (from CSV `Task Cue Type`) -> SE-Mappable for PCA:**
+C.  **`Task_1_Stimulus-Response_Mapping_Mapped`**: Derived from `Task 1 Stimulus-Response Mapping`. Categories: `SRM_Compatible`, `SRM_Incompatible`, `SRM_Arbitrary`.
+	*   **SE-Mappable PCA Categories:** These categories are directly SE-mappable as they define how the `keyMap` is configured in the Super Experiment.
+        *   `SRM_SE_Compatible` (Lit: "Compatible" -> SE: `keyMap` aligns stimulus with spatially/semantically congruent response)
+        *   `SRM_SE_Incompatible` (Lit: "Incompatible" -> SE: `keyMap` forces a crossed or counter-intuitive stimulus-response link)
+        *   `SRM_SE_Arbitrary` (Lit: "Arbitrary" -> SE: `keyMap` is based on learned, non-prepotent associations; this is the typical setup for many tasks)
+
+D.  **`Task_2_Stimulus-Response_Mapping_Mapped`**: Derived from `Task 2 Stimulus-Response Mapping`. Categories: `SRM2_Compatible`, `SRM2_Incompatible`, `SRM2_Arbitrary`.
+
+E.  **`Task_1_Cue_Type_Mapped`**: Derived from `Task 1 Cue Type`. Categories: `TCT_Implicit`, `TCT_Arbitrary`
     *   Literature Categories: "None/Implicit", "Arbitrary_External", "Transparent_External", "N/A"
     *   SE-Mappable PCA Categories (SE's internal cue is always arbitrary; this focuses on *when* external info is available):
         *   `TCT_SE_None_Implicit` (Lit: "None/Implicit" -> SE: cue likely simultaneous with stim, CSI=0)
         *   `TCT_SE_Info_Precedes_Stim` (Lit: "Arbitrary_External", "Transparent_External" where CSI > 0 -> SE: CSI value respected)
         *   `TCT_SE_NA`
-    *   One-Hot Encoded PCA Features: `TCT_SE_None_Implicit`, `TCT_SE_Info_Precedes_Stim`. (If CSI=0 for an external cue, it might fall into `None_Implicit` effectively for SE timing, or a third category `TCT_SE_Info_Simultaneous_Stim`).
-        *Given CSI_ms_PCA is a numerical feature, perhaps one-hot encoding Task Cue Type for PCA is less critical if CSI captures the main timing variance. If the *nature* (Arbitrary vs Transparent) of external cues is thought to have effects SE can't model but we want in PCA, then keep more distinct categories.*
-	 - there are two features, one for each potential task
-D.  **`Stimulus_Response_Mapping` (from CSV `Stimulus Response Mapping`) -> SE-Mappable for PCA:**
-    *   **Literature Categories (from CSV):** "`Compatible`", "`Incompatible`", "`Arbitrary`", (potentially "`N/A`")
-    *   **SE-Mappable PCA Categories:** These categories are directly SE-mappable as they define how the `keyMap` is configured in the Super Experiment.
-        *   `SRM_SE_Compatible` (Lit: "Compatible" -> SE: `keyMap` aligns stimulus with spatially/semantically congruent response)
-        *   `SRM_SE_Incompatible` (Lit: "Incompatible" -> SE: `keyMap` forces a crossed or counter-intuitive stimulus-response link)
-        *   `SRM_SE_Arbitrary` (Lit: "Arbitrary" -> SE: `keyMap` is based on learned, non-prepotent associations; this is the typical setup for many tasks)
-    *   **One-Hot Encoded PCA Features:** `SRM_SE_Compatible`, `SRM_SE_Incompatible`. Arbitrary is represented by 0 values for those two columns.
-    * There are two features, one for each potential task.
+F.  **`Task_2_Cue_Type_Mapped`**: Derived from `Task 2 Cue Type`. Categories: `TCT2_Implicit`, `TCT2_Arbitrary`.
+G. **`Trial_Transition_Type_Mapped`**: Derived from `Trial Transition Type`. Categories: `TTT_Pure`, `TTT_Switch`, `TTT_Repeat`.

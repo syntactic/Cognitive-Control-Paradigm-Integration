@@ -11,6 +11,7 @@ Key functions include:
 - Task-set configuration and [[Task Switching]]
 - Managing [[Dual-Task Performance & PRP|Dual-Task Interference]]
 - [[Interference Control]] (resolving conflict)
+- Monitoring for conflict ([[Theoretical Concepts/Conflict Monitoring Theory]])
 - [[Preparation and Pre-cuing|Preparation]] for upcoming events
 - Response inhibition
 
