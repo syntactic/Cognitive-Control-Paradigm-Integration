@@ -14,6 +14,8 @@ The core idea of this thesis is to conceptualize standard cognitive control para
 4. Identify [[Transitions and Modulators]].
 5. Identify gaps (unexplored regions) and limitations (dimensions outside the framework).
 
+This approach builds on early theoretical work, such as the "Dimensional Overlap" model by [[Kornblum et al. (1990)]], who developed a foundational taxonomy of stimulus-response compatibility tasks. Their work demonstrated that paradigms like the Stroop and Simon tasks could be seen as variants within a common conceptual framework, providing a direct precedent for this thesis's more comprehensive mapping effort. It is also conceptually parallel to the work of [[Miyake et al. (2000)]], who used latent variable analysis to decompose complex executive tasks into more fundamental, separable abilities, similarly aiming to bring a unified structure to the field.
+
 **Dimensions Tentatively Identified:**
 
 - [[Number of Tasks]]

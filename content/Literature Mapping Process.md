@@ -3,7 +3,7 @@ tags:
   - methodology
   - thesis_concept
 ---
-The process of mapping the existing literature onto the [[Parametric Design Space]] is a core methodological component of this thesis. It involves a systematic procedure for translating published experimental designs into a consistent, analyzable format.
+The process of mapping the existing literature onto the [[Parametric Design Space]] is a core methodological component of this thesis. It involves a systematic procedure for translating published experimental designs into a consistent, analyzable format. This structured approach is similar to the strategy to overcome the "task impurity problem," a challenge identified and tackled with a statistical methodology by [[Miyake et al. (2000)]].
 
 ## 1. High-Level Process
 

@@ -17,6 +17,7 @@ Refers to the ability to focus on task-relevant information and suppress or igno
 - [[Stimulus Bivalence & Congruency]]: The dimension defining the conflict.
 - [[Response Set Overlap]]: Can determine if conflict occurs at stimulus or response level.
 - **Conflict Monitoring/Adaptation:** Mechanisms that detect conflict and adjust control accordingly, as described by [[Theoretical Concepts/Conflict Monitoring Theory]] (e.g., [[Congruency Sequence Effect (CSE)]]).
+- **Inhibitory Control:** The ability to resolve the conflict in these tasks is a hallmark of the executive function of **Inhibition**, a factor robustly identified by [[Miyake et al. (2000)]].
 
 **Relation to other concepts:**
 

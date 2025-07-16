@@ -28,3 +28,7 @@ Refers to experimental situations where participants perform **two distinct task
 - [[Meyer & Kieras (1997a)]] (EPIC/SRD)
 - [[Telford (1931)]] (Early PRP-like findings)
 - [[Koch et al. (2018)]] (Review)
+
+**Relationship to Other Executive Functions**
+
+The ability to coordinate two tasks may rely on a distinct set of executive processes. The foundational work of [[Miyake et al. (2000)]] found that while performance on tasks like WCST and Stroop could be predicted by latent factors of Shifting and Inhibition, performance on a dual-task paradigm was not significantly predicted by any of their three core factors. This suggests that dual-task coordination might be a separate executive function, distinct from those involved in task switching or simple interference resolution.

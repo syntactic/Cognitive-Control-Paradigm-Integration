@@ -23,3 +23,6 @@ This general effect is the core finding in several hallmark paradigms:
 
 ###### Theoretical Importance
 The congruency effect is a direct measure of the failure of selective attention. It demonstrates that task-irrelevant information is often processed automatically to a stage where it can compete with and interfere with the processing of task-relevant information, particularly at the level of [[Theoretical Concepts/Response Selection Bottleneck (RSB)|response selection]]. The magnitude of the effect is often used to probe the efficiency of executive functions like inhibition and conflict monitoring.
+
+#### Theoretical Explanation
+An early and influential explanation for the congruency effect was provided by the two-pathway processing model of [[Kornblum et al. (1990)]]. They proposed that a stimulus with dimensional overlap automatically activates its corresponding response, while a parallel, controlled process identifies the required response based on task rules. The congruency effect is the behavioral cost of detecting and aborting the automatically activated response when it conflicts with the required one.

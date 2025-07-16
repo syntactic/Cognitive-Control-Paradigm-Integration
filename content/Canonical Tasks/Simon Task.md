@@ -42,6 +42,7 @@ The **Simon Effect** refers to the observation that reaction times (RTs) are typ
 
 ###### Theoretical Interpretations:
 
+*   **Dimensional Overlap Model:** In the framework of [[Kornblum et al. (1990)]], the Simon task is a classic "Type 3" ensemble, where the relevant stimulus dimension (e.g., color) has no overlap with the spatial response set, but the irrelevant stimulus dimension (location) does, causing automatic response activation and interference.
 *   **Automatic Response Activation:** The irrelevant spatial location of the stimulus automatically activates a spatially corresponding response code.
 *   **Dual-Route Models / Response Competition:** Information about the relevant feature and the irrelevant spatial location are processed (perhaps in parallel). If the responses primed by these two routes conflict, response selection is delayed due to competition.
 *   **Attentional Shift / Orienting:** The stimulus location might automatically capture attention or trigger an orienting response towards its location, biasing response selection.

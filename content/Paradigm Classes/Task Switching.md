@@ -10,6 +10,7 @@ Refers to experimental situations where participants switch between **two or mor
 - **Switch Cost:** RT/Accuracy is worse on switch trials (Task A -> Task B) compared to repeat trials (Task A -> Task A).
 - **Mixing Cost:** RT/Accuracy on repeat trials is worse than in single-task blocks.
 - **Bivalent Stimul**i: The stimuli used in task-switching experiments are often [[Dimensions/Stimulus Bivalence & Congruency|bivalent]] (e.g., a colored shape affords both a color task and a shape task). This property is a primary source of between-task interference and is thought to be a major contributor to the mixing cost. ([[Rubin & Meiran (2005)]])
+- **Core Executive Function:** The cognitive processes involved in task switching are thought to reflect a core executive function of mental set **Shifting**, as identified in the influential latent variable analysis by [[Miyake et al. (2000)]].
 - **Preparation Effects:** Switch costs are often reduced by providing preparation time ([[CSI (Cue-Stimulus Interval)]]) or predictable sequences.
 - **Residual Switch Cost:** Switch costs often remain even with long preparation time.
 - **Task-Set Inertia / Priming:** Carry-over activation/interference from the previous task set.

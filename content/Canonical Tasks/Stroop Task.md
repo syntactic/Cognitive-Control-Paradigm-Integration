@@ -45,6 +45,7 @@ The **Stroop Effect** is the robust finding that naming the ink color of a color
 
 ###### Theoretical Interpretations:
 
+- **Dimensional Overlap Model:** In the framework of [[Kornblum et al. (1990)]], the classic Stroop task is a **Type 4B ensemble**. This is because both the relevant dimension (ink color) and the irrelevant dimension (word meaning) have dimensional overlap with the response set (spoken color names). This contrasts with a "Neutral Stroop" (e.g., a neutral word like "TABLE" in colored ink), which would be a **Type 2 ensemble**, as the irrelevant word dimension does not have overlap with the response set.
 *   **Speed of Processing Theory:** Word reading is a faster, more automatic process than color naming. The output of the reading process becomes available sooner and interferes with the slower color-naming process.
 *   **Automaticity:** Word reading is a highly automatized skill that is difficult to inhibit once initiated by the presence of a word.
 *   **Parallel Distributed Processing (PDP) / Connectionist Models:** Both word and color pathways are activated in parallel. Stronger connections for the reading pathway lead to its output dominating or creating conflict with the color pathway. (e.g., [[Cohen et al. (1990)]]).
