@@ -43,9 +43,12 @@ def validate_and_log_warnings(df, logger):
         if pd.notna(row.get('Inter-task SOA')) and row.get('Inter-task SOA') != 'N/A' and row.get('Task 2 Response Probability') != 1:
             logger.warning(f"Warning: Inter-task SOA has a value but T2RP is not 1 in experiment {exp_name}.")
 
-        # Heuristic 5: If Distractor SOA has a value, Stimulus Valency should be Bivalent.
-        if pd.notna(row.get('Distractor SOA')) and row.get('Distractor SOA') != 'N/A' and 'Bivalent' not in str(row.get('Stimulus Valency')):
-            logger.warning(f"Warning: Distractor SOA has a value but Stimulus Valency is not Bivalent in experiment {exp_name}.")
+        # Heuristic 5: If Distractor SOA has a value, there must be some form of S-S or S-R conflict defined.
+        if pd.notna(row.get('Distractor SOA')) and row.get('Distractor SOA') != 'N/A':
+            ss_is_na = pd.isna(row.get('Stimulus-Stimulus Congruency')) or row.get('Stimulus-Stimulus Congruency') == 'N/A'
+            sr_is_na = pd.isna(row.get('Stimulus-Response Congruency')) or row.get('Stimulus-Response Congruency') == 'N/A'
+            if ss_is_na and sr_is_na:
+                logger.warning(f"Warning: Distractor SOA has a value but neither S-S nor S-R congruency is defined in experiment {exp_name}.")
 
 
 def clean_rsi(value):
@@ -88,29 +91,36 @@ def classify_paradigm(row):
     if row['Switch Rate'] > 0:
         return 'Task Switching'
 
-    # At this point, we know T2RP == 0 and Switch Rate == 0.
-    # The remaining paradigms are distinguished by stimulus valency.
-
-    # 3. Interference tasks are non-switching, single-response tasks with a bivalent stimulus.
-    if 'Bivalent' in str(row['Stimulus Valency']):
+    # 3. Interference tasks are non-switching, single-response tasks with either S-S or S-R conflict.
+    if (row.get('Stimulus-Stimulus Congruency') != 'N/A' and pd.notna(row.get('Stimulus-Stimulus Congruency'))) or \
+       (row.get('Stimulus-Response Congruency') != 'N/A' and pd.notna(row.get('Stimulus-Response Congruency'))):
         return 'Interference'
 
-    # 4. Pure single-task baselines are non-switching, single-response tasks with a univalent stimulus.
-    if 'Univalent' in str(row['Stimulus Valency']):
-        return 'Single-Task'
+    # 4. Pure single-task baselines are what remains.
+    return 'Single-Task' # Simplified remaining logic
 
-    # 5. 'Other' serves as a fallback for any combinations not explicitly defined.
-    return 'Other'
+def map_ss_congruency(val):
+    """Maps Stimulus-Stimulus Congruency to standardized codes."""
+    val_str = str(val)
+    if val_str == 'Congruent':
+        return 'SS_Congruent'
+    if val_str == 'Incongruent':
+        return 'SS_Incongruent'
+    if val_str == 'Neutral':
+        return 'SS_Neutral'
+    return 'SS_NA'
 
-def map_valency(val):
-    val_str = str(val).lower()
-    if 'univalent' in val_str: return 'SBC_Univalent'
-    # CORRECTED BUG: 'incongruent' should map to Incongruent
-    if 'incongruent' in val_str: return 'SBC_Bivalent_Incongruent'
-    # CORRECTED BUG: 'congruent' should map to Congruent
-    if 'congruent' in val_str: return 'SBC_Bivalent_Congruent'
-    if 'neutral' in val_str: return 'SBC_Bivalent_Neutral'
-    return 'SBC_NA'
+def map_sr_congruency(val):
+    """Maps Stimulus-Response Congruency to standardized codes."""
+    val_str = str(val)
+    if val_str == 'Congruent':
+        return 'SR_Congruent'
+    if val_str == 'Incongruent':
+        return 'SR_Incongruent'
+    if val_str == 'Neutral':
+        return 'SR_Neutral'
+    return 'SR_NA'
+
 
 def map_rso(val):
     val_str = str(val).lower()
@@ -164,6 +174,18 @@ def reverse_map_categories(df):
     df_out = df.copy()
 
     # Define the reverse mappings (the inverse of your 'map_*' functions)
+    ss_congruency_reverse_map = {
+        'SS_Congruent': 'Congruent',
+        'SS_Incongruent': 'Incongruent',
+        'SS_Neutral': 'Neutral',
+        'SS_NA': 'N/A'
+    }
+    sr_congruency_reverse_map = {
+        'SR_Congruent': 'Congruent',
+        'SR_Incongruent': 'Incongruent',
+        'SR_Neutral': 'Neutral',
+        'SR_NA': 'N/A'
+    }
     srm_reverse_map = {
         'SRM_Compatible': 'Compatible',
         'SRM_Incompatible': 'Incompatible',
@@ -175,13 +197,6 @@ def reverse_map_categories(df):
         'SRM2_Incompatible': 'Incompatible',
         'SRM2_Arbitrary': 'Arbitrary',
         'SRM2_NA': 'N/A'
-    }
-    valency_reverse_map = {
-        'SBC_Univalent': 'Univalent',
-        'SBC_Bivalent_Congruent': 'Bivalent-Congruent',
-        'SBC_Bivalent_Incongruent': 'Bivalent-Incongruent',
-        'SBC_Bivalent_Neutral': 'Bivalent-Neutral',
-        'SBC_NA': 'N/A'
     }
     rso_reverse_map = {
         'RSO_Identical': 'Identical',
@@ -206,12 +221,14 @@ def reverse_map_categories(df):
     }
 
     # Apply the reverse mappings
+    if 'Stimulus_Stimulus_Congruency_Mapped' in df_out.columns:
+        df_out['Stimulus-Stimulus Congruency'] = df_out['Stimulus_Stimulus_Congruency_Mapped'].map(ss_congruency_reverse_map)
+    if 'Stimulus_Response_Congruency_Mapped' in df_out.columns:
+        df_out['Stimulus-Response Congruency'] = df_out['Stimulus_Response_Congruency_Mapped'].map(sr_congruency_reverse_map)
     if 'Task_1_Stimulus-Response_Mapping_Mapped' in df_out.columns:
         df_out['Task 1 Stimulus-Response Mapping'] = df_out['Task_1_Stimulus-Response_Mapping_Mapped'].map(srm_reverse_map)
     if 'Task_2_Stimulus-Response_Mapping_Mapped' in df_out.columns:
         df_out['Task 2 Stimulus-Response Mapping'] = df_out['Task_2_Stimulus-Response_Mapping_Mapped'].map(srm2_reverse_map)
-    if 'Stimulus_Valency_Mapped' in df_out.columns:
-        df_out['Stimulus Valency'] = df_out['Stimulus_Valency_Mapped'].map(valency_reverse_map)
     if 'Response_Set_Overlap_Mapped' in df_out.columns:
         df_out['Response Set Overlap'] = df_out['Response_Set_Overlap_Mapped'].map(rso_reverse_map)
     if 'Trial_Transition_Type_Mapped' in df_out.columns:
@@ -340,7 +357,8 @@ def preprocess_for_pca(df_raw):
     df['Task 2 Difficulty Norm'] = df['Task 2 Difficulty Norm'].fillna(0.5)
 
     # --- Step 5: Map Categorical Features ---
-    df['Stimulus_Valency_Mapped'] = df['Stimulus Valency'].apply(map_valency)
+    df['Stimulus_Stimulus_Congruency_Mapped'] = df['Stimulus-Stimulus Congruency'].apply(map_ss_congruency)
+    df['Stimulus_Response_Congruency_Mapped'] = df['Stimulus-Response Congruency'].apply(map_sr_congruency)
     df['Response_Set_Overlap_Mapped'] = df['Response Set Overlap'].apply(map_rso)
     df['Task_1_Stimulus-Response_Mapping_Mapped'] = df['Task 1 Stimulus-Response Mapping'].apply(map_srm)
     df['Task_1_Cue_Type_Mapped'] = df['Task 1 Cue Type'].apply(map_tct)
@@ -357,7 +375,8 @@ def preprocess_for_pca(df_raw):
         'RSI_Is_Predictable'
     ]
     categorical_cols = [
-        'Stimulus_Valency_Mapped', 'Response_Set_Overlap_Mapped',
+        'Stimulus_Stimulus_Congruency_Mapped', 'Stimulus_Response_Congruency_Mapped',
+        'Response_Set_Overlap_Mapped',
         'Task_1_Stimulus-Response_Mapping_Mapped', 'Task_1_Cue_Type_Mapped',
         'Task_2_Stimulus-Response_Mapping_Mapped', 'Task_2_Cue_Type_Mapped',
         'Trial_Transition_Type_Mapped'
