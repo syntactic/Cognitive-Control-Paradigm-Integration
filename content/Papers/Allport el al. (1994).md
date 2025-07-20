@@ -43,7 +43,8 @@ The paper describes a series of experiments using variations of a [[Task Switchi
 *   The authors argue against a unitary, limited-capacity central executive for controlling shifts, as their data show costs are insensitive to manipulations (like task difficulty) that should load such a system.
 
 ### Notes on CSV Coding
-The following experiments were excluding from the mapping to our dimensions
+The following experiments were excluded from the mapping to dimensional framework: 2, 4.
+
 ### Relevance to Thesis & Mapping Notes
 This paper is foundational for the thesis as it establishes one of the major theoretical accounts of task switching.
 
@@ -51,7 +52,7 @@ This paper is foundational for the thesis as it establishes one of the major the
 *   **Dimensional Relevance:**
     *   [[Number of Tasks|Number of Tasks]]: 1
     *   [[Dimensions/Switch Rate|Switch Rate]]: 100% (predictable alternation).
-    *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: The stimuli are bivalent (e.g., a numeral has both value and group size; a colored word has both word and color attributes).
+    *   [[Dimensions/Stimulus-Stimulus Congruency]]: The stimuli are bivalent (e.g., a numeral has both value and group size; a colored word has both word and color attributes).
     *   [[Dimensions/Task Difficulty|Task Difficulty]]: This paper provides a crucial data point where manipulating this dimension had **no effect** on the switch cost.
     *   [[Dimensions/Task Cue Type|Task Cue Type]]: Manipulated between `Implicit` (uniform lists) and stimulus-cued (`Transparent_External` via mixed lists).
     *   [[Dimensions/RSI (Response Stimulus Interval)|RSI]]: Explicitly manipulated in Exp 5. This is a critical parameter, but note the [[Study Limitations|SE Limitation]]: RSI is mapped to `regen` in SE, which is an imperfect proxy.

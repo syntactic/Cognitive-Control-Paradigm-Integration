@@ -27,7 +27,6 @@ Telford conducted three main sets of experiments, all ofwhich can be conceptuali
 *   **Other Derived Dimensions:**
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0 (stimulus is the cue)
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0 (same task repeated)
-    *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]: Univalent
     *   [[Dimensions/Response Set Overlap|Response Set Overlap]]: Identical (same keypress)
     *   [[Dimensions/Task Cue Type|Task Cue Type]]: None/Implicit
 
@@ -39,7 +38,6 @@ Telford conducted three main sets of experiments, all ofwhich can be conceptuali
 *   **Other Derived Dimensions:**
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0
-    *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]: Univalent (the line pair affords the judgment task)
     *   [[Dimensions/Response Set Overlap|Response Set Overlap]]: Identical (same vocal judgment categories)
     *   [[Dimensions/Task Cue Type|Task Cue Type]]: None/Implicit
 
@@ -53,7 +51,6 @@ Telford conducted three main sets of experiments, all ofwhich can be conceptuali
 *   **Other Derived Dimensions:**
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0
-    *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]: Univalent
     *   [[Dimensions/Response Set Overlap|Response Set Overlap]]: Identical (written digit)
     *   [[Dimensions/Task Cue Type|Task Cue Type]]: None/Implicit
 
@@ -92,4 +89,4 @@ Telford conducted three main sets of experiments, all ofwhich can be conceptuali
 *   **Task Definition:** Useful for thinking about how to define an "S-R episode" or "task instance" in sequential performance. Each judgment or association here is treated as such.
 *   **Mapping to Super Experiment:** All three experimental types are fundamentally mappable to SE by using its two task channels to represent S1-R1 and S2-R2, with SOA being the delay between `start_stim1` and `start_stim2` (and their respective cues/go signals). The tasks themselves (auditory RT, line judgment, number association) would be abstractly represented by SE's 'mov'/'or' placeholders, with the *timing* being the crucial aspect mapped.
 *   **Phenomena:** Demonstrates the basic PRP effect on RT, and extends the idea of a "refractory period" to accuracy and response choice, which is conceptually broader than just RT-based bottlenecks.
-*   **Dimensions:** Clearly fits [[Number of Tasks]]=2, variable [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]], [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]=0, [[Dimensions/Switch Rate|Switch Rate]]=0, [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]=Univalent, [[Dimensions/Response Set Overlap|Response Set Overlap]]=Identical, and [[Dimensions/Task Cue Type|Task Cue Type]]=None/Implicit.
+*   **Dimensions:** Clearly fits [[Number of Tasks]]=2, variable [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]], [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]=0, [[Dimensions/Switch Rate|Switch Rate]]=0, [[Dimensions/Response Set Overlap|Response Set Overlap]]=Identical, and [[Dimensions/Task Cue Type|Task Cue Type]]=None/Implicit.

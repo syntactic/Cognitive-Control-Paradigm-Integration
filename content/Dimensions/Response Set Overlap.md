@@ -16,7 +16,7 @@ Definition: Describes the relationship between the sets of possible motor respon
 
 **Relevance to Design Space:**
 
-- Crucial for determining the potential for **response-level conflict or facilitation** when [[Stimulus Bivalence & Congruency|bivalent stimuli]] are processed. Congruency effects are typically strongest with Identical or Overlapping response sets.
+- Crucial for determining the potential for **response-level conflict or facilitation** when stimuli that are bivalent due to [[Dimensions/Stimulus-Stimulus Congruency|S-S conflict]] or [[Dimensions/Stimulus-Response Congruency|S-R conflict]] are processed. Congruency effects are typically strongest with Identical or Overlapping response sets.
 - Can modulate the magnitude of [[PRP Effect]] and [[Switch Cost]].
 - [[Yeung & Monsell (2003)]] showed that manipulating response set overlap (making them disjoint) reversed the asymmetry of switch costs.
 - Studies on ideomotor compatibility in [[Dual-Task Performance & PRP|PRP]] often rely on disjoint modalities (e.g., manual vs. vocal).

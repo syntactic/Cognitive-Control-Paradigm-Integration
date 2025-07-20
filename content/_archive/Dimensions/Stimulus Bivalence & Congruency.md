@@ -3,6 +3,7 @@ tags:
   - dimension
   - stimulus_property
 ---
+NOTE: This dimension is being phased out in favor of the more granular [[Stimulus-Stimulus Congruency]] and [[Stimulus-Response Congruency]].
 Definition: Describes the **relational property between a stimulus and the set of tasks currently active in an experimental block.** A stimulus is bivalent if it possesses features or affords operations that are relevant to **more than one** of the active task-sets. This property is the source of task ambiguity and is fundamental to creating cognitive conflict.
 
 The theoretical basis for bivalence is rooted in the concept of "Dimensional Overlap" proposed by [[Kornblum et al. (1990)]]. They argued that a stimulus creates the potential for conflict when its representational dimensions overlap with the dimensions of the response set, which is the precondition for what we term bivalence.

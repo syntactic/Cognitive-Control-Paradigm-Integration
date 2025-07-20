@@ -22,7 +22,8 @@ This approach builds on early theoretical work, such as the "Dimensional Overlap
 - [[Inter-task SOA (Stimulus Onset Asynchrony)]]
 - [[CSI (Cue-Stimulus Interval)]]
 - [[Switch Cost]]
-- [[Stimulus Bivalence & Congruency]]
+- [[Dimensions/Stimulus-Stimulus Congruency]]
+- [[Dimensions/Stimulus-Response Congruency]]
 - [[Response Set Overlap]]
 - [[Task Cue Type]]
 - (Initially considered, likely excluded) Cue Validity

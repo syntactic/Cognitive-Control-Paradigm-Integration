@@ -25,7 +25,7 @@ The **Stroop Effect** is the robust finding that naming the ink color of a color
 
 ###### Key Conditions & How Congruency Arises:
 
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** The stimulus (e.g., "RED" in blue ink) is bivalent because it has two salient dimensions: word meaning and ink color.
+*   **[[Dimensions/Stimulus-Stimulus Congruency]]:** The stimulus (e.g., "RED" in blue ink) is bivalent because it has two salient dimensions: word meaning and ink color.
     *   **Congruent Trials:** The word meaning matches the ink color.
         *   *Example:* Word "BLUE" printed in blue ink. Task: Name ink color (say "blue").
     *   **Incongruent Trials:** The word meaning conflicts with the ink color.
@@ -62,7 +62,7 @@ The **Stroop Effect** is the robust finding that naming the ink color of a color
 ###### Key Parameters for Design Space Mapping:
 
 *   [[Number of Tasks|Number of Tasks]]: 1.
-*   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: Defines congruent/incongruent/neutral conditions.
+*   [[Dimensions/Stimulus-Stimulus Congruency]]: Defines congruent/incongruent/neutral conditions.
 *   Response Modality (vocal, manual).
 *   [[Distractor SOA]]: Typically 0 (or N/A) as word and color are simultaneous attributes of one stimulus.
 *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: Typically 0.

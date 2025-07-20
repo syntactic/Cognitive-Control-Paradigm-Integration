@@ -40,8 +40,8 @@ The authors' main conclusions focused on the clinical populations, suggesting di
 ###### Relevance to Thesis & Mapping Notes
 
 *   **Operationalization of Neutral:** This study provides a clear example of using a visually matched but semantically neutral stimulus (gray cans) as the neutral condition in a pictorial Flanker task.
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** The study clearly operationalizes congruent, incongruent, and neutral conditions, making it a good candidate for coding. The `Bivalent-Neutral (Feature Similar)` classification from [[Eriksen & Eriksen (1974)]] could be argued for, as the gray cans are featurally similar (cans) but lack the specific identity of the target/distractor sets.
-*   **Go/No-Go Component:** The integration of a Go/No-Go logic is a common modification to interference tasks. While our framework focuses on the choice RT aspect, it's important to note this design feature.
+*   **[[Dimensions/Stimulus-Stimulus Congruency]]:** The study clearly operationalizes congruent, incongruent, and neutral conditions, making it a good candidate for coding. The `Bivalent-Neutral (Feature Similar)` classification from [[Eriksen & Eriksen (1974)]] could be argued for, as the gray cans are featurally similar (cans) but lack the specific identity of the target/distractor sets.
+*   **Go/No-Go Component:** The integration of a Go/No-Go logic is a common modification to interference tasks. While the framework focuses on the choice RT aspect, it's important to note this design feature.
 *   **SE Mapping Considerations:**
     *   [[Number of Tasks|Number of Tasks]]: 1.
     *   The core Flanker task (Go trials) can be mapped. The target identity (e.g., soda) would be represented on one SE pathway (e.g., `mov`), and the flanker identity (soda, beer, or gray can) would be on the other pathway (`or`), with [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]=0.

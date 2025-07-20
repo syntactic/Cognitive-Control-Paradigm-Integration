@@ -50,7 +50,7 @@ To test an "intentional approach" to the [[Canonical Tasks/Simon Task|Simon effe
 *   **Neutral Condition:** The use of binaural tones for a neutral condition is a standard and effective method. The fact that the RT pattern (R>1 vs R<1) changes with instruction is a powerful finding.
 *   **SE Mapping Considerations:**
     *   [[Number of Tasks|Number of Tasks]]: 1.
-    *   The core manipulation between groups is not a parameter within a single SE trial but a difference in the *interpretation* of the task, which maps to our `Stimulus Response Mapping` dimension.
+    *   The core manipulation between groups is not a parameter within a single SE trial but a difference in the *interpretation* of the task, which maps to the `Stimulus Response Mapping` dimension.
     *   For SE instantiation, the **physical setup is identical** for the KI-IM and LI-IM groups. The difference lies in what defines "congruent" vs. "incongruent" for analysis.
     *   In SE, the task would be modeled as Target=Tone Pitch, Distractor=Tone Location.
     *   For the KI-IM group (`SRM=Compatible` relative to the keypress), an SE stimulus on the left (`stim_or=left`) is congruent with a left keypress (`keyMap`).

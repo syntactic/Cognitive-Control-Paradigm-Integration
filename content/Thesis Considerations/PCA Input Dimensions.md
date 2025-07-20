@@ -33,9 +33,11 @@ This note lists the features intended for input into the Principal Component Ana
 
 *Note: The `_Mapped` suffix indicates that these are the final categories used by the PCA pipeline after being processed by the mapping functions in `analysis_utils.py`.*
 
-A. **`Stimulus_Valency_Mapped`**: Derived from `Stimulus Valency`. Categories: `SBC_Univalent`, `SBC_Bivalent_Congruent`, `SBC_Bivalent_Incongruent`, `SBC_Bivalent_Neutral`.
+A. **`Stimulus_Stimulus_Congruency_Mapped`**: Derived from `Stimulus-Stimulus Congruency`. Categories: `SS_Congruent`, `SS_Incongruent`, `SS_Neutral`, `SS_NA`.
 
-B. **`Response_Set_Overlap_Mapped`**: Derived from `Response Set Overlap`. Categories: `RSO_Identical`, `RSO_Disjoint`.
+B. **`Stimulus_Response_Congruency_Mapped`**: Derived from `Stimulus-Response Congruency`. Categories: `SR_Congruent`, `SR_Incongruent`, `SR_Neutral`, `SR_NA`.
+
+C. **`Response_Set_Overlap_Mapped`**: Derived from `Response Set Overlap`. Categories: `RSO_Identical`, `RSO_Disjoint`.
     *   Literature Categories (examples): "Identical", "Disjoint - Category (Same Modality)", "Disjoint - Effector (Same Modality)", "Disjoint - Modality (Standard/Non-Standard)", "N/A"
     *   SE-Mappable PCA Categories:
         *  `RSO_SE_Identical` (Maps from Lit: "Identical")

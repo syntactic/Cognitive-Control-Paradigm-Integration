@@ -32,7 +32,7 @@ The paper provides a thorough discussion of the core concepts and effects in the
     *   **Proactive Interference & [[Task-Set Inertia]]:** Discusses the idea that switch costs arise from the passive carry-over of activation from the previous task set, which must be overcome (e.g., [[Allport et al. (1994)]]).
     *   **Asymmetrical Switch Costs:** Reviews the finding that it can be harder to switch to a stronger/dominant task than a weaker one, often attributed to the need to inhibit the stronger task more forcefully.
     *   **Task Inhibition & N-2 Repetition Costs:** Discusses evidence for inhibitory mechanisms from paradigms using three or more tasks, where performance is worse when returning to a recently abandoned task (e.g., ABA sequence vs. CBA).
-    *   **Stimulus-Based Interference:** Emphasizes the role of [[Dimensions/Stimulus Bivalence & Congruency|bivalent stimuli]] in creating interference at both the task-set level and the response level (congruency effects).
+    *   **Stimulus-Based Interference:** Emphasizes the role of [[Dimensions/Stimulus-Stimulus Congruency|bivalent stimuli]] in creating interference at both the task-set level and the response level (congruency effects).
     *   **Response-Based Interference:** Reviews the impact of [[Dimensions/Response Set Overlap|response-set overlap]] (e.g., bivalent vs. univalent responses) and response-repetition effects on task-switching performance.
 
 ### Authors' Main Conclusions
@@ -47,7 +47,7 @@ This paper is a cornerstone resource for this thesis project for several reasons
 *   **Defines Key Dimensions & Phenomena:** The review offers clear definitions and discussions of nearly all the core concepts and [[Derived Dimensions vs. Low-Level Parameters|derived dimensions]] used in this thesis, including:
     *   [[Effects/Switch Cost]], [[Effects/Mixing Cost]], and [[Effects/N-2 Repetition Cost|N-2 Repetition Cost]].
     *   The roles of [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]] and [[Dimensions/RSI (Response Stimulus Interval)|RSI]].
-    *   The importance of [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]].
+    *   The importance of [[Dimensions/Stimulus-Stimulus Congruency]].
     *   The impact of [[Dimensions/Response Set Overlap|Response Set Overlap]].
     *   The influence of [[Dimensions/Task Cue Type|Task Cue Type]] (e.g., transparent vs. arbitrary cues).
 *   **Frames Theoretical Debates:** It clearly outlines the central theoretical tensions in the field (e.g., active reconfiguration vs. passive task-set inertia), which the [[Parametric Design Space|parametric design space]] aims to contextualize.

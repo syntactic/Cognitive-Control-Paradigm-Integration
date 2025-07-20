@@ -56,7 +56,7 @@ To investigate the "paradoxical" asymmetry in [[Effects/Switch Cost|Switch Costs
 **Relevance to Thesis:**
 
 -   **Critical for [[Dimensions/Response Set Overlap|Response Set Overlap]]:** Provides direct empirical evidence on how different degrees and types of response set overlap (identical, category-disjoint, modality-disjoint, fully disjoint) modulate [[Effects/Switch Cost|Switch Costs]] and their asymmetry.
--   **Informs [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Experiment 1, by manipulating the temporal distinctiveness of stimulus attributes, addresses a form of stimulus-level interference that impacts congruency and selection.
+-   **Informs [[Dimensions/Stimulus-Stimulus Congruency]]:** Experiment 1, by manipulating the temporal distinctiveness of stimulus attributes, addresses a form of stimulus-level interference that impacts congruency and selection.
 -   **Nuances Asymmetric Switch Costs:** Moves beyond a simple "stronger task always harder to switch to" by showing this is context-dependent (high interference). This is a key refinement of the Allport et al. (1994) findings.
 -   **Interaction of Factors:** Demonstrates the interplay between task strength, interference levels (due to stimulus and response factors), and control processes in determining switching performance.
 -   **Mapping to Super Experiment:**

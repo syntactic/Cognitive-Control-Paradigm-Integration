@@ -15,7 +15,7 @@
 ## 2. Literature Review
    2.1. [[Interference Control]]
       2.1.1. Canonical Effects & Behavioral Phenomena (e.g., [[Effects/Stroop Effect]])
-      2.1.2. Key Parameters (e.g., [[Dimensions/Stimulus Bivalence & Congruency]])
+      2.1.2. Key Parameters (e.g., [[Dimensions/Stimulus-Stimulus Congruency]], [[Dimensions/Stimulus-Response Congruency]])
    2.2. [[Task Switching]]
       2.2.1. Canonical Effects & Behavioral Phenomena (e.g., [[Effects/Switch Cost]], [[Effects/Mixing Cost]], [[Effects/N-2 Repetition Cost|N-2 Repetition Cost]])
       2.2.2. Key Parameters (e.g., [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]], [[Dimensions/Switch Rate|Switch Rate]], [[Dimensions/Task Cue Type|Task Cue Type]], [[Dimensions/Response Set Overlap|Response Set Overlap]])
@@ -34,10 +34,11 @@
       3.2.2. [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]] (and its dual meaning)
       3.2.3. [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]
       3.2.4. [[Dimensions/Task Cue Type|Task Cue Type]]
-      3.2.5. [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]
-      3.2.6. [[Dimensions/Response Set Overlap|Response Set Overlap]]
-      3.2.7. [[Dimensions/Switch Rate|Switch Rate]]
-      3.2.8. (Potentially: Task Difficulty)
+      3.2.5. [[Dimensions/Stimulus-Stimulus Congruency]]
+      3.2.6. [[Dimensions/Stimulus-Response Congruency]]
+      3.2.7. [[Dimensions/Response Set Overlap|Response Set Overlap]]
+      3.2.8. [[Dimensions/Switch Rate|Switch Rate]]
+      3.2.9. (Potentially: Task Difficulty)
    3.3. [[Literature Mapping Process|Literature Coding Procedure]]
       3.3.1. Criteria for study inclusion/exclusion
       3.3.2. Process for translating from derived dimensions to SE low-level parameters (for PCA dataset)

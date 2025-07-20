@@ -36,11 +36,11 @@ This is a theoretical and computational modeling paper, not a primary empirical 
 
 ### Relevance to Thesis & Mapping Notes
 
-This paper is a cornerstone theoretical text for the entire thesis project. It provides a candidate *mechanism* that underlies the behavioral phenomena our [[Parametric Design Space]] aims to map.
+This paper is a cornerstone theoretical text for the entire thesis project. It provides a candidate *mechanism* that underlies the behavioral phenomena the [[Parametric Design Space]] aims to map.
 
 *   **Bridging Paradigms:** It is a perfect example of a "Bridge Builder" paper. It explicitly connects [[Paradigm Classes/Interference Control]] (Stroop, Flanker) and the dynamics of [[Paradigm Classes/Task Switching]] (sequential adjustments) through the shared concept of [[Theoretical Concepts/Crosstalk|Crosstalk]] being the primary driver of conflict. It complements the structural [[Theoretical Concepts/Bottleneck Theories|Bottleneck Theory]] of [[Dual-Task Performance & PRP|PRP]] by proposing a mechanism for dynamically managing the interference that bottlenecks can cause.
 
 *   **Dimensional Relevance:**
-    *   **[[Dimensions/Stimulus Bivalence & Congruency]]:** The theory provides a mechanistic basis for *why* this dimension is critical. `Bivalent-Incongruent` stimuli are the primary drivers of the conflict that the monitor detects.
-    *   **[[Dimensions/Trial Transition Type]]:** By modeling the Gratton et al. (1992) results, the paper explains *how* trial history modulates control. The conflict on trial N-1 sets the control level for trial N, providing a mechanism for the effects captured by our `Trial Transition Type` dimension.
+    *   **[[Dimensions/Stimulus-Stimulus Congruency]]:** The theory provides a mechanistic basis for *why* this dimension is critical. `Bivalent-Incongruent` stimuli are the primary drivers of the conflict that the monitor detects.
+    *   **[[Dimensions/Trial Transition Type]]:** By modeling the Gratton et al. (1992) results, the paper explains *how* trial history modulates control. The conflict on trial N-1 sets the control level for trial N, providing a mechanism for the effects captured by the `Trial Transition Type` dimension.
     *   **[[Dimensions/Task Difficulty|Task Difficulty]]:** The theory helps re-frame "difficulty." It suggests that many 'difficult' tasks are difficult precisely *because* they induce high conflict, providing a more specific mechanism than a

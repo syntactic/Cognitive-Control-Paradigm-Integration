@@ -51,7 +51,7 @@ Eriksen & Eriksen (1974) investigated the impact of flanking "noise" letters on 
 ###### Relevance to Thesis & Mapping Notes
 
 *   **Foundational Study:** Establishes key characteristics of the flanker effect and the impact of flanker-target spacing and response compatibility.
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Provides clear operationalizations of congruent, incongruent, and different types of neutral flanker conditions.
+*   **[[Dimensions/Stimulus-Stimulus Congruency]]:** Provides clear operationalizations of congruent, incongruent, and different types of neutral flanker conditions.
 *   **Parameter for Spacing:** Systematically varied letter spacing, a critical physical parameter.
 *   **Neutral Condition Varieties:** The "Heterogeneous-Similar" and "-Dissimilar" conditions exemplify early attempts to create neutral flankers based on feature overlap, distinct from simple unrelated symbols.
 *   **SE Mapping Considerations:**

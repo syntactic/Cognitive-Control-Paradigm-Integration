@@ -14,7 +14,7 @@ Refers to the ability to focus on task-relevant information and suppress or igno
 **Key Concepts/Effects:**
 
 - **Congruency Effect:** RT/Accuracy difference between incongruent and congruent/neutral trials.
-- [[Stimulus Bivalence & Congruency]]: The dimension defining the conflict.
+- [[Dimensions/Stimulus-Stimulus Congruency]] and [[Dimensions/Stimulus-Response Congruency]]: These dimensions define the source of conflict.
 - [[Response Set Overlap]]: Can determine if conflict occurs at stimulus or response level.
 - **Conflict Monitoring/Adaptation:** Mechanisms that detect conflict and adjust control accordingly, as described by [[Theoretical Concepts/Conflict Monitoring Theory]] (e.g., [[Congruency Sequence Effect (CSE)]]).
 - **Inhibitory Control:** The ability to resolve the conflict in these tasks is a hallmark of the executive function of **Inhibition**, a factor robustly identified by [[Miyake et al. (2000)]].
@@ -22,5 +22,5 @@ Refers to the ability to focus on task-relevant information and suppress or igno
 **Relation to other concepts:**
 
 - Relevant in [[Dual-Task Performance & PRP|Dual Task]] when tasks might interfere.
-- Relevant in [[Task Switching]] when stimuli are [[Stimulus Bivalence & Congruency|bivalent]].
+- Relevant in [[Task Switching]] when stimuli create [[Dimensions/Stimulus-Stimulus Congruency|S-S conflict]].
 - Probes selective [[Attention]].

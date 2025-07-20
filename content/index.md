@@ -32,7 +32,8 @@ The parametric space is defined by a set of core experimental dimensions. Unders
     *   `[[Switch Rate]]` & `[[Trial Transition Type]]`: Parameters that define the dynamics of task-switching.
 
 *   **Stimulus & Task Properties:**
-    *   `[[Stimulus Bivalence & Congruency]]`: The source of conflict in interference tasks.
+    *   `[[Dimensions/Stimulus-Stimulus Congruency]]`: The source of Stroop-like conflict.
+    *   `[[Dimensions/Stimulus-Response Congruency]]`: The source of Simon-like conflict.
     *   `[[Task Cue Type]]`: The nature of the information given to the participant.
     *   `[[Task Difficulty]]`: An abstraction of the cognitive load of a task.
 

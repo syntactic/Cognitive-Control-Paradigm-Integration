@@ -28,7 +28,7 @@ The theory can be understood as a four-stage process:
 The theory is powerful because it identifies a common source of conflict across multiple paradigm classes:
 
 *   **Response Override ([[Paradigm Classes/Interference Control|Interference Control]]):** In tasks like [[Canonical Tasks/Stroop Task|Stroop]] or [[Canonical Tasks/Flanker Task|Flanker]], conflict arises when an incongruent distractor (e.g., the word "RED") activates a response pathway that competes with the one activated by the target (e.g., the ink color blue).
-*   **Underdetermined Responding ([[Paradigm Classes/Task Switching|Task Switching]]):** In tasks with [[Dimensions/Stimulus Bivalence & Congruency|bivalent stimuli]] (e.g., a colored letter), the stimulus itself affords processing by multiple task-sets (the Color task and the Letter task), creating conflict between them.
+*   **Underdetermined Responding ([[Paradigm Classes/Task Switching|Task Switching]]):** In tasks with stimuli that are bivalent due to [[Dimensions/Stimulus-Stimulus Congruency|S-S conflict]] (e.g., a colored letter), the stimulus itself affords processing by multiple task-sets (the Color task and the Letter task), creating conflict between them.
 *   **Error Commission:** The theory proposes that errors often occur when conflict is high and an incorrect response is prematurely executed. However, the correct response pathway often becomes active shortly after, leading to a transient period of high conflict between the executed (wrong) and intended (right) actions. This explains the error-related negativity (ERN) signal observed in ERP studies.
 
 ### Relationship to Other Concepts & Paradigms
@@ -39,8 +39,8 @@ The theory is powerful because it identifies a common source of conflict across 
 
 ### Relevance to the Thesis & Parametric Design Space
 
-This theory provides a crucial conceptual link between our high-level dimensions and the cognitive processes they engage. It is not a point *in* our space, but a theory *about* the space's structure.
+This theory provides a crucial conceptual link between the high-level dimensions and the cognitive processes they engage. It is not a point *in* the space, but a theory *about* the space's structure.
 
-1.  **Justifies Dimensional Importance:** It explains *why* the [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] dimension is so fundamental. The difference between `Univalent`, `Bivalent-Neutral`, `Bivalent-Congruent`, and `Bivalent-Incongruent` conditions directly maps onto a parametric manipulation of the amount of conflict generated.
-2.  **Provides Interpretive Power:** The theory helps us interpret the results of our analysis. If a principal component in our PCA is heavily loaded by features related to incongruency, we can label this as a "Conflict Axis." This bridges our quantitative analysis back to a core cognitive function.
-3.  **Frames the Transitions:** It helps explain what happens at the boundaries of our paradigm classes. The need to resolve conflict is a common thread running through Interference, Task Switching, and even Dual-Task paradigms, and this theory provides a single mechanism for how control is allocated in all three.
+1.  **Justifies Dimensional Importance:** It explains *why* dimensions related to conflict, like [[Dimensions/Stimulus-Stimulus Congruency]] and [[Dimensions/Stimulus-Response Congruency]], are so fundamental. The difference between `N/A`, `Neutral`, `Congruent`, and `Incongruent` conditions directly maps onto a parametric manipulation of the amount of conflict generated.
+2.  **Provides Interpretive Power:** The theory helps us interpret the results of the analysis. If a principal component in the PCA is heavily loaded by features related to incongruency, we can label this as a "Conflict Axis." This bridges the quantitative analysis back to a core cognitive function.
+3.  **Frames the Transitions:** It helps explain what happens at the boundaries of the paradigm classes. The need to resolve conflict is a common thread running through Interference, Task Switching, and even Dual-Task paradigms, and this theory provides a single mechanism for how control is allocated in all three.

@@ -12,7 +12,7 @@ Definition: A performance decrement (typically slower reaction times and/or incr
 
 - Observed in [[Task Switching]] paradigms.
 - Suggests that maintaining multiple task sets in an active or readily accessible state incurs a general cost, even when not actually switching.
-- Strongly influenced by [[Stimulus Bivalence & Congruency|stimulus bivalence]]; often larger with bivalent stimuli (e.g., [[Rubin & Meiran (2005)]]).
+- Strongly influenced by [[Dimensions/Stimulus-Stimulus Congruency|stimulus bivalence]]; often larger with bivalent stimuli (e.g., [[Rubin & Meiran (2005)]]).
 
 **Theoretical Explanations:**
 

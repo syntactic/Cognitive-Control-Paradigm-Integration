@@ -86,7 +86,7 @@ Jersild employed a variety of tasks, typically comparing performance when tasks 
 *   **Historical Importance:** An early, comprehensive study of task switching phenomena, predating much of the modern terminology but covering many core concepts.
 *   **[[Dimensions/Switch Rate|Switch Rate]]:** All his "shift" conditions involve a 100% switch rate (alternating on every item or every other item).
 *   **[[Number of Tasks|Number of Tasks]]:** All experiments are Number of Tasks=1 per response, but the "pool" of tasks being alternated varies (2 to 4).
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Highly relevant in the Form Naming & Substitution task (same stimulus, two different task rules/responses). Also implicitly present in calculation tasks where a number like '64' could be subject to 'add digits' or 'multiply digits'.
+*   **[[Dimensions/Stimulus-Stimulus Congruency]]:** Highly relevant in the Form Naming & Substitution task (same stimulus, two different task rules/responses). Also implicitly present in calculation tasks where a number like '64' could be subject to 'add digits' or 'multiply digits'.
 *   **[[Dimensions/Response Set Overlap|Response Set Overlap]]:** Varied implicitly. E.g., Calculation tasks often use the same output modality (written numbers). Form Naming vs. Substitution involves different response *types* to the same stimulus.
 *   **[[Dimensions/Task Cue Type|Task Cue Type]]:** Implicit (determined by alternating sequence).
 *   **Task Difficulty:** Jersild's finding that easier tasks can show greater *relative* shift loss is an important and counterintuitive point that theories of practice and automaticity must address.

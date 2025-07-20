@@ -12,7 +12,7 @@ To investigate the nature of the [[Switch Cost]] in predictable [[Task Switching
 1. **Response-Stimulus Interval (RSI):** Varied the time between the response on trial N-1 and the stimulus on trial N.
     - Exp 2: Random RSI (150-1200ms).
     - Exp 3 & 4: Constant RSI within blocks (varied between blocks: 150, 300, 450, 600, 1200ms).
-2. **Stimulus Irrelevant Character Type (Exp 5):** Compared trials where the irrelevant character was associated with the competing task set (e.g., digit '7' on a letter trial for 'G7' - [[Stimulus Bivalence & Congruency|Bivalent-Congruent/Incongruent]]) vs. where it was a neutral symbol '#' ([[Stimulus Bivalence & Congruency|Bivalent-Neutral]]).
+2. **Stimulus Irrelevant Character Type (Exp 5):** Compared trials where the irrelevant character was associated with the competing task set (e.g., digit '7' on a letter trial for 'G7' - [[Dimensions/Stimulus-Stimulus Congruency|Congruent/Incongruent]]) vs. where it was a neutral symbol '#' ([[Dimensions/Stimulus-Stimulus Congruency|Neutral]]).
 3. **Run Length (Exp 6):** Compared AABB sequence with AAAABBBB sequence.
 
 **Key Findings:**
@@ -35,5 +35,5 @@ To investigate the nature of the [[Switch Cost]] in predictable [[Task Switching
 **Relevance to Thesis:**
 
 - **Foundational TS Paper:** Establishes the alternating runs paradigm and the key finding of reducible but persistent (residual) switch costs with preparation time (RSI).
-- **Dimensions:** Directly informs [[Switch Rate]] (predictable alternation), [[Stimulus Bivalence & Congruency]] (via Exp 5), [[Response Set Overlap]] (Identical), [[Task Cue Type]] (Implicit), and the effect of preparation time (RSI, analogous to [[CSI (Cue-Stimulus Interval)|CSI]]).
+- **Dimensions:** Directly informs [[Switch Rate]] (predictable alternation), [[Dimensions/Stimulus-Stimulus Congruency]] (via Exp 5), [[Response Set Overlap]] (Identical), [[Task Cue Type]] (Implicit), and the effect of preparation time (RSI, analogous to [[CSI (Cue-Stimulus Interval)|CSI]]).
 - **Theoretical Importance:** Provides strong evidence against models where switch costs are solely due to a fully endogenous preparation process that can be completed given sufficient time. Highlights the role of stimulus-driven effects and/or persistent interference ([[Task-Set Inertia]]). Key paper for contrasting [[Task-Set Reconfiguration]] and [[Task-Set Inertia]] accounts. The concept of a mandatory, stimulus-driven component for the residual switch cost is challenged by alternative accounts, such as the "Failure-to-Engage" model proposed by [[De Jong (2000)]].

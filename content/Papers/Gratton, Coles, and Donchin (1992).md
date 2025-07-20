@@ -44,7 +44,7 @@ The study used three different methods across its experiments to manipulate the 
 ### Relevance to Thesis & Mapping Notes
 *   **Paradigm Type:** This is a classic [[Paradigm Classes/Interference Control|Interference Control]] paradigm, specifically a Flanker task.
 *   **Dimensional Relevance:**
-    *   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** The core manipulation is between `Bivalent-Congruent` (compatible) and `Bivalent-Incongruent` (incompatible) conditions.
+    *   **[[Dimensions/Stimulus-Stimulus Congruency]]:** The core manipulation is between `Congruent` (compatible) and `Incongruent` (incompatible) conditions.
     *   **[[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]:** Experiment 3 provides a clear example of using a long CSI (1500ms) to study preparatory effects.
     *   **[[Dimensions/Task Cue Type|Task Cue Type]]:** Experiment 3 uses an `Arbitrary` symbolic cue.
 *   **Theoretical Importance:** This paper is crucial because it demonstrates that the magnitude of a "bottom-up" interference effect can be modulated by "top-down" strategic control. It highlights the dynamic and adaptive nature of [[Cognitive Control]].

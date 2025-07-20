@@ -10,7 +10,7 @@ aliases:
 ###### Definition
 **Stimulus Response Mapping (SRM)** refers to the specific rule set that dictates how a given stimulus (or a feature of it) should be translated into a particular response. This dimension primarily concerns the *nature* of this instructed S-R relationship, particularly whether it aligns with or opposes pre-existing, "natural," or highly learned tendencies.
 
-While related to [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] (which deals with conflict/alignment *between stimulus features*), SRM focuses on the compatibility of the *overall instructed S-R rule itself*.
+While related to [[Dimensions/Stimulus-Stimulus Congruency|Stimulus-Stimulus Congruency]] (which deals with conflict/alignment *between stimulus features*), SRM focuses on the compatibility of the *overall instructed S-R rule itself*.
 
 ###### Key Values / Categories:
 

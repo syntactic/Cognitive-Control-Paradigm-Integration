@@ -10,7 +10,7 @@ tags:
 
 **Core Goal:**  
 To investigate the origins of the [[Effects/Mixing Cost|Mixing Cost (MC)]] in cued [[Task Switching]] paradigms. Specifically, the paper tests two hypotheses:
-1.  **Task Ambiguity Hypothesis:** MC arises from the need to resolve task ambiguity when stimuli are [[Dimensions/Stimulus Bivalence & Congruency|bivalent]] (i.e., afford responses for multiple tasks) in mixed-task blocks.
+1.  **Task Ambiguity Hypothesis:** MC arises from the need to resolve task ambiguity when stimuli are [[Dimensions/Stimulus-Stimulus Congruency]] (i.e., afford responses for multiple tasks) in mixed-task blocks.
 2.  **Working Memory (WM) Load Hypothesis:** MC arises from the increased load of holding multiple task sets in working memory in mixed-task blocks.
 
 **Paradigm(s) Used:**
@@ -28,7 +28,7 @@ Cued [[Task Switching]] paradigm.
 Compared three groups based on stimulus characteristics:
 1.  **Univalent (Uni) without filtering:** Irrelevant dimension fixed (e.g., for shape task, all stimuli green). No ambiguity, no filtering needed.
 2.  **Univalent plus Filtering (Uni+F):** Irrelevant dimension varied but with values not used in the competing task (e.g., for shape task, stimuli green or yellow; color task used red/blue). No ambiguity, but filtering of irrelevant variation needed.
-3.  **Bivalent plus Filtering (Biv+F):** Irrelevant dimension varied with values used in the competing task (e.g., for shape task, stimuli red or blue; color task also used red/blue). [[Dimensions/Stimulus Bivalence & Congruency|Bivalent stimuli]], filtering needed.
+3.  **Bivalent plus Filtering (Biv+F):** Irrelevant dimension varied with values used in the competing task (e.g., for shape task, stimuli red or blue; color task also used red/blue). [[Dimensions/Stimulus-Stimulus Congruency]], filtering needed.
     - [[Dimensions/Response Set Overlap|Response Set Overlap]]: Disjoint (different keys for shape vs. color responses).
 
 **Experiment 2: WM Load**
@@ -71,7 +71,7 @@ Compared performance in:
 
 **Authors' Main Conclusions/Interpretations:**
 
--   The [[Effects/Mixing Cost|Mixing Cost]] is primarily driven by **task ambiguity** arising from [[Dimensions/Stimulus Bivalence & Congruency|bivalent stimuli]] that activate competing task sets. It reflects the need to resolve this bottom-up interference.
+-   The [[Effects/Mixing Cost|Mixing Cost]] is primarily driven by **task ambiguity** arising from [[Dimensions/Stimulus-Stimulus Congruency]] that activate competing task sets. It reflects the need to resolve this bottom-up interference.
 -   The simple requirement to maintain more S-R rules in WM (WM load) does *not* seem to be the primary source of MC, at least when ambiguity is controlled.
 -   MC and [[Effects/Switch Cost|Switch Cost]] are dissociable: stimulus bivalence strongly affects MC but not necessarily SC (especially with disjoint response sets).
 -   Preparation (long [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]) can reduce, but not always eliminate, the MC associated with bivalent stimuli, by allowing for more effective top-down control to overcome stimulus-driven interference.
@@ -80,18 +80,18 @@ Compared performance in:
 **Relevance to Thesis:**
 
 -   **Crucial for Mixing Cost:** This paper provides a detailed investigation into the [[Effects/Mixing Cost|Mixing Cost]], a key phenomenon in [[Task Switching]].
--   **Highlights Stimulus Bivalence:** Strongly supports the importance of the [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] dimension in generating specific costs (MC).
+-   **Highlights Stimulus Bivalence:** Strongly supports the importance of the [[Dimensions/Stimulus-Stimulus Congruency]] dimension in generating specific costs (MC).
 -   **Dissociates Costs:** Empirically dissociates MC from [[Effects/Switch Cost|Switch Cost]] based on their sensitivity to stimulus bivalence.
 -   **Informs WM Load:** Challenges a simple "number of active task sets in WM" explanation for MC, suggesting the *nature* of the stimuli (bivalent vs. univalent) is more critical.
 -   **Interaction with Preparation:** Shows how [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]] interacts with stimulus bivalence in determining MC.
--   **Mapping:** The conditions (Uni, Uni+F, Biv+F in Exp1; MBC, MWC, AMWBC, UMWBC in Exp2) provide excellent, nuanced points for the [[Parametric Design Space]] map, particularly for [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] and its interaction with the number of tasks held in memory (though the latter seems less impactful on MC here). The explicit use of cues and CSI makes it mappable to Super Experiment's timing parameters.
+-   **Mapping:** The conditions (Uni, Uni+F, Biv+F in Exp1; MBC, MWC, AMWBC, UMWBC in Exp2) provide excellent, nuanced points for the [[Parametric Design Space]] map, particularly for [[Dimensions/Stimulus-Stimulus Congruency]] and its interaction with the number of tasks held in memory (though the latter seems less impactful on MC here). The explicit use of cues and CSI makes it mappable to Super Experiment's timing parameters.
 -   The finding that bivalence did not affect SC with disjoint response sets is an important detail when considering [[Dimensions/Response Set Overlap]].
 
 ### Coding & Mapping Notes
  
- A key methodological decision for this paper is how to handle the different stimulus valency conditions within pure vs. mixed blocks.
+ A key methodological decision for this paper is how to handle the different Stimulus-Stimulus Congruency conditions within pure vs. mixed blocks.
  
  - **Pure Blocks:** The concept of stimulus-response congruency is not meaningful within a pure block, as only one task set is intentionally active. Therefore, the pure blocks for all three groups (Uni NoFilt, Uni+F, and Biv+F) should each be coded as a **single row per CSI condition**.
-     - For the Biv+F group, the pure block should be coded with Stimulus Valency: Bivalent-neutral. This captures that a competing task set is afforded by the stimulus, but there is no specific response conflict to measure.
+     - For the Biv+F group, the pure block should be coded with Stimulus-Stimulus Congruency: Bivalent-neutral. This captures that a competing task set is afforded by the stimulus, but there is no specific response conflict to measure.
   - **Mixed Blocks:** In the mixed blocks, both task sets are active, so S-R congruency effects are a primary variable. For the Biv+F group, it is correct to have separate rows for Switch-Congruent, Switch-Incongruent, Repeat-Congruent, and Repeat-Incongruent trials, as these represent distinct experimental conditions.
 >

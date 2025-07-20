@@ -6,7 +6,7 @@ To provide strong evidence for an active, time-consuming process of task-set rec
 - **Explicit Task-Cuing Paradigm:** Participants switched between two spatial judgment tasks (Up/Down vs. Left/Right) based on an explicit cue (arrow direction) presented before the target stimulus (a dot in one of four locations).
 - [[Number of Tasks|Number of Tasks=1]] per trial, [[Switch Rate]] typically 50% (random cuing).
 - [[Response Set Overlap]] = Identical (Left/Right keypresses for both tasks).
-- [[Stimulus Bivalence & Congruency|Stimulus Bivalence]] = Bivalent-Neutral (Target location affords judgments on both dimensions).
+- [[Dimensions/Stimulus-Stimulus Congruency]] = Bivalent-Neutral (Target location affords judgments on both dimensions).
 - [[Task Cue Type]] = Arbitrary (arrow direction maps to spatial judgment axis).
 
 **Key Manipulations:**
@@ -29,11 +29,17 @@ To provide strong evidence for an active, time-consuming process of task-set rec
 - This reconfiguration process cannot typically be fully completed before stimulus onset, resulting in a **residual switch cost**. This residual component might reflect stimulus-triggered completion of reconfiguration or potentially [[Task-Set Inertia]].
 - The task-cuing paradigm successfully isolates preparatory reconfiguration effects from simple stimulus/response priming or passive decay effects (when RCI is controlled or accounted for).
 
-**Relevance to Thesis:**
+### Relevance to Thesis
 
-- **Methodological Importance:** Introduces the explicit **task-cuing paradigm with variable CSI** as a primary tool for studying preparation effects in task switching, contrasting with the alternating runs/RSI manipulation in [[Rogers & Monsell (1995)]].
-- **Dimensional Relevance:** Directly informs the [[CSI (Cue-Stimulus Interval)]] dimension and its impact on [[Switch Cost]]. Also relevant to [[Number of Tasks]], [[Switch Rate]] (typically 50% random), [[Stimulus Bivalence & Congruency]] (uses bivalent), [[Response Set Overlap]] (uses identical), and [[Task Cue Type]] (uses arbitrary).
-- **Theoretical Importance:** Provides strong evidence for **active preparation (reconfiguration)** in task switching. Reinforces the concept of a **residual switch cost** that preparation time alone cannot eliminate, a key phenomenon the theoretical map needs to accommodate. Sets the stage for debates about the nature of this residual cost (incomplete endogenous reconfiguration vs. stimulus-driven completion vs. inertia).
+This is a foundational paper for the [[Paradigm Classes/Task Switching]] domain, as it introduces the explicit **task-cuing paradigm** and provides some of the cleanest evidence for an active, preparatory **[[Theoretical Concepts/Task-Set Reconfiguration|Task-Set Reconfiguration]]** process by manipulating the [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]].
+
+**A Key Case Study for Conflict Dimensions:** This paper is a particularly valuable test case for the orthogonal conflict dimensions, as it unintentionally instantiates different types of conflict across its experiments:
+
+- **Exp 1 & 2 (Spatial Tasks):** These experiments involve two distinct sources of conflict. The first is **[[Dimensions/Stimulus-Stimulus Congruency|S-S Congruency]]**, arising because the bivalent stimulus (a dot in a quadrant) affords two competing task rules (Up/Down vs. Left/Right) that can map to the same or different responses. The second is **[[Dimensions/Stimulus-Response Congruency|S-R Congruency]]**, arising because the irrelevant spatial location of the stimulus can correspond to the physical location of the response key. As Meiran himself notes (p. 1427), these two forms of conflict were **perfectly confounded** in his design. The coding in super_experiment_design_space.csv reflects this by assigning identical values to both S-S Congruency and S-R Congruency for these conditions.
+- **Exp 5 (Object Tasks):** This experiment successfully isolates **pure [[Dimensions/Stimulus-Stimulus Congruency|S-S Congruency]]**. By switching between non-spatial color and shape tasks, the conflict is entirely about the competing semantic interpretations of the bivalent stimulus. There is no irrelevant spatial feature to prime a response, so S-R Congruency is correctly coded as N/A.
+- **Dimensional Mapping Summary:**
+    - [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: The primary manipulated variable.
+    - [[Dimensions/Trial Transition Type|Trial Transition Type]]: Switch vs. Repeat.
+    - [[Dimensions/Stimulus Response Mapping|Stimulus Response Mapping]]: Arbitrary for all tasks, as the mappings (e.g., Up -> Key 7) are learned.
 **Exclusions**:
-- Meiran 1996's experiments manipulated not involved having bivalent stimuli in the tasks being switched, but also compatible and incompatible stimulus response mappings. This means that there were trial types where the participant saw a stimulus in the lower left quadrant or upper right quadrant and had to press a key that was incompatible with the spatial location of the stimulus. For example, in the up-down task, if the participant saw the stimulus in the lower left, they might have to press '7' (compatible with up and left and incompatible with down and right). Right now the Meiran experiments are all coded as having arbitrary SRM but ideally they would all be coded with more fidelity. This compatibility was expressly manipulated in experiment 3 and for this reason I have excluded it from the spreadsheet, but in theory we could add it in.
 - Experiment 4 intended to see the effect of practice effects - both the experiment length was longer and the warm-up procedure was emphasized to improve accuracy. Because these are not necessarily manipulations we can make in the SE, I have excluded experiment 4.

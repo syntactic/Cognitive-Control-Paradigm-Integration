@@ -41,7 +41,7 @@ The paper's central arguments are that the neutral condition is more than just a
 ###### Relevance to Thesis & How It Was Used
 
 *   **Literature Identification:** Table 1 was a primary source for identifying empirical studies of Flanker, Stroop, and Simon tasks that included neutral conditions, allowing for a more targeted literature search for the CSV coding.
-*   **Conceptualization of Neutrality:** Deepened the understanding of the neutral condition and its role in dissecting congruency effects, informing the `Stimulus Bivalence & Congruency` dimension.
+*   **Conceptualization of Neutrality:** Deepened the understanding of the neutral condition and its role in dissecting congruency effects, informing the `[[Dimensions/Stimulus-Stimulus Congruency]]` and `[[Dimensions/Stimulus-Response Congruency]]` dimensions.
 *   **R-Value as a Metric:** Introduced the R-value as a useful descriptive metric for quantifying the relative position of the neutral RT, which could be a potential variable to extract or calculate for coded studies.
 *   **Model Evaluation Context:** Provided context on how different conflict models make predictions regarding the neutral condition, which is relevant for the broader theoretical discussion of the [[Parametric Design Space]].
 *   **Highlighting Gaps/Challenges:** Underscored the challenge in consistently defining and modeling "neutral" stimuli and the implications for theoretical accounts of cognitive control.

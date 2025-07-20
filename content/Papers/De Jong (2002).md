@@ -33,20 +33,20 @@ The chapter describes experiments using a classic [[Paradigm Classes/Task Switch
 *   **Explicit Cues Prompt Preparation:** The chapter notes that the failure to prepare is more common with implicit cues than with explicit cues, suggesting explicit cues are a more powerful trigger for engaging the intention to prepare.
 
 ### Relevance to Thesis & Mapping Notes
-This chapter is theoretically crucial because it introduces a major alternative explanation for a key phenomenon in task switching, and its methodology provides an excellent test case for our coding framework.
+This chapter is theoretically crucial because it introduces a major alternative explanation for a key phenomenon in task switching, and its methodology provides an excellent test case for the coding framework.
 
-*   **A Third Major Theory:** This paper establishes the **Failure-to-Engage (FTE) hypothesis** as a distinct account of the residual switch cost. This refines the central debate in our framework, which is currently dominated by the tension between incomplete [[Theoretical Concepts/Task-Set Reconfiguration|Task-Set Reconfiguration]] ([[Rogers & Monsell (1995)]]) and persistent [[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia]] ([[Allport el al. (1994)]]). Our notes on these concepts must be updated to reflect this third, strategic viewpoint.
+*   **A Third Major Theory:** This paper establishes the **Failure-to-Engage (FTE) hypothesis** as a distinct account of the residual switch cost. This refines the central debate in the framework, which is currently dominated by the tension between incomplete [[Theoretical Concepts/Task-Set Reconfiguration|Task-Set Reconfiguration]] ([[Rogers & Monsell (1995)]]) and persistent [[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia]] ([[Allport el al. (1994)]]). The notes on these concepts must be updated to reflect this third, strategic viewpoint.
 
 *   **Dimensional Relevance & Validation:**
-    *   `[[Dimensions/RSI Is Predictable]]`: This paper's use of an *unpredictable* RSI provides the perfect counterpoint to the predictable RSI in [[Rogers & Monsell (1995)]]. It empirically validates our decision to include `RSI Is Predictable` as a critical binary dimension, as it's central to testing theories of preparation.
+    *   `[[Dimensions/RSI Is Predictable]]`: This paper's use of an *unpredictable* RSI provides the perfect counterpoint to the predictable RSI in [[Rogers & Monsell (1995)]]. It empirically validates the decision to include `RSI Is Predictable` as a critical binary dimension, as it's central to testing theories of preparation.
     *   `[[Dimensions/RSI (Response Stimulus Interval)|RSI]]`: Serves as the primary manipulated preparation interval.
     *   `[[Dimensions/Trial Transition Type|Trial Transition Type]]`: Clearly maps `Switch`, `Repeat` ("nonswitch"), and `Pure` trials.
     *   `[[Dimensions/Task Cue Type|Task Cue Type]]`: The AABB sequence is a classic example of an `Implicit` cue.
 
 *   **Mapping to Super Experiment & Overrides:**
-    *   The paradigm is highly mappable. The random RSI manipulation is a perfect application of our JSON override system. For example, for Exp 1 in the chapter, the main `RSI` column would contain the mean (717ms), while the `Super_Experiment_Mapping_Notes` column would contain: `{"RSI_distribution": "choice", "RSI_values": [150, 600, 1500]}`.
+    *   The paradigm is highly mappable. The random RSI manipulation is a perfect application of the JSON override system. For example, for Exp 1 in the chapter, the main `RSI` column would contain the mean (717ms), while the `Super_Experiment_Mapping_Notes` column would contain: `{"RSI_distribution": "choice", "RSI_values": [150, 600, 1500]}`.
     *   The AABB sequence is also handled by an override: `{"sequence_type": "AABB"}`. This ensures the viewer can simulate the experiment faithfully while the derived `Switch Rate` of 33% is used for PCA.
 
 *   **Framework Limitations:**
-    *   De Jong's "Block Length" manipulation probes strategic effort/pacing, a factor our current dimensional space does not explicitly capture. While we can code the short- and long-block conditions as separate rows, our framework doesn't have a parameter for "Strategic Pacing."
-    *   The reliance on CDF and mixture model analysis highlights a difference in analytical approach. Our project maps the *design space*, while De Jong models the *behavioral output*. This is not a contradiction, but a complementary perspective.
+    *   De Jong's "Block Length" manipulation probes strategic effort/pacing, a factor the current dimensional space does not explicitly capture. While we can code the short- and long-block conditions as separate rows, the framework doesn't have a parameter for "Strategic Pacing."
+    *   The reliance on CDF and mixture model analysis highlights a difference in analytical approach. The project maps the *design space*, while De Jong models the *behavioral output*. This is not a contradiction, but a complementary perspective.

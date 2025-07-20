@@ -61,7 +61,7 @@ The decision to simplify a dimension at Level 2, or to add a new granular dimens
         - **Example:** The SRM of Task 1 can be different from Task 2 (e.g., [[McCann & Johnston (1992)]]). SE can implement this with independent keyMap configurations. **Therefore, separate SRM_Task1 and SRM_Task2 features are maintained for the PCA.**
     - **If NO (Simplify/Collapse Categories):** If multiple conceptual categories all map to the same SE implementation, they must be collapsed into a single category for the PCA. To do otherwise would create illusory dimensions of variance that are not operationally real within this project's framework.
         - **Example 1:** The distinction between Disjoint - Modality (Vocal vs. Manual) and Disjoint - Effector (Left vs. Right Hand) cannot be implemented in the keypress-only SE framework. Both map to "different sets of keys." **Therefore, they are collapsed into a single RSO_Disjoint category during analytical processing (analysis_utils.py).**
-        - **Example 2:** The fine-grained neutral flanker conditions of [[Eriksen & Eriksen (1974)]] (Feature Similar vs. Feature Dissimilar) are recorded faithfully in the source CSV (Level 1). However, because SE does not model abstract feature similarity, these are **collapsed into a single SBC_Bivalent_Neutral category for the PCA (Level 2).**
+        - **Example 2:** The fine-grained neutral flanker conditions of [[Eriksen & Eriksen (1974)]] (Feature Similar vs. Feature Dissimilar) are recorded faithfully in the source CSV (Level 1). However, because SE does not model abstract feature similarity, these are **collapsed into a single SS_Neutral category for the PCA (Level 2).**
 
 By rigorously applying this three-step rubric, we ensure that the final feature set for the PCA is maximally informative, non-redundant, and operationally sound, providing a solid foundation for analyzing the parametric design space.
 
@@ -79,7 +79,7 @@ For any given experimental condition, begin by analyzing the properties of a sin
 
 **Step B: Assign Dimensional Values Based on Features**
 The answers from Step A directly determine the values in the CSV.
-*   If a stimulus is `Bivalent` and its features are simultaneous, `Stimulus Valency` must be coded as `Bivalent-*` and `Distractor SOA` **must** be coded as `0`. It cannot be `N/A`.
+*   If a stimulus is `Bivalent` and its features are simultaneous, `Stimulus-Stimulus Congruency` or `Stimulus-Response Congruency` must both not be coded as `N/A` (otherwise this would imply it's univalent) and `Distractor SOA` **must** be coded as `0`. It also cannot be `N/A`.
 *   If `Task 2 Response Probability` is `1` and there is a delay between S1 and S2, `Inter-task SOA` **must** have a numerical value.
 *   The high-level "Paradigm" label (e.g., Task Switching, Interference) is a descriptive *output* of this coding process, not an input that constrains it.
 
@@ -92,6 +92,6 @@ Before finalizing the coding for a new, complex paper, it is mandatory to perfor
 If the consistency check reveals a discrepancy, it must be resolved before proceeding. The discrepancy signals one of three possibilities:
 1.  The proposed coding for the new paper is incorrect and must be revised to align with precedent.
 2.  The coding for the older, precedent-setting papers was incorrect and must be revised.
-3.  The new paper introduces a genuinely novel manipulation that our current dimensional framework cannot account for, which may require adding a new dimension or making a note in `[[Study Limitations]]`.
+3.  The new paper introduces a genuinely novel manipulation that the current dimensional framework cannot account for, which may require adding a new dimension or making a note in `[[Study Limitations]]`.
 
 By adhering to this bottom-up workflow, we ensure that the design space is built on a foundation of logically consistent, trial-level features, which is essential for the validity of any subsequent analysis.

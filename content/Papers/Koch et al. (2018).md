@@ -34,7 +34,7 @@ The paper aims to highlight similarities in underlying mechanisms and promote a 
     - Discusses [[Task-Set Reconfiguration]] (active control) versus [[Task-Set Inertia]] (passive carry-over/priming) accounts.
     - Reviews evidence for preparatory effects based on [[CSI (Cue-Stimulus Interval)]] and passive decay based on RSI.
     - Highlights the role of inhibition (n-2 costs/backward inhibition).
-    - Discusses [[Interference Control]] within task switching, particularly [[Stimulus Bivalence & Congruency|task-rule congruency effects]] and the role of [[Response Set Overlap]].
+    - Discusses [[Interference Control]] within task switching, particularly [[Dimensions/Stimulus-Stimulus Congruency|task-rule congruency effects]] and the role of [[Response Set Overlap]].
         
 - **Plasticity Perspective (Practice Effects):**
     
@@ -52,6 +52,6 @@ The paper aims to highlight similarities in underlying mechanisms and promote a 
 
 - **Primary Source:** This paper is a cornerstone reference for understanding the theoretical landscape, key phenomena, and standard methodologies in both dual-task and task-switching research.
 - **Integrative Goal:** Directly supports the thesis goal of bridging these paradigms and mapping the [[Parametric Design Space]].
-- **Dimensional Relevance:** Discusses the impact of many of the identified [[Derived Dimensions vs. Low-Level Parameters|derived dimensions]], including [[Inter-task SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[Stimulus Bivalence & Congruency|Bivalence/Congruency]], [[Response Set Overlap]] (via modality), and practice effects (related to plasticity).
+- **Dimensional Relevance:** Discusses the impact of many of the identified [[Derived Dimensions vs. Low-Level Parameters|derived dimensions]], including [[Inter-task SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[Dimensions/Stimulus-Stimulus Congruency|S-S Congruency]] and [[Dimensions/Stimulus-Response Congruency|S-R Congruency]], [[Response Set Overlap]] (via modality), and practice effects (related to plasticity).
 - **Identifies Key Studies:** Cites many of the foundational and contemporary papers relevant for detailed literature mapping (e.g., Pashler, Meyer & Kieras, Rogers & Monsell, Meiran, Allport, Hommel, Logan, etc.).
 - **Highlights Theoretical Tensions:** Clearly outlines the debates (e.g., serial bottleneck vs. parallel capacity sharing; reconfiguration vs. inertia) that the design space map aims to contextualize.

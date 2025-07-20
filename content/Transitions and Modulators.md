@@ -20,7 +20,7 @@ This transition occurs entirely within the dual-task domain and is governed by t
 ---
 ### Transition 2: From Number of Tasks=2 to Number of Tasks=1 (The Dual-Task to Distractor-Filtering Transition)
 
-This transition represents a fundamental change in the participant's goal set, moving across the boundary of our N_Tasks dimension.
+This transition represents a fundamental change in the participant's goal set, moving across the boundary of the N_Tasks dimension.
 - **Core Change:** Changing the status of the second stimulus (S2) from requiring a response to being irrelevant.
 - **Key Parameter:** This is not a simple numerical parameter like SOA, but a change in the **task rules**, often manipulated via instructions or [[Dimensions/Task Cue Type|Task Cue Type]].
 - **The Continuum:**

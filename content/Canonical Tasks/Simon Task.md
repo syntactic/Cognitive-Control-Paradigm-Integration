@@ -25,7 +25,7 @@ The **Simon Effect** refers to the observation that reaction times (RTs) are typ
 
 *   **Relevant Dimension:** The feature participants must respond to (e.g., respond "blue" to blue stimuli, "red" to red stimuli).
 *   **Irrelevant Dimension:** The spatial location of the stimulus.
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:**
+*   **[[Dimensions/Stimulus-Response Congruency]]:**
     *   **Congruent Trials:** The irrelevant spatial location of the stimulus matches the spatial location of the correct response defined by the relevant feature.
         *   *Example:* Task is "press left key for BLUE stimulus." A blue square appears on the *left* side of the screen. The irrelevant location (left) matches the required response location (left key).
     *   **Incongruent Trials:** The irrelevant spatial location of the stimulus conflicts with the spatial location of the correct response.
@@ -56,7 +56,7 @@ The **Simon Effect** refers to the observation that reaction times (RTs) are typ
 ###### Key Parameters for Design Space Mapping:
 
 *   [[Number of Tasks|Number of Tasks]]: Typically 1.
-*   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]: Crucial for defining congruent/incongruent trials in the classic Simon effect.
+*   [[Dimensions/Stimulus-Response Congruency]]: Crucial for defining congruent/incongruent trials in the classic Simon effect.
 *   [[Dimensions/Stimulus Response Mapping|Stimulus Response Mapping]]: Becomes the central manipulation in variants like Simon (1969).
 *   Stimulus Modality (visual, auditory).
 *   Response Modality (manual, vocal).

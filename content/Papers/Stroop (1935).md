@@ -29,7 +29,7 @@ To investigate and quantify the interference effects observed when there is a co
     *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: N/A (or 0, if considering the ink color as an attribute presented simultaneously with the word form)
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0
-    *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]:
+    *   [[Dimensions/Stimulus-Stimulus Congruency]]:
         *   RCNd: **Bivalent-Incongruent** (word form + conflicting ink color attribute)
         *   RCNb: **Univalent** (word form + neutral black ink)
     *   [[Dimensions/Response Set Overlap|Response Set Overlap]]: N/A (single task)
@@ -46,7 +46,7 @@ To investigate and quantify the interference effects observed when there is a co
     *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: N/A (or 0)
     *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: 0
     *   [[Dimensions/Switch Rate|Switch Rate]]: 0
-    *   [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence]]:
+    *   [[Dimensions/Stimulus-Stimulus Congruency]]:
         *   NCWd: **Bivalent-Incongruent** (ink color + conflicting word attribute)
         *   NC: **Univalent** (color patch/swastika only)
     *   [[Dimensions/Response Set Overlap|Response Set Overlap]]: N/A (single task)
@@ -81,7 +81,7 @@ To investigate and quantify the interference effects observed when there is a co
 **Relevance to Thesis:**
 
 *   **Foundational Interference Study:** This is the seminal paper defining the [[Effects/Stroop Effect|Stroop effect]], a cornerstone phenomenon in [[Interference Control]] and [[Attention]].
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Perfectly exemplifies Bivalent-Incongruent stimuli and their comparison to Univalent (control) stimuli.
+*   ***   [[Dimensions/Stimulus-Stimulus Congruency]]:** Perfectly exemplifies Bivalent-Incongruent stimuli and their comparison to Univalent (control) stimuli.
 *   **Mapping to Super Experiment:**
     *   Both Exp 1 and Exp 2 are [[Number of Tasks|Number of Tasks]]=1 paradigms.
     *   SE can model these by using one task channel for the "target" dimension (e.g., 'mov' for word form, 'or' for ink color) and the other channel to present the "distractor" dimension simultaneously (`start_mov_1 = start_or_1`, `dur_mov_1 = dur_or_1`).

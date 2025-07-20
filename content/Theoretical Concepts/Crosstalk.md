@@ -10,7 +10,7 @@ Definition: Crosstalk refers to the unwanted transmission of information or proc
 **Manifestations:**
 
 - In [[Dual-Task Performance & PRP]]: Can contribute to the [[PRP Effect]] and [[Dual-Task Cost]]. [[Backward Crosstalk Effect (BCE)]] specifically refers to Task 2 processing influencing Task 1 performance. Modality effects (less interference between different modalities) are often explained by reduced crosstalk potential (e.g., [[Koch et al. (2018)]]).
-- In [[Task Switching]]: Manifests as [[Congruency Effect (CSE)|congruency effects]] when [[Stimulus Bivalence & Congruency|bivalent stimuli]] activate representations relevant to the currently irrelevant task.
+- In [[Task Switching]]: Manifests as [[Congruency Effect |congruency effects]] when stimuli that are bivalent due to [[Dimensions/Stimulus-Stimulus Congruency|S-S conflict]] or [[Dimensions/Stimulus-Response Congruency|S-R conflict]] activate representations relevant to the currently irrelevant task.
 - In [[Interference Control]] tasks (Stroop, Flanker, Simon): It is the core phenomenon – processing of the irrelevant dimension interferes with processing of the relevant dimension.
 
 **Levels of Occurrence:** Crosstalk can potentially occur at various processing stages:
@@ -20,7 +20,7 @@ Definition: Crosstalk refers to the unwanted transmission of information or proc
 - Task-Set Level: Interference from activation of competing task rules.
 
 **Super Experiment Relevance:**
-- The `experiment.js` UI, by allowing explicit control over [[Dimensions/Response Set Overlap|Response Set Overlap]] ("Identical" vs. "Disjoint") and [[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]] ("Congruent", "Incongruent", "Neutral"), enables more direct and systematic setup of experimental conditions hypothesized to modulate crosstalk.
+- The `experiment.js` UI, by allowing explicit control over [[Dimensions/Response Set Overlap|Response Set Overlap]] ("Identical" vs. "Disjoint") and both [[Dimensions/Stimulus-Stimulus Congruency]] and [[Dimensions/Stimulus-Response Congruency]] ("Congruent", "Incongruent", "Neutral"), enables more direct and systematic setup of experimental conditions hypothesized to modulate crosstalk.
 - For instance, selecting "Identical" response sets with "Incongruent" stimuli is designed to maximize response-level crosstalk. Selecting "Disjoint" response sets aims to minimize such crosstalk, potentially shifting any observed interference to earlier processing stages.
 
 **Theoretical Relevance:**

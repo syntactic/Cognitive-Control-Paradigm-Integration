@@ -47,7 +47,7 @@ Simon & Rudell (1967) aimed to demonstrate the existence of a strong auditory S-
 ###### Relevance to Thesis & Mapping Notes
 
 *   **Foundational Simon Effect Study:** This paper is a key early demonstration of the Simon effect, illustrating interference from an irrelevant spatial stimulus feature on a non-spatial task.
-*   **[[Dimensions/Stimulus Bivalence & Congruency|Stimulus Bivalence & Congruency]]:** Provides a clear example of `Bivalent-Congruent` and `Bivalent-Incongruent` conditions based on the alignment of the irrelevant spatial cue (ear) with the relevant semantic cue (word meaning).
+*   **[[Dimensions/Stimulus-Response Congruency]]:** Provides a clear example of `Congruent` and `Incongruent` conditions based on the alignment of the irrelevant spatial cue (ear) with the relevant semantic cue (word meaning).
 *   **Mapping to SE:**
     *   [[Number of Tasks|Number of Tasks]]: 1.
     *   [[Inter-task SOA (Stimulus Onset Asynchrony)|SOA]]: 0 (conceptual, as ear and word are part of the same auditory event) or N/A.

@@ -43,7 +43,6 @@ Simon (1969) aimed to investigate the fundamental nature of spatial stimulus-res
 *   **Distinction from Classic Simon Effect Paradigm:** While related, this design differs from [[Simon & Rudell (1967)]] in that stimulus location is *task-relevant*. The interference arises from the *rule* rather than an *irrelevant stimulus dimension*.
 *   **Mapping to SE:**
     *   [[Number of Tasks|Number of Tasks]]: 1.
-    *   [[Stimulus Bivalence & Congruency|Stimulus Valency]]: `Univalent` (the tone itself doesn't have conflicting features; the conflict is rule-based).
     *   The core manipulation is modeled in SE by altering the `keyMap` (e.g., `movementKeyMap`) between blocks.
         *   "Toward": `stim_LeftEar` maps to `left_response_key`; `stim_RightEar` maps to `right_response_key`.
         *   "Away": `stim_LeftEar` maps to `right_response_key`; `stim_RightEar` maps to `left_response_key`.
