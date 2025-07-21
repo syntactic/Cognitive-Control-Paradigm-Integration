@@ -109,15 +109,35 @@ def process_condition(row):
     t1_cue_go_duration = get_param(row, notes, 't1_cue_go_duration', BASE_CUE_GO_DURATION)
     t2_cue_go_duration = get_param(row, notes, 't2_cue_go_duration', BASE_CUE_GO_DURATION)
 
-    # --- 2. Pre-process conceptual info to be passed to the client ---
+    # --- 2. Derive backwards-compatible Stimulus_Valency ---
+    ss_congruency = row['Stimulus-Stimulus Congruency']
+    sr_congruency = row['Stimulus-Response Congruency']
+    derived_stimulus_valency = 'Univalent' # Default
+
+    if ss_congruency == 'Congruent':
+        derived_stimulus_valency = 'Bivalent-Congruent'
+    elif ss_congruency == 'Incongruent':
+        derived_stimulus_valency = 'Bivalent-Incongruent'
+    elif ss_congruency == 'Neutral':
+        derived_stimulus_valency = 'Bivalent-Neutral'
+    elif ss_congruency == 'N/A':
+        if sr_congruency in ['Congruent', 'Incongruent', 'Neutral']:
+            # Abstracting pure S-R conflict as Bivalent-Neutral for the viewer
+            derived_stimulus_valency = 'Bivalent-Neutral'
+
+    # --- 3. Pre-process conceptual info to be passed to the client ---
+    task_2_prob = float(row['Task 2 Response Probability'])
+    n_tasks = 2 if task_2_prob == 1.0 else 1
+    
     resolved_params = {
         'Experiment': row['Experiment'],
-        'N_Tasks': int(row['Number of Tasks']),  # Add N_Tasks to resolved parameters
+        'N_Tasks': n_tasks,
         'Task_1_Type': row['Task 1 Type'],
         'Task_2_Type': row['Task 2 Type'],
-        'Stimulus_Valency': row['Stimulus Valency'],
+        'Stimulus_Valency': derived_stimulus_valency, # Use the derived value
         'Simplified_RSO': simplify_response_set_overlap(row['Response Set Overlap']),
-        'SRM': row['Stimulus Response Mapping'],
+        'SRM_1': row['Task 1 Stimulus-Response Mapping'],
+        'SRM_2': row['Task 2 Stimulus-Response Mapping'],
         'Switch_Rate_Percent': row['Switch Rate'].replace('%', '') if isinstance(row['Switch Rate'], str) else row['Switch Rate'],
         'Sequence_Type': notes.get('sequence_type', 'Random'),
         'ITI_ms': row.get('RSI'),
@@ -125,6 +145,7 @@ def process_condition(row):
         'ITI_Distribution_Params': str(notes.get('RSI_range', notes.get('RSI_values', []))),
         'coh_1': difficulty_to_coherence(row['Task 1 Difficulty']),
         'coh_2': difficulty_to_coherence(row['Task 2 Difficulty']),
+        'Trial_Transition_Type': row['Trial Transition Type'],
     }
     
     # Initialize all timing parameters to 0
@@ -137,10 +158,14 @@ def process_condition(row):
     for key in timing_keys:
         resolved_params[key] = 0
         
-    # --- 3. Calculate Absolute Timings based on N_Tasks ---
-    n_tasks = int(row['Number of Tasks'])
-    soa = 0 if pd.isna(row['SOA']) else int(row['SOA'])
-    csi = 0 if pd.isna(row['CSI']) else int(row['CSI'])
+    # --- 4. Calculate Absolute Timings based on N_Tasks ---
+    soa_str = row['Inter-task SOA'] if n_tasks == 2 else row['Distractor SOA']
+    soa = 0 if pd.isna(soa_str) or soa_str == 'N/A' else int(soa_str)
+    
+    csi1_str = row['Task 1 CSI']
+    csi2_str = row['Task 2 CSI']
+    csi1 = 0 if pd.isna(csi1_str) or csi1_str == 'N/A' else int(csi1_str)
+    csi2 = 0 if pd.isna(csi2_str) or csi2_str == 'N/A' else int(csi2_str)
 
     if n_tasks == 2:
         # Standard Dual-Task / PRP paradigm
@@ -151,7 +176,7 @@ def process_condition(row):
         resolved_params['effective_start_stim1_mov'] = t1_stim_start
         resolved_params['effective_end_stim1_mov'] = t1_stim_start + t1_stim_duration
         
-        resolved_params['effective_start_cue1'] = t1_stim_start - csi
+        resolved_params['effective_start_cue1'] = t1_stim_start - csi1
         resolved_params['effective_end_cue1'] = resolved_params['effective_start_cue1'] + t1_cue_go_duration
         resolved_params['effective_start_go1'] = resolved_params['effective_start_cue1']
         resolved_params['effective_end_go1'] = resolved_params['effective_end_cue1']
@@ -161,7 +186,7 @@ def process_condition(row):
         resolved_params['effective_start_stim2_or'] = t2_stim_start
         resolved_params['effective_end_stim2_or'] = t2_stim_start + t2_stim_duration
         
-        resolved_params['effective_start_cue2'] = t2_stim_start - csi
+        resolved_params['effective_start_cue2'] = t2_stim_start - csi2
         resolved_params['effective_end_cue2'] = resolved_params['effective_start_cue2'] + t2_cue_go_duration
         resolved_params['effective_start_go2'] = resolved_params['effective_start_cue2']
         resolved_params['effective_end_go2'] = resolved_params['effective_end_cue2']
@@ -175,13 +200,13 @@ def process_condition(row):
         resolved_params['effective_start_stim1_mov'] = target_stim_start
         resolved_params['effective_end_stim1_mov'] = target_stim_start + t1_stim_duration
         
-        resolved_params['effective_start_cue1'] = target_stim_start - csi
+        resolved_params['effective_start_cue1'] = target_stim_start - csi1
         resolved_params['effective_end_cue1'] = resolved_params['effective_start_cue1'] + t1_cue_go_duration
         resolved_params['effective_start_go1'] = resolved_params['effective_start_cue1']
         resolved_params['effective_end_go1'] = resolved_params['effective_end_cue1']
         
-        # Distractor Events (if stimulus is bivalent)
-        if 'Bivalent' in str(row['Stimulus Valency']):
+        # Distractor Events (if stimulus is bivalent based on new columns)
+        if row['Stimulus-Stimulus Congruency'] != 'N/A' or row['Stimulus-Response Congruency'] != 'N/A':
             distractor_stim_start = target_stim_start + soa
             resolved_params['effective_start_stim1_or'] = distractor_stim_start
             resolved_params['effective_end_stim1_or'] = distractor_stim_start + t2_stim_duration # Use T2 duration for distractor
@@ -218,11 +243,11 @@ if __name__ == "__main__":
         
         # Define the final column order for the output CSV
         final_column_order = [
-            'Experiment', 'N_Tasks', 'Task_1_Type', 'Task_2_Type',  # Add N_Tasks to column order
-            'Stimulus_Valency', 'Simplified_RSO', 'SRM',
+            'Experiment', 'N_Tasks', 'Task_1_Type', 'Task_2_Type',
+            'Stimulus_Valency', 'Simplified_RSO', 'SRM_1', 'SRM_2',
             'Switch_Rate_Percent', 'Sequence_Type', 'ITI_Distribution_Type',
             'ITI_Distribution_Params', 'ITI_ms',
-            'coh_1', 'coh_2',
+            'coh_1', 'coh_2', 'Trial_Transition_Type',
             'effective_start_cue1', 'effective_end_cue1', 'effective_start_go1', 'effective_end_go1',
             'effective_start_stim1_mov', 'effective_end_stim1_mov', 'effective_start_stim2_mov', 'effective_end_stim2_mov',
             'effective_start_cue2', 'effective_end_cue2', 'effective_start_go2', 'effective_end_go2',
