@@ -85,7 +85,7 @@ def classify_paradigm(row):
     """
     # 1. Dual-Task/PRP paradigms are defined by requiring a response to a second task.
     if row['Task 2 Response Probability'] == 1:
-        return 'Dual-Task/PRP'
+        return 'Dual-Task_PRP'
 
     # 2. For single-response paradigms, task-switching is the next major category.
     if row['Switch Rate'] > 0:
@@ -351,7 +351,7 @@ def preprocess_for_pca(df_raw):
     df['Task 1 Difficulty Norm'] = df['Task 1 Difficulty Norm'].fillna(0.5) # Impute missing T1 difficulty
     
     # Set to placeholder (-1) ONLY if it's NOT a Task-Switching or Dual-Task paradigm.
-    is_true_single_task = ~df['Paradigm'].isin(['Task Switching', 'Dual-Task/PRP'])
+    is_true_single_task = ~df['Paradigm'].isin(['Task Switching', 'Dual-Task_PRP'])
     df.loc[is_true_single_task, 'Task 2 Difficulty Norm'] = -1.0
     # For any remaining NaNs (e.g., in TS or DT where it wasn't specified), impute with moderate difficulty.
     df['Task 2 Difficulty Norm'] = df['Task 2 Difficulty Norm'].fillna(0.5)
