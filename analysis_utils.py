@@ -9,6 +9,32 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
+from scipy.stats import skew
+
+
+VIEW_MAPPING_UNIFIED = {
+    'Temporal': ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI'],
+    'Context': ['Switch Rate', 'RSI is Predictable', 'Trial_Transition_Type'],
+    'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty'],
+    'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency'],
+    'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap'],
+    'Structure': ['Task 2 Response Probability', 'Task_1_Cue_Type', 'Task_2_Cue_Type', 'Inter_task_SOA_is_NA', 'Distractor_SOA_is_NA', 'Task_2_CSI_is_NA', 'Task_2_Difficulty_is_NA']
+}
+
+VIEW_MAPPING = {
+    'Temporal': ['num__Inter-task SOA', 'num__Distractor SOA', 'num__Task 1 CSI', 'num__Task 2 CSI', 'num__RSI'],
+    'Context': ['num__Switch Rate', 'cat__RSI is Predictable_1', 'cat__Trial_Transition_Type_Mapped_TTT_NA', 'cat__Trial_Transition_Type_Mapped_TTT_Pure', 'cat__Trial_Transition_Type_Mapped_TTT_Repeat', 'cat__Trial_Transition_Type_Mapped_TTT_Switch'],
+    'Task_Properties': ['num__Task 1 Difficulty', 'num__Task 2 Difficulty'],
+    'Conflict': ['cat__Stimulus_Stimulus_Congruency_Mapped_SS_Congruent', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Incongruent', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Neutral', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_NA', 'cat__Stimulus_Response_Congruency_Mapped_SR_NA', 'cat__Stimulus_Response_Congruency_Mapped_SR_Neutral', 'cat__Stimulus_Response_Congruency_Mapped_SR_Congruent', 'cat__Stimulus_Response_Congruency_Mapped_SR_Incongruent'],
+    'Rules': ['cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Arbitrary', 'cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Compatible', 'cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Incompatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Arbitrary', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Compatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Incompatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_NA', 'cat__Response_Set_Overlap_Mapped_RSO_Disjoint', 'cat__Response_Set_Overlap_Mapped_RSO_Identical', 'cat__Response_Set_Overlap_Mapped_RSO_NA'],
+    'Structure': ['num__Task 2 Response Probability', 'cat__Task_1_Cue_Type_Mapped_TCT_Implicit', 'cat__Task_2_Cue_Type_Mapped_TCT2_Arbitrary', 'cat__Task_2_Cue_Type_Mapped_TCT2_Implicit', 'cat__Task_2_Cue_Type_Mapped_TCT2_NA', 'cat__Inter_task_SOA_is_NA_1', 'cat__Distractor_SOA_is_NA_1', 'cat__Task_2_CSI_is_NA_1', 'cat__Task_2_Difficulty_is_NA_1']
+}
+
+# Map original CSV columns to their designated view
+FEATURE_TO_VIEW = {feature: view for view, features in VIEW_MAPPING.items() for feature in features}
+
+NUMERICAL_COLS = ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI',
+'Switch Rate', 'Task 1 Difficulty', 'Task 2 Difficulty', 'Task 2 Response Probability']
 
 # =============================================================================
 # 1. Helper Functions for Data Cleaning
@@ -239,8 +265,8 @@ def reverse_map_categories(df):
         df_out['Task 2 Cue Type'] = df_out['Task_2_Cue_Type_Mapped'].map(tct2_reverse_map)
 
     # Handle the binary predictable RSI
-    if 'RSI_Is_Predictable' in df_out.columns:
-         df_out['RSI Is Predictable'] = df_out['RSI_Is_Predictable'].apply(lambda x: 'Yes' if round(x) == 1 else 'No')
+    if 'RSI is Predictable' in df_out.columns:
+         df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 'Yes' if round(x) == 1 else 'No')
 
     return df_out
 
@@ -254,14 +280,16 @@ def apply_conceptual_constraints(df):
     logger = logging.getLogger(__name__)
 
     # Define a threshold for what we consider a 'single-task' paradigm
-    T2RP_THRESHOLD = 0.5
+    THRESHOLD = 0.5
 
     # Identify rows that represent functionally single-task paradigms
-    is_single_task = sum([df_out['Task 2 Response Probability'] < T2RP_THRESHOLD,
+    is_single_task = sum([df_out['Task 2 Response Probability'] < THRESHOLD,
                           df_out['Trial Transition Type'] == 'Pure',
                           df_out['Response Set Overlap'] == 'N/A',
-                          df_out['Task 2 Difficulty'] < 1,
-                          df_out['Task 2 Cue Type'] == 'N/A']) > 3
+                          df_out['Task_2_Difficulty_is_NA'] > THRESHOLD,
+                          df_out['Task_2_CSI_is_NA'] > THRESHOLD,
+                          df_out['Task 2 Stimulus-Response Mapping'] == 'N/A',
+                          df_out['Task 2 Cue Type'] == 'N/A']) > 4
     logger.warning(f"Is single task: {is_single_task}")
 
     # For these rows, nullify all Task 2-specific parameters
@@ -284,24 +312,20 @@ def apply_conceptual_constraints(df):
 # 2. Main Preprocessing Pipeline Function
 # =============================================================================
 
-def preprocess_for_pca(df_raw):
+def preprocess(df_raw, target='pca'):
     """
-    Performs all preprocessing steps to prepare the raw DataFrame for PCA.
+    Performs all preprocessing for either PCA or MOFA+.
+
+    Args:
+        df_raw (pd.DataFrame): The raw data from the CSV.
+        target (str): The target analysis pipeline ('pca' or 'mofa').
+
     Returns:
-        - df_pca_features: DataFrame ready to be fed into the PCA pipeline.
-        - numerical_cols: List of numerical column names.
-        - categorical_cols: List of mapped categorical column names.
-        - df_processed: The fully cleaned and annotated DataFrame for visualization.
+        For target='pca': (df_pca_features, numerical_cols, categorical_cols, df_processed)
+        For target='mofa': (df_long, likelihoods)
     """
     logger = logging.getLogger(__name__)
     df = df_raw.copy()
-
-    # --- Step 0: Rename old columns for clarity BEFORE any processing ---
-    df.rename(columns={
-        'Stimulus Response Mapping': 'Task 1 Stimulus-Response Mapping',
-        'Task Cue Type': 'Task 1 Cue Type',
-        'CSI': 'Task 1 CSI'
-    }, inplace=True)
 
     # --- Step 1: General Cleaning & Type Conversion ---
     # Convert all potentially numeric columns to numeric, coercing errors
@@ -320,9 +344,14 @@ def preprocess_for_pca(df_raw):
         df['Switch Rate'] = df['Switch Rate'].apply(clean_switch_rate)
 
     # Impute RSI with the median before it's used in calculations
-    if 'RSI' in df.columns:
-        rsi_median = df['RSI'].median()
-        df['RSI'] = df['RSI'].fillna(rsi_median)
+    if target == 'pca':
+        if 'RSI' in df.columns:
+            rsi_median = df['RSI'].median()
+            df['RSI'] = df['RSI'].fillna(rsi_median)
+
+    # Normalize Task Difficulty (1-5 scale to 0-1)
+    df['Task 1 Difficulty Norm'] = (df['Task 1 Difficulty'] - 1) / 4
+    df['Task 2 Difficulty Norm'] = (df['Task 2 Difficulty'] - 1) / 4
 
     # --- Step 2: Validate data and log warnings ---
     validate_and_log_warnings(df, logger)
@@ -330,31 +359,23 @@ def preprocess_for_pca(df_raw):
     # --- Step 3: Add Paradigm Classification for Difficulty Placeholder and Plotting ---
     df['Paradigm'] = df.apply(classify_paradigm, axis=1)
 
-    # --- Step 4: Create PCA-specific features ---
+    # --- Step 4: Create binary presence features ---
     # Generate Applicability Flags DIRECTLY from NaN status.
     # This is done BEFORE imputation.
     df['Inter_task_SOA_is_NA'] = df['Inter-task SOA'].isna().astype(int)
     df['Distractor_SOA_is_NA'] = df['Distractor SOA'].isna().astype(int)
+    df['Task_2_CSI_is_NA'] = df['Task 2 CSI'].isna().astype(int)
+    df['Task_2_Difficulty_is_NA'] = df['Task 2 Difficulty'].isna().astype(int)
+    # Impute Main SOA Columns and other numeric columns.
+    df['Inter-task SOA'] = df['Inter-task SOA'].fillna(df['Inter-task SOA'].median())
+    df['Distractor SOA'] = df['Distractor SOA'].fillna(df['Distractor SOA'].median())
+    df['Task 1 CSI'] = df['Task 1 CSI'].fillna(0) # this should never happen but in case it does
+    df['Task 2 CSI'] = df['Task 2 CSI'].fillna(df['Task 2 CSI'].median())
+    df['Task 1 Difficulty Norm'] = df['Task 1 Difficulty Norm'].fillna(df['Task 1 Difficulty Norm'].mean()) # This should never happen but in case it does
+    df['Task 2 Difficulty Norm'] = df['Task 2 Difficulty Norm'].fillna(df['Task 2 Difficulty Norm'].mean())
 
-    # Impute Main SOA Columns and other numeric columns. This is now safe.
-    df['Inter-task SOA'] = df['Inter-task SOA'].fillna(0)
-    df['Distractor SOA'] = df['Distractor SOA'].fillna(0)
-    df['Task 1 CSI'] = df['Task 1 CSI'].fillna(0)
-    df['Task 2 CSI'] = df['Task 2 CSI'].fillna(0) # New
-
-    # Process new binary 'RSI Is Predictable'
-    df['RSI_Is_Predictable'] = df['RSI Is Predictable'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
-
-    # Normalize Task Difficulty (1-5 scale to 0-1)
-    df['Task 1 Difficulty Norm'] = (df['Task 1 Difficulty'] - 1) / 4
-    df['Task 2 Difficulty Norm'] = (df['Task 2 Difficulty'] - 1) / 4
-    df['Task 1 Difficulty Norm'] = df['Task 1 Difficulty Norm'].fillna(0.5) # Impute missing T1 difficulty
-    
-    # Set to placeholder (-1) ONLY if it's NOT a Task-Switching or Dual-Task paradigm.
-    is_true_single_task = ~df['Paradigm'].isin(['Task Switching', 'Dual-Task_PRP'])
-    df.loc[is_true_single_task, 'Task 2 Difficulty Norm'] = -1.0
-    # For any remaining NaNs (e.g., in TS or DT where it wasn't specified), impute with moderate difficulty.
-    df['Task 2 Difficulty Norm'] = df['Task 2 Difficulty Norm'].fillna(0.5)
+    # Process new binary 'RSI is Predictable'
+    df['RSI is Predictable'] = df['RSI is Predictable'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
 
     # --- Step 5: Map Categorical Features ---
     df['Stimulus_Stimulus_Congruency_Mapped'] = df['Stimulus-Stimulus Congruency'].apply(map_ss_congruency)
@@ -370,13 +391,12 @@ def preprocess_for_pca(df_raw):
     # --- Step 6: Select final columns for the PCA pipeline ---
     numerical_cols = [
         'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA',
-        'Inter_task_SOA_is_NA', 'Distractor_SOA_is_NA', 'Task 1 CSI', 'Task 2 CSI',
-        'RSI', 'Switch Rate', 'Task 1 Difficulty Norm', 'Task 2 Difficulty Norm',
-        'RSI_Is_Predictable'
+        'Task 1 CSI', 'Task 2 CSI',
+        'RSI', 'Switch Rate', 'Task 1 Difficulty Norm', 'Task 2 Difficulty Norm', 
     ]
-    categorical_cols = [
+    categorical_cols = [ 'Inter_task_SOA_is_NA', 'Distractor_SOA_is_NA', 'Task_2_CSI_is_NA', 'Task_2_Difficulty_is_NA',
         'Stimulus_Stimulus_Congruency_Mapped', 'Stimulus_Response_Congruency_Mapped',
-        'Response_Set_Overlap_Mapped',
+        'Response_Set_Overlap_Mapped', 'RSI is Predictable',
         'Task_1_Stimulus-Response_Mapping_Mapped', 'Task_1_Cue_Type_Mapped',
         'Task_2_Stimulus-Response_Mapping_Mapped', 'Task_2_Cue_Type_Mapped',
         'Trial_Transition_Type_Mapped'
@@ -393,6 +413,52 @@ def preprocess_for_pca(df_raw):
     numerical_cols = [name.replace(' Norm', '') if 'Norm' in name else name for name in numerical_cols]
 
     return df_pca_features, numerical_cols, categorical_cols, df
+
+def preprocess_for_mofa(df_raw):
+    df_pca_features, numerical_cols, categorical_cols, df = preprocess(df_raw, target="mofa")
+
+    preprocessor = InvertibleColumnTransformer(
+        transformers=[
+            ('num', StandardScaler(), numerical_cols),
+            ('cat', OneHotEncoder(handle_unknown='ignore', drop='if_binary'), categorical_cols)
+        ],
+        remainder='drop'
+    )
+
+    df_mofa = preprocessor.fit_transform(df_pca_features)
+    column_names = preprocessor.get_feature_names_out()
+    df_mofa = pd.DataFrame(df_mofa, columns=column_names)
+    df_mofa['Experiment'] = df_raw['Experiment']
+
+    value_vars = list(FEATURE_TO_VIEW.keys()) # All columns that are features
+    
+    df_long = pd.melt(df_mofa, id_vars=['Experiment'], value_vars=column_names,
+                      var_name='feature', value_name='value')
+    
+    # --- Step 4: Add 'view' and 'group' columns ---
+    df_long['view'] = df_long['feature'].map(FEATURE_TO_VIEW)
+    # Commented out: use paradigm classification for the 'group' column
+    # this is commented out because grouping them by paradigm yields no factors
+    #df_temp_for_group = df_pca_features.set_index('Experiment')
+    #df_long['group'] = df_long['Experiment'].apply(lambda x: classify_paradigm(df_temp_for_group.loc[x]))
+    df_long['group'] = 'all_studies'
+    df_pca_features['Experiment'] = df_raw['Experiment']
+    df_long.rename(columns={'Experiment': 'sample'}, inplace=True)
+    
+    # --- Step 5: Final Cleanup ---
+    df_long.dropna(subset=['value', 'view'], inplace=True)
+    df_long['value'] = pd.to_numeric(df_long['value'])
+
+    # --- Step 6: Define Likelihoods ---
+    # For now, let's start with gaussian for all views
+    # The order must be alphabetical by view name
+    views_ordered = sorted(df_long['view'].unique())
+    likelihoods = ['gaussian'] * len(views_ordered)
+
+    return df_long, preprocessor, likelihoods
+
+    return df_mofa, preprocessor
+
 
 
 # =============================================================================
@@ -426,7 +492,24 @@ class InvertibleColumnTransformer(ColumnTransformer):
                  n_transformed_features = len(trans.get_feature_names_out(original_feature_names))
 
             # Slice the correct part of the transformed data
-            transformed_slice = X[:, col_idx : col_idx + n_transformed_features]
+            if hasattr(X, 'iloc'):
+                transformed_slice = X.iloc[:, col_idx : col_idx + n_transformed_features]
+            else:
+                transformed_slice = X[:, col_idx : col_idx + n_transformed_features]
+
+            # --- START OF DEBUGGING BLOCK ---
+            try:
+                # This is the line that is expected to fail
+                original_slice = trans.inverse_transform(transformed_slice)
+            except ValueError as e:
+                print(f"--- DEBUG: Error in transformer '{name}' ---")
+                print(f"Problematic Data Slice (shape: {transformed_slice.shape}):")
+                # Print the slice that's causing the error
+                print(transformed_slice)
+                print("-----------------------------------------")
+                # Re-raise the original error to stop execution
+                raise e
+            # --- END OF DEBUGGING BLOCK ---
             
             # Apply inverse_transform
             original_slice = trans.inverse_transform(transformed_slice)
@@ -539,3 +622,116 @@ def inverse_transform_point(point_pc, pipeline):
     final_params['Task 2 Difficulty'] = (final_params['Task 2 Difficulty'] * 4) + 1
 
     return final_params
+
+def reconstruct_from_mofa_factors(factor_scores, model, preprocessor):
+    """
+    Reconstructs the original feature space from MOFA+ factor scores.
+
+    Args:
+        factor_scores (pd.DataFrame or pd.Series): A dataframe or series of factor scores for one or more samples.
+        model (mfx.mofa_model): The trained mofax model.
+        preprocessor (InvertibleColumnTransformer): The *fitted* preprocessor from the pipeline.
+
+    Returns:
+        pd.DataFrame: A DataFrame with the de-normalized and decoded original parameters.
+    """
+    # Ensure factor_scores is a 2D array for matrix multiplication
+    if isinstance(factor_scores, pd.Series):
+        factor_scores = factor_scores.to_frame().T
+        
+    Z = factor_scores.values
+    W = model.get_weights(df=True) # Get weights as a DataFrame
+
+    # --- THE CRITICAL FIX ---
+    # 1. Get the exact feature order the preprocessor expects.
+    expected_feature_order = preprocessor.get_feature_names_out()
+
+    # 2. Re-index the weight matrix to match the preprocessor's order.
+    #    This ensures the columns of W.T are aligned before multiplication.
+    W_aligned = W.reindex(expected_feature_order)
+
+    # 3. Perform the dot product. The resulting numpy array's columns
+    #    are now implicitly in the correct order for the preprocessor.
+    # 1. Reconstruct. The result is a DataFrame with the right columns but a default integer index.
+    reconstructed_df = Z @ W_aligned.T
+
+    # 2. CRITICAL: Assign the correct experiment name(s) as the index.
+    reconstructed_df.index = factor_scores.index
+
+    # 3. Now the DataFrame is perfect. Pass it to the inverse_transform method.
+    reconstructed_original_data = preprocessor.inverse_transform(reconstructed_df)
+    # --- END OF DEBUGGING BLOCK ---
+
+    # Reconstruct the preprocessed data space
+
+    # Use the preprocessor to inverse transform back to the original space
+    #reconstructed_original_data = preprocessor.inverse_transform(reconstructed_data_array)
+
+    # Return as a nice DataFrame
+    return pd.DataFrame(reconstructed_original_data, 
+                        columns=preprocessor.feature_names_in_, 
+                        index=factor_scores.index)
+
+def sparseness_hoyer(x):
+    """
+    The sparseness of array x is a real number in [0, 1], where sparser array
+    has value closer to 1. Sparseness is 1 iff the vector contains a single
+    nonzero component and is equal to 0 iff all components of the vector are 
+    the same
+        
+    modified from Hoyer 2004: [sqrt(n)-L1/L2]/[sqrt(n)-1]
+    
+    adapted from nimfa package: https://nimfa.biolab.si/
+    """
+    from math import sqrt # faster than numpy sqrt 
+    eps = np.finfo(x.dtype).eps if 'int' not in str(x.dtype) else 1e-9
+    
+    n = x.size
+
+    # patch for array of zeros
+    if np.allclose(x, np.zeros(x.shape), atol=1e-6):
+        return 0.0
+    
+    L1 = abs(x).sum()
+    L2 = sqrt(np.multiply(x, x).sum())
+    sparseness_num = sqrt(n) - (L1 + eps) / (L2 + eps)
+    sparseness_den = sqrt(n) - 1
+    
+    return sparseness_num / sparseness_den
+
+def get_loadings_sparseness(loadings):
+    """
+    Args:
+        loadings (numpy.array): a loadings matrix in the shape of (factors/components, features)
+
+    Returns:
+        factor_sparsities (list): a list of with as many elements as factors/components
+    """
+    
+    transposed_loadings = loadings.T  # Shape will get turned into (features, factors/components)
+    factor_sparsities = [sparseness_hoyer(factor) for factor in transposed_loadings]
+    return factor_sparsities
+
+def check_skewness(data_column: np.ndarray, threshold: float = 0.5) -> str:
+    """
+    Checks if a 1D NumPy array is symmetric or skewed based on its skewness coefficient.
+
+    Args:
+        data_column: A 1D NumPy array of numerical data.
+        threshold: The skewness value |s| above which data is considered skewed.
+                   A common threshold is 0.5.
+
+    Returns:
+        A string indicating if the data is "Symmetric", "Moderately Skewed",
+        or "Highly Skewed".
+    """
+    # Calculate the skewness coefficient
+    skewness = skew(data_column, nan_policy='omit')
+    
+    # Interpret the result
+    if abs(skewness) < threshold:
+        return f"Symmetric (Skewness: {skewness:.4f})"
+    elif abs(skewness) < 1.0:
+        return f"Moderately Skewed (Skewness: {skewness:.4f})"
+    else:
+        return f"Highly Skewed (Skewness: {skewness:.4f})"
