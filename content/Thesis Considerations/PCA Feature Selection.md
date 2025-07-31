@@ -13,7 +13,7 @@ A critical decision in preparing data for Principal Component Analysis (PCA) wit
 **Justification for using Higher-Level Derived Dimensions as the primary features for PCA:**
 
 1.  **Interpretability of Principal Components:**
-    *  **Derived Dimensions:** PCA components derived from these features are more directly interpretable in cognitive terms. For example, a component heavily loading on `SOA_ms_PCA`, `N_Tasks_PCA`, and `Task2_Difficulty_Normalized_PCA` could be readily understood as representing "Dual-Task Load & Temporal Coordination." This aligns with how cognitive psychologists conceptualize experimental designs.
+    *  **Derived Dimensions:** PCA components derived from these features are more directly interpretable in cognitive terms. For example, a component heavily loading on `Inter-task SOA`, `Task 2 Response Probability`, and `Task 2 Difficulty` could be readily understood as representing "Dual-Task Load & Temporal Coordination." This aligns with how cognitive psychologists conceptualize experimental designs.
     *  **Low-Level SE Parameters:** Components based on numerous, fine-grained SE parameters would be significantly harder to interpret. A component loading on `dur_mov_1`, `start_go_2`, and `coh_or_1` lacks immediate psychological meaning and would require reverse-engineering to understand its functional significance.
 
 2.  **Alignment with Thesis Goals:**

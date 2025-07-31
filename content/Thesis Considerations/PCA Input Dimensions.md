@@ -9,25 +9,21 @@ This note lists the features intended for input into the Principal Component Ana
 **I. Numerical PCA Features (Standardized - e.g., Z-scored):**
 
 1.  **`Task 2 Response Probability`**: (Numeric: 0-1) The core dimension separating single-task from dual-task paradigms.
-2.  **`Inter-task SOA`**: (Numeric: ms) The delay between S1 and S2 in `N_Tasks=2` paradigms. Imputed to 0 when not applicable.
-3.  **`Distractor SOA`**: (Numeric: ms) The delay between target and distractor features in `N_Tasks=1`, bivalent paradigms. Imputed to 0 when not applicable.
-4.  **`Inter_task_SOA_is_NA`**: (Binary: 0 or 1) A flag indicating if `Inter-task SOA` is the relevant temporal variable for the paradigm.
-5.  **`Distractor_SOA_is_NA`**: (Binary: 0 or 1) A flag indicating if `Distractor SOA` is the relevant temporal variable for the paradigm.
-6.  **`Task 1 CSI`**: (Numeric: ms) The Cue-Stimulus Interval for the first task.
-7. **`Task 2 CSI`**: (Numeric: ms) The Cue-Stimulus Interval for the second task. Imputed to 0 for single-task paradigms.
-8.  **`RSI`**: (Numeric: ms) The Response-Stimulus Interval.
+2.  **`Inter-task SOA`**: (Numeric: ms) The delay between S1 and S2 in `N_Tasks=2` paradigms. Imputed to median when not applicable.
+3.  **`Distractor SOA`**: (Numeric: ms) The delay between target and distractor features in `N_Tasks=1`, bivalent paradigms. Imputed to median when not applicable.
+4. **`Task 1 CSI`**: (Numeric: ms) The Cue-Stimulus Interval for the first task.
+5. **`Task 2 CSI`**: (Numeric: ms) The Cue-Stimulus Interval for the second task. Imputed to median for single-task paradigms.
+6.  **`RSI`**: (Numeric: ms) The Response-Stimulus Interval.
     * The `Super_Experiment_Mapping_Notes` may indicate a more accurate idea of how RSI might have been manipulated in an experiment (see [[Stephan & Koch (2010)]] for example). It might indicate that the RSI is drawn from a distribution. In that case, the CSV's `RSI` value is the expected value of that distribution.
     * Placeholder/Imputation for N/A or "Not Specified": e.g., median of observed RSIs, or a fixed value representing a common ITI.
-9.  **`RSI_Is_Predictable`**: (Binary: 0 or 1) Captures whether the RSI is fixed (`1`) or variable (`0`), a critical distinction for preparation theories.
-10. **`Switch Rate`**: (Numeric: 0-100) The probability of a task switch.
+7. **`Switch Rate`**: (Numeric: 0-100) The probability of a task switch.
     *  Placeholder/Imputation for N/A: 0. This shouldn't practically be N/A. If we're in a single-task paradigm there either is a switch (mixed block) or never a switch. If we're in a dual-task paradigm then the task order could switch such as in [[Sigman & Dehaene (2006)]].
-11. **`Task 1 Difficulty`**: (Numeric: 0-1) Normalized difficulty score for the first task.
+8. **`Task 1 Difficulty`**: (Numeric: 0-1) Normalized difficulty score for the first task.
     *   Derived from CSV `Task 1 Difficulty` (1-5 ordinal) -> (value-1)/4.
     *   Placeholder/Imputation for N/A: e.g., 0.5 (moderate difficulty).
-12.  **`Task 2 Difficulty`**: (Numeric: 0-1 or -1) Normalized difficulty for the second task in the repertoire. A value of `-1` is used as a placeholder for true single-task paradigms where no alternative task exists.
+9.  **`Task 2 Difficulty`**: (Numeric: 0-1 or -1) Normalized difficulty for the second task in the repertoire. A value of `-1` is used as a placeholder for true single-task paradigms where no alternative task exists.
     *   Derived from CSV `Task 2 Difficulty` (1-5 ordinal) -> (value-1)/4.
-    *   If `Number of Tasks` = 1 (for that row/condition), this feature is set to a distinct placeholder (e.g., -1) or imputed based on context (e.g. if it's a TS paradigm, it's the difficulty of the *other* task in repertoire). *Current preference: Use actual difficulty of T2 in repertoire for TS; use placeholder -1 if truly no T2.*
-    *   Placeholder/Imputation for N/A (if N_Tasks=2 but difficulty unspecified): e.g., 0.5.
+	*   If `Number of Tasks` = 1 (for that row/condition), this feature can imputed with the mean task 2 difficulty. If it's a TS paradigm, it's the difficulty of the *other* task in repertoire.
 
 **II. Categorical PCA Features (One-Hot Encoded from SE-Mappable Categories):**
 
@@ -60,3 +56,8 @@ E.  **`Task_1_Cue_Type_Mapped`**: Derived from `Task 1 Cue Type`. Categories: `T
         *   `TCT_SE_NA`
 F.  **`Task_2_Cue_Type_Mapped`**: Derived from `Task 2 Cue Type`. Categories: `TCT2_Implicit`, `TCT2_Arbitrary`.
 G. **`Trial_Transition_Type_Mapped`**: Derived from `Trial Transition Type`. Categories: `TTT_Pure`, `TTT_Switch`, `TTT_Repeat`.
+H.  **`Inter_task_SOA_is_NA`**: (Binary: 0 or 1) A flag indicating if `Inter-task SOA` is the relevant temporal variable for the paradigm.
+I.  **`Distractor_SOA_is_NA`**: (Binary: 0 or 1) A flag indicating if `Distractor SOA` is the relevant temporal variable for the paradigm.
+J.  **`RSI_Is_Predictable`**: (Binary: 0 or 1) Captures whether the RSI is fixed (`1`) or variable (`0`), a critical distinction for preparation theories.
+K. Task_2_Difficulty_is_NA : (Binary: 0 or 1) Describes whether there is a difficulty for task 2.
+L. Task_2_CSI_is_NA : (Binary: 0 or 1) Describes whether there is a CSI for task 2.

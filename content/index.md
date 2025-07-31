@@ -20,26 +20,30 @@ To understand the project's foundation, start with these key ideas:
 
 ### The Building Blocks: Derived Dimensions
 
-The parametric space is defined by a set of core experimental dimensions. Understanding these is key to understanding how paradigms relate to one another.
+The parametric space is defined by a set of core experimental dimensions, grouped by the cognitive function they primarily target. This structure is directly operationalized in our analytical pipeline (see [[Thesis Considerations/MOFA+ as an Exploratory Analytical Tool|MOFA+]]).
 
-*   **Temporal & Structural Factors:**
-    *   `[[Task 2 Response Probability]]`: The key dimension differentiating single-task from dual-task paradigms.
-    *   `[[Inter-task SOA (Stimulus Onset Asynchrony)|Inter-task SOA]]`: The primary variable in dual-task research.
-    *   `[[Distractor SOA]]`: The SOA between a target and distractor in a single-task context.
-    *   `[[CSI (Cue-Stimulus Interval)]]`: The time available for advance preparation.
-    *   `[[RSI (Response Stimulus Interval)]]`: The time between trials, crucial for studying preparation and decay.
-    *   `[[RSI Is Predictable]]`: A critical modulator determining how RSI can be used for preparation.
-    *   `[[Switch Rate]]` & `[[Trial Transition Type]]`: Parameters that define the dynamics of task-switching.
+*   **Structure & Task Load:**
+    *   [[Dimensions/Task 2 Response Probability|Task 2 Response Probability]]: The key dimension differentiating single-task (p=0) from dual-task (p=1) paradigms.
+    *   [[Dimensions/Task Difficulty|Task Difficulty]]: An abstraction of the cognitive load required by each task.
 
-*   **Stimulus & Task Properties:**
-    *   `[[Dimensions/Stimulus-Stimulus Congruency]]`: The source of Stroop-like conflict.
-    *   `[[Dimensions/Stimulus-Response Congruency]]`: The source of Simon-like conflict.
-    *   `[[Task Cue Type]]`: The nature of the information given to the participant.
-    *   `[[Task Difficulty]]`: An abstraction of the cognitive load of a task.
+*   **Temporal Dynamics:**
+    *   [[Dimensions/Inter-task SOA (Stimulus Onset Asynchrony)|Inter-task SOA]]: The primary temporal variable in dual-task research (T1-S1 to T2-S2 onset).
+    *   [[Dimensions/Distractor SOA|Distractor SOA]]: The temporal offset between a target and a distractor in a single-task context.
+    *   [[Dimensions/CSI (Cue-Stimulus Interval)|CSI]]: The time available for advance preparation.
+    *   [[Dimensions/RSI (Response Stimulus Interval)|RSI]]: The time between trials, crucial for studying preparation and decay of interference.
 
-*   **Response Properties:**
-    *   `[[Response Set Overlap]]`: The relationship between the motor outputs of different tasks.
-    *   `[[Stimulus Response Mapping]]`: The compatibility of the rule linking a stimulus to a response.
+*   **Context & Sequence:**
+    *   [[Dimensions/Switch Rate|Switch Rate]] & [[Dimensions/Trial Transition Type|Trial Transition Type]]: Parameters that define the dynamics of task-switching.
+    *   [[Dimensions/RSI Is Predictable|RSI Is Predictable]]: A critical modulator determining how RSI can be used for preparation.
+    *   [[Dimensions/Task Cue Type|Task Cue Type]]: The nature of the information given to the participant to specify the task.
+
+*   **Conflict Sources:**
+    *   [[Dimensions/Stimulus-Stimulus Congruency|Stimulus-Stimulus Congruency]]: The source of Stroop-like conflict (semantic/identity).
+    *   [[Dimensions/Stimulus-Response Congruency|Stimulus-Response Congruency]]: The source of Simon-like conflict (spatial/structural).
+
+*   **Rules & Mappings:**
+    *   [[Dimensions/Response Set Overlap|Response Set Overlap]]: The relationship between the motor outputs of different tasks.
+    *   [[Dimensions/Stimulus Response Mapping|Stimulus Response Mapping]]: The compatibility of the instructed rule linking a stimulus to a response.
 
 ### Canonical Paradigm Classes
 
@@ -61,10 +65,12 @@ The vault contains notes on foundational papers and theories. Here are a few exa
 
 ### Implementation and Analysis
 
-This section details how the conceptual framework is operationalized.
+This section details how the conceptual framework is operationalized and analyzed.
 
 *   **[[Super Experiment Framework]]**: The software library used to define and run experimental trials based on low-level parameters.
-*   **[[Thesis Considerations/PCA Feature Selection|PCA Feature Selection]]** & **[[Thesis Considerations/PCA Input Dimensions|PCA Input Dimensions]]**: The rationale and methodology for the Principal Component Analysis used to analyze the structure of the design space.
+*   **Analytical Methods**: We use a dual-analysis approach to explore the structure of the design space:
+    *   **[[Thesis Considerations/PCA Input Dimensions|Principal Component Analysis (PCA)]]**: Our primary method for identifying the orthogonal axes of maximal variance in the design space. See our notes on [[Thesis Considerations/PCA Feature Selection|feature selection]] and [[Thesis Considerations/PCA Input Dimensions|input dimensions]].
+    *   **[[Thesis Considerations/MOFA+ as an Exploratory Analytical Tool|MOFA+]]**: A secondary, theory-driven method used to explore how latent factors are distributed across conceptually-defined "views" of the data.
 *   **[[Parameter Overrides and Sequence Metadata]]**: A note on the system used to handle special cases and non-standard timings from the literature.
 
 ### Project Status and Open Questions
