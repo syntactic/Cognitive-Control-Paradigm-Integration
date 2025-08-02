@@ -14,7 +14,7 @@ from scipy.stats import skew
 
 VIEW_MAPPING_UNIFIED = {
     'Temporal': ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI'],
-    'Context': ['Switch Rate', 'RSI is Predictable', 'Trial_Transition_Type'],
+    'Context': ['Switch Rate', 'RSI is Predictable', 'Trial Transition Type'],
     'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty'],
     'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency'],
     'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap'],
@@ -23,7 +23,7 @@ VIEW_MAPPING_UNIFIED = {
 
 VIEW_MAPPING = {
     'Temporal': ['num__Inter-task SOA', 'num__Distractor SOA', 'num__Task 1 CSI', 'num__Task 2 CSI', 'num__RSI'],
-    'Context': ['num__Switch Rate', 'cat__RSI is Predictable_1', 'cat__Trial_Transition_Type_Mapped_TTT_NA', 'cat__Trial_Transition_Type_Mapped_TTT_Pure', 'cat__Trial_Transition_Type_Mapped_TTT_Repeat', 'cat__Trial_Transition_Type_Mapped_TTT_Switch'],
+    'Context': ['num__Switch Rate', 'cat__RSI is Predictable_1', 'cat__Trial Transition Type_Mapped_TTT_NA', 'cat__Trial Transition Type_Mapped_TTT_Pure', 'cat__Trial Transition Type_Mapped_TTT_Repeat', 'cat__Trial Transition Type_Mapped_TTT_Switch'],
     'Task_Properties': ['num__Task 1 Difficulty', 'num__Task 2 Difficulty'],
     'Conflict': ['cat__Stimulus_Stimulus_Congruency_Mapped_SS_Congruent', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Incongruent', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Neutral', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_NA', 'cat__Stimulus_Response_Congruency_Mapped_SR_NA', 'cat__Stimulus_Response_Congruency_Mapped_SR_Neutral', 'cat__Stimulus_Response_Congruency_Mapped_SR_Congruent', 'cat__Stimulus_Response_Congruency_Mapped_SR_Incongruent'],
     'Rules': ['cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Arbitrary', 'cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Compatible', 'cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Incompatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Arbitrary', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Compatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Incompatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_NA', 'cat__Response_Set_Overlap_Mapped_RSO_Disjoint', 'cat__Response_Set_Overlap_Mapped_RSO_Identical', 'cat__Response_Set_Overlap_Mapped_RSO_NA'],
@@ -257,8 +257,8 @@ def reverse_map_categories(df):
         df_out['Task 2 Stimulus-Response Mapping'] = df_out['Task_2_Stimulus-Response_Mapping_Mapped'].map(srm2_reverse_map)
     if 'Response_Set_Overlap_Mapped' in df_out.columns:
         df_out['Response Set Overlap'] = df_out['Response_Set_Overlap_Mapped'].map(rso_reverse_map)
-    if 'Trial_Transition_Type_Mapped' in df_out.columns:
-        df_out['Trial Transition Type'] = df_out['Trial_Transition_Type_Mapped'].map(ttt_reverse_map)
+    if 'Trial Transition Type_Mapped' in df_out.columns:
+        df_out['Trial Transition Type'] = df_out['Trial Transition Type_Mapped'].map(ttt_reverse_map)
     if 'Task_1_Cue_Type_Mapped' in df_out.columns:
         df_out['Task 1 Cue Type'] = df_out['Task_1_Cue_Type_Mapped'].map(tct_reverse_map)
     if 'Task_2_Cue_Type_Mapped' in df_out.columns:
@@ -386,7 +386,7 @@ def preprocess(df_raw, target='pca'):
     # New categorical mappings
     df['Task_2_Stimulus-Response_Mapping_Mapped'] = df['Task 2 Stimulus-Response Mapping'].apply(map_srm2)
     df['Task_2_Cue_Type_Mapped'] = df['Task 2 Cue Type'].apply(map_tct2)
-    df['Trial_Transition_Type_Mapped'] = df['Trial Transition Type'].apply(map_ttt)
+    df['Trial Transition Type_Mapped'] = df['Trial Transition Type'].apply(map_ttt)
 
     # --- Step 6: Select final columns for the PCA pipeline ---
     numerical_cols = [
@@ -399,7 +399,7 @@ def preprocess(df_raw, target='pca'):
         'Response_Set_Overlap_Mapped', 'RSI is Predictable',
         'Task_1_Stimulus-Response_Mapping_Mapped', 'Task_1_Cue_Type_Mapped',
         'Task_2_Stimulus-Response_Mapping_Mapped', 'Task_2_Cue_Type_Mapped',
-        'Trial_Transition_Type_Mapped'
+        'Trial Transition Type_Mapped'
     ]
     
     df_pca_features = df[numerical_cols + categorical_cols]

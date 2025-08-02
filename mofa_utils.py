@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 # 1. Define Mappings
 VIEW_MAPPING = {
     'Temporal': ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI'],
-    'Context': ['Switch Rate', 'RSI Is Predictable'],
+    'Context': ['Switch Rate', 'RSI is Predictable'],
     'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty'],
     'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency'],
     'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap', 'Trial Transition Type'],
@@ -46,8 +46,8 @@ def preprocess_for_mofa(df_raw):
     # --- Step 1: Initial Cleaning (can reuse some helpers) ---
     df['RSI'] = df['RSI'].apply(clean_rsi)
     df['Switch Rate'] = df['Switch Rate'].apply(clean_switch_rate)
-    if 'RSI Is Predictable' in df.columns:
-            df['RSI Is Predictable'] = df['RSI Is Predictable'].apply(lambda x: 1.0 if str(x).lower() == 'yes' else 0.0)
+    if 'RSI is Predictable' in df.columns:
+            df['RSI is Predictable'] = df['RSI is Predictable'].apply(lambda x: 1.0 if str(x).lower() == 'yes' else 0.0)
 
     # --- Step 2: Numerical Encoding of Categoricals, Normalization of Numerics ---
     for col, mapping in CATEGORICAL_ENCODING.items():

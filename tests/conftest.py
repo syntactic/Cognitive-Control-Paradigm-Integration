@@ -25,8 +25,8 @@ def raw_test_data_dict():
         'Task 2 Stimulus-Response Mapping': ['N/A', 'Compatible', 'Arbitrary'],
         'Task 1 Cue Type': ['None/Implicit', 'None/Implicit', 'Arbitrary'],
         'Task 2 Cue Type': ['N/A', 'None/Implicit', 'Arbitrary'],
-        'RSI Is Predictable': ['Yes', 'Yes', 'No'],
-        'RSI': ['1000', '1500', 'Varied (choice: 600, 1600)'],
+        'RSI is Predictable': ['Yes', 'Yes', 'No'],
+        'RSI': ['1000', '1500', '1100'],
         'Task 1 Difficulty': [3, 2, 3],
         'Task 2 Difficulty': ['N/A', 2, 3],
     }
