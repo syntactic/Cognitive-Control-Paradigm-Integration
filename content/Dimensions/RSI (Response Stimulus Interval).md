@@ -35,8 +35,8 @@ Its manipulation and effects are central to understanding task-set inertia, task
 
 **Values for Coding:**
 *   Milliseconds (ms).
-*   **"Not Specified"**: If the paper does not report a controlled ITI or R-S interval between relevant episodes.
-*   **Placeholder (e.g., -1 or specific text like "Varied Random")**: For conditions where RSI was explicitly varied unpredictably within a block (e.g., [[Rogers & Monsell (1995)]] Exp 2; [[Stephan & Koch (2010)]] Exp 2). This distinguishes it from fixed RSI values. The specific range of variation should be in the `Notes`.
+*   **"Not Specified"**: If the paper does not report a controlled ITI or R-S interval between relevant episodes. This will be preprocessed to be imputed with the median before PCA sees it.
+*   A derived value, usually expected value of RSI over the conditions: For conditions where RSI was explicitly varied unpredictably within a block (e.g., [[Rogers & Monsell (1995)]] Exp 2; [[Stephan & Koch (2010)]] Exp 2). This distinguishes it from fixed RSI values. The specific range of variation should be in the `Super_Experiment_Mapping_Notes`.
 
 **Relationship to Other Dimensions:**
 *   Interacts significantly with [[CSI (Cue-Stimulus Interval)|CSI]]: Total preparation time can be seen as `RSI + CSI` (though they afford different types/stages of preparation).
