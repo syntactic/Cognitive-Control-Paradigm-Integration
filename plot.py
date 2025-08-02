@@ -64,8 +64,8 @@ def plot_factor_weights_by_view(model, factor, n_features_per_view=5, figsize=(1
     return fig
 
 def add_na_mask_from_flag(final_plot_df):
-    columns_to_mask = {'Inter-task SOA' : 'Inter_task_SOA_is_NA', 'Distractor SOA': 'Distractor_SOA_is_NA',
-                       'Task 2 CSI': 'Task_2_CSI_is_NA', 'Task 2 Difficulty': 'Task_2_Difficulty_is_NA'}
+    columns_to_mask = {'Inter-task SOA' : 'Inter-task SOA is NA', 'Distractor SOA': 'Distractor SOA is NA',
+                       'Task 2 CSI': 'Task 2 CSI is NA', 'Task 2 Difficulty': 'Task 2 Difficulty is NA'}
     for column, flag_column in columns_to_mask.items():
         final_plot_df[column] = np.where(
                 final_plot_df[flag_column] == 1,

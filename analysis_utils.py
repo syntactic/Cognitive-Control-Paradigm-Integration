@@ -290,8 +290,8 @@ def apply_conceptual_constraints(df):
     is_single_task = sum([df_out['Task 2 Response Probability'] < THRESHOLD,
                           df_out['Trial Transition Type'] == 'Pure',
                           df_out['Response Set Overlap'] == 'N/A',
-                          df_out['Task_2_Difficulty_is_NA'] > THRESHOLD,
-                          df_out['Task_2_CSI_is_NA'] > THRESHOLD,
+                          df_out['Task 2 Difficulty is NA'] > THRESHOLD,
+                          df_out['Task 2 CSI is NA'] > THRESHOLD,
                           df_out['Task 2 Stimulus-Response Mapping'] == 'N/A',
                           df_out['Task 2 Cue Type'] == 'N/A']) > 4
     logger.warning(f"Is single task: {is_single_task}")
