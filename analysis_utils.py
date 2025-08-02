@@ -16,25 +16,10 @@ VIEW_MAPPING_UNIFIED = {
     'Temporal': ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI'],
     'Context': ['Switch Rate', 'RSI is Predictable', 'Trial Transition Type'],
     'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty'],
-    'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency'],
+    'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency', 'Stimulus Bivalence & Congruency'],
     'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap'],
-    'Structure': ['Task 2 Response Probability', 'Task_1_Cue_Type', 'Task_2_Cue_Type', 'Inter_task_SOA_is_NA', 'Distractor_SOA_is_NA', 'Task_2_CSI_is_NA', 'Task_2_Difficulty_is_NA']
+    'Structure': ['Task 2 Response Probability', 'Task 1 Cue Type', 'Task 2 Cue Type', 'Inter task SOA is NA', 'Distractor SOA is NA', 'Task 2 CSI is NA', 'Task 2 Difficulty is NA']
 }
-
-VIEW_MAPPING = {
-    'Temporal': ['num__Inter-task SOA', 'num__Distractor SOA', 'num__Task 1 CSI', 'num__Task 2 CSI', 'num__RSI'],
-    'Context': ['num__Switch Rate', 'cat__RSI is Predictable_1', 'cat__Trial Transition Type_Mapped_TTT_NA', 'cat__Trial Transition Type_Mapped_TTT_Pure', 'cat__Trial Transition Type_Mapped_TTT_Repeat', 'cat__Trial Transition Type_Mapped_TTT_Switch'],
-    'Task_Properties': ['num__Task 1 Difficulty', 'num__Task 2 Difficulty'],
-    'Conflict': ['cat__Stimulus_Stimulus_Congruency_Mapped_SS_Congruent', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Incongruent', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Neutral', 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_NA', 'cat__Stimulus_Response_Congruency_Mapped_SR_NA', 'cat__Stimulus_Response_Congruency_Mapped_SR_Neutral', 'cat__Stimulus_Response_Congruency_Mapped_SR_Congruent', 'cat__Stimulus_Response_Congruency_Mapped_SR_Incongruent'],
-    'Rules': ['cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Arbitrary', 'cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Compatible', 'cat__Task_1_Stimulus-Response_Mapping_Mapped_SRM_Incompatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Arbitrary', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Compatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_Incompatible', 'cat__Task_2_Stimulus-Response_Mapping_Mapped_SRM2_NA', 'cat__Response_Set_Overlap_Mapped_RSO_Disjoint', 'cat__Response_Set_Overlap_Mapped_RSO_Identical', 'cat__Response_Set_Overlap_Mapped_RSO_NA'],
-    'Structure': ['num__Task 2 Response Probability', 'cat__Task_1_Cue_Type_Mapped_TCT_Implicit', 'cat__Task_2_Cue_Type_Mapped_TCT2_Arbitrary', 'cat__Task_2_Cue_Type_Mapped_TCT2_Implicit', 'cat__Task_2_Cue_Type_Mapped_TCT2_NA', 'cat__Inter_task_SOA_is_NA_1', 'cat__Distractor_SOA_is_NA_1', 'cat__Task_2_CSI_is_NA_1', 'cat__Task_2_Difficulty_is_NA_1']
-}
-
-# Map original CSV columns to their designated view
-FEATURE_TO_VIEW = {feature: view for view, features in VIEW_MAPPING.items() for feature in features}
-
-NUMERICAL_COLS = ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI',
-'Switch Rate', 'Task 1 Difficulty', 'Task 2 Difficulty', 'Task 2 Response Probability']
 
 # =============================================================================
 # 1. Helper Functions for Data Cleaning
@@ -147,6 +132,17 @@ def map_sr_congruency(val):
         return 'SR_Neutral'
     return 'SR_NA'
 
+def map_sbc(val):
+    """Maps the merged Stimulus Bivalence & Congruency column."""
+    val_str = str(val)
+    if val_str == 'Congruent':
+        return 'Congruent'
+    if val_str == 'Incongruent':
+        return 'Incongruent'
+    if val_str == 'Neutral':
+        return 'Neutral'
+    return 'N/A'
+
 
 def map_rso(val):
     val_str = str(val).lower()
@@ -200,6 +196,12 @@ def reverse_map_categories(df):
     df_out = df.copy()
 
     # Define the reverse mappings (the inverse of your 'map_*' functions)
+    sbc_reverse_map = {
+        'Congruent': 'Congruent',
+        'Incongruent': 'Incongruent',
+        'Neutral': 'Neutral',
+        'N/A': 'N/A'
+    }
     ss_congruency_reverse_map = {
         'SS_Congruent': 'Congruent',
         'SS_Incongruent': 'Incongruent',
@@ -247,26 +249,28 @@ def reverse_map_categories(df):
     }
 
     # Apply the reverse mappings
-    if 'Stimulus_Stimulus_Congruency_Mapped' in df_out.columns:
-        df_out['Stimulus-Stimulus Congruency'] = df_out['Stimulus_Stimulus_Congruency_Mapped'].map(ss_congruency_reverse_map)
-    if 'Stimulus_Response_Congruency_Mapped' in df_out.columns:
-        df_out['Stimulus-Response Congruency'] = df_out['Stimulus_Response_Congruency_Mapped'].map(sr_congruency_reverse_map)
-    if 'Task_1_Stimulus-Response_Mapping_Mapped' in df_out.columns:
-        df_out['Task 1 Stimulus-Response Mapping'] = df_out['Task_1_Stimulus-Response_Mapping_Mapped'].map(srm_reverse_map)
-    if 'Task_2_Stimulus-Response_Mapping_Mapped' in df_out.columns:
-        df_out['Task 2 Stimulus-Response Mapping'] = df_out['Task_2_Stimulus-Response_Mapping_Mapped'].map(srm2_reverse_map)
-    if 'Response_Set_Overlap_Mapped' in df_out.columns:
-        df_out['Response Set Overlap'] = df_out['Response_Set_Overlap_Mapped'].map(rso_reverse_map)
-    if 'Trial Transition Type_Mapped' in df_out.columns:
-        df_out['Trial Transition Type'] = df_out['Trial Transition Type_Mapped'].map(ttt_reverse_map)
-    if 'Task_1_Cue_Type_Mapped' in df_out.columns:
-        df_out['Task 1 Cue Type'] = df_out['Task_1_Cue_Type_Mapped'].map(tct_reverse_map)
-    if 'Task_2_Cue_Type_Mapped' in df_out.columns:
-        df_out['Task 2 Cue Type'] = df_out['Task_2_Cue_Type_Mapped'].map(tct2_reverse_map)
+    if 'SBC_Mapped' in df_out.columns:
+        df_out['Stimulus Bivalence & Congruency'] = df_out['SBC_Mapped'].map(sbc_reverse_map)
+    if 'Stimulus-Stimulus Congruency Mapped' in df_out.columns:
+        df_out['Stimulus-Stimulus Congruency'] = df_out['Stimulus-Stimulus Congruency Mapped'].map(ss_congruency_reverse_map)
+    if 'Stimulus-Response Congruency Mapped' in df_out.columns:
+        df_out['Stimulus-Response Congruency'] = df_out['Stimulus-Response Congruency Mapped'].map(sr_congruency_reverse_map)
+    if 'Task 1 Stimulus-Response Mapping Mapped' in df_out.columns:
+        df_out['Task 1 Stimulus-Response Mapping'] = df_out['Task 1 Stimulus-Response Mapping Mapped'].map(srm_reverse_map)
+    if 'Task 2 Stimulus-Response Mapping Mapped' in df_out.columns:
+        df_out['Task 2 Stimulus-Response Mapping'] = df_out['Task 2 Stimulus-Response Mapping Mapped'].map(srm2_reverse_map)
+    if 'Response Set Overlap Mapped' in df_out.columns:
+        df_out['Response Set Overlap'] = df_out['Response Set Overlap Mapped'].map(rso_reverse_map)
+    if 'Trial Transition Type Mapped' in df_out.columns:
+        df_out['Trial Transition Type'] = df_out['Trial Transition Type Mapped'].map(ttt_reverse_map)
+    if 'Task 1 Cue Type Mapped' in df_out.columns:
+        df_out['Task 1 Cue Type'] = df_out['Task 1 Cue Type Mapped'].map(tct_reverse_map)
+    if 'Task 2 Cue Type Mapped' in df_out.columns:
+        df_out['Task 2 Cue Type'] = df_out['Task 2 Cue Type Mapped'].map(tct2_reverse_map)
 
     # Handle the binary predictable RSI
     if 'RSI is Predictable' in df_out.columns:
-         df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 'Yes' if round(x) == 1 else 'No')
+         df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 1 if round(x) == 1 else 'No')
 
     return df_out
 
@@ -312,17 +316,17 @@ def apply_conceptual_constraints(df):
 # 2. Main Preprocessing Pipeline Function
 # =============================================================================
 
-def preprocess(df_raw, target='pca'):
+def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
     """
     Performs all preprocessing for either PCA or MOFA+.
 
     Args:
         df_raw (pd.DataFrame): The raw data from the CSV.
+        merge_conflict_dimensions (bool): If True, merge conflict columns.
         target (str): The target analysis pipeline ('pca' or 'mofa').
 
     Returns:
-        For target='pca': (df_pca_features, numerical_cols, categorical_cols, df_processed)
-        For target='mofa': (df_long, likelihoods)
+        (df_features, numerical_cols, categorical_cols, df_processed, preprocessor)
     """
     logger = logging.getLogger(__name__)
     df = df_raw.copy()
@@ -343,7 +347,7 @@ def preprocess(df_raw, target='pca'):
     if 'Switch Rate' in df.columns:
         df['Switch Rate'] = df['Switch Rate'].apply(clean_switch_rate)
 
-    # Impute RSI with the median before it's used in calculations
+    # Impute RSI with the median for PCA, but not for MOFA
     if target == 'pca':
         if 'RSI' in df.columns:
             rsi_median = df['RSI'].median()
@@ -362,103 +366,178 @@ def preprocess(df_raw, target='pca'):
     # --- Step 4: Create binary presence features ---
     # Generate Applicability Flags DIRECTLY from NaN status.
     # This is done BEFORE imputation.
-    df['Inter_task_SOA_is_NA'] = df['Inter-task SOA'].isna().astype(int)
-    df['Distractor_SOA_is_NA'] = df['Distractor SOA'].isna().astype(int)
-    df['Task_2_CSI_is_NA'] = df['Task 2 CSI'].isna().astype(int)
-    df['Task_2_Difficulty_is_NA'] = df['Task 2 Difficulty'].isna().astype(int)
-    # Impute Main SOA Columns and other numeric columns.
+    df['Inter-task SOA is NA'] = df['Inter-task SOA'].isna().astype(int)
+    df['Distractor SOA is NA'] = df['Distractor SOA'].isna().astype(int)
+    df['Task 2 CSI is NA'] = df['Task 2 CSI'].isna().astype(int)
+    df['Task 2 Difficulty is NA'] = df['Task 2 Difficulty'].isna().astype(int)
+    
+    # --- Step 5: Manual Imputation ---
     df['Inter-task SOA'] = df['Inter-task SOA'].fillna(df['Inter-task SOA'].median())
     df['Distractor SOA'] = df['Distractor SOA'].fillna(df['Distractor SOA'].median())
-    df['Task 1 CSI'] = df['Task 1 CSI'].fillna(0) # this should never happen but in case it does
+    df['Task 1 CSI'] = df['Task 1 CSI'].fillna(0)
     df['Task 2 CSI'] = df['Task 2 CSI'].fillna(df['Task 2 CSI'].median())
-    df['Task 1 Difficulty Norm'] = df['Task 1 Difficulty Norm'].fillna(df['Task 1 Difficulty Norm'].mean()) # This should never happen but in case it does
+    df['Task 1 Difficulty Norm'] = df['Task 1 Difficulty Norm'].fillna(df['Task 1 Difficulty Norm'].mean())
     df['Task 2 Difficulty Norm'] = df['Task 2 Difficulty Norm'].fillna(df['Task 2 Difficulty Norm'].mean())
 
     # Process new binary 'RSI is Predictable'
     df['RSI is Predictable'] = df['RSI is Predictable'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
 
-    # --- Step 5: Map Categorical Features ---
-    df['Stimulus_Stimulus_Congruency_Mapped'] = df['Stimulus-Stimulus Congruency'].apply(map_ss_congruency)
-    df['Stimulus_Response_Congruency_Mapped'] = df['Stimulus-Response Congruency'].apply(map_sr_congruency)
-    df['Response_Set_Overlap_Mapped'] = df['Response Set Overlap'].apply(map_rso)
-    df['Task_1_Stimulus-Response_Mapping_Mapped'] = df['Task 1 Stimulus-Response Mapping'].apply(map_srm)
-    df['Task_1_Cue_Type_Mapped'] = df['Task 1 Cue Type'].apply(map_tct)
-    # New categorical mappings
-    df['Task_2_Stimulus-Response_Mapping_Mapped'] = df['Task 2 Stimulus-Response Mapping'].apply(map_srm2)
-    df['Task_2_Cue_Type_Mapped'] = df['Task 2 Cue Type'].apply(map_tct2)
-    df['Trial Transition Type_Mapped'] = df['Trial Transition Type'].apply(map_ttt)
+    # --- Step 6: Map Categorical Features ---
+    if merge_conflict_dimensions:
+        # Create the merged column
+        df['Stimulus Bivalence & Congruency'] = np.where(
+            df['Stimulus-Stimulus Congruency'].notna() & (df['Stimulus-Stimulus Congruency'] != 'N/A'),
+            df['Stimulus-Stimulus Congruency'],
+            df['Stimulus-Response Congruency']
+        )
+        df['SBC_Mapped'] = df['Stimulus Bivalence & Congruency'].apply(map_sbc)
+    else:
+        df['Stimulus-Stimulus Congruency Mapped'] = df['Stimulus-Stimulus Congruency'].apply(map_ss_congruency)
+        df['Stimulus-Response Congruency Mapped'] = df['Stimulus-Response Congruency'].apply(map_sr_congruency)
 
-    # --- Step 6: Select final columns for the PCA pipeline ---
+    df['Response Set Overlap Mapped'] = df['Response Set Overlap'].apply(map_rso)
+    df['Task 1 Stimulus-Response Mapping Mapped'] = df['Task 1 Stimulus-Response Mapping'].apply(map_srm)
+    df['Task 1 Cue Type Mapped'] = df['Task 1 Cue Type'].apply(map_tct)
+    # New categorical mappings
+    df['Task 2 Stimulus-Response Mapping Mapped'] = df['Task 2 Stimulus-Response Mapping'].apply(map_srm2)
+    df['Task 2 Cue Type Mapped'] = df['Task 2 Cue Type'].apply(map_tct2)
+    df['Trial Transition Type Mapped'] = df['Trial Transition Type'].apply(map_ttt)
+
+    # --- Step 7: Select final columns for the pipeline ---
     numerical_cols = [
         'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA',
         'Task 1 CSI', 'Task 2 CSI',
         'RSI', 'Switch Rate', 'Task 1 Difficulty Norm', 'Task 2 Difficulty Norm', 
     ]
-    categorical_cols = [ 'Inter_task_SOA_is_NA', 'Distractor_SOA_is_NA', 'Task_2_CSI_is_NA', 'Task_2_Difficulty_is_NA',
-        'Stimulus_Stimulus_Congruency_Mapped', 'Stimulus_Response_Congruency_Mapped',
-        'Response_Set_Overlap_Mapped', 'RSI is Predictable',
-        'Task_1_Stimulus-Response_Mapping_Mapped', 'Task_1_Cue_Type_Mapped',
-        'Task_2_Stimulus-Response_Mapping_Mapped', 'Task_2_Cue_Type_Mapped',
-        'Trial Transition Type_Mapped'
+    categorical_cols = [ 'Inter-task SOA is NA', 'Distractor SOA is NA', 'Task 2 CSI is NA', 'Task 2 Difficulty is NA',
+        'Response Set Overlap Mapped', 'RSI is Predictable',
+        'Task 1 Stimulus-Response Mapping Mapped', 'Task 1 Cue Type Mapped',
+        'Task 2 Stimulus-Response Mapping Mapped', 'Task 2 Cue Type Mapped',
+        'Trial Transition Type Mapped'
     ]
     
-    df_pca_features = df[numerical_cols + categorical_cols]
+    if merge_conflict_dimensions:
+        categorical_cols.append('SBC_Mapped')
+    else:
+        categorical_cols.extend(['Stimulus-Stimulus Congruency Mapped', 'Stimulus-Response Congruency Mapped'])
+
+    df_features = df[numerical_cols + categorical_cols]
     
     # Rename columns for clarity in pipeline/loadings output
-    df_pca_features = df_pca_features.rename(columns={
+    df_features = df_features.rename(columns={
         'Task 1 Difficulty Norm': 'Task 1 Difficulty',
         'Task 2 Difficulty Norm': 'Task 2 Difficulty'
     })
     # Update the list of numerical columns to match the renamed columns
     numerical_cols = [name.replace(' Norm', '') if 'Norm' in name else name for name in numerical_cols]
 
-    return df_pca_features, numerical_cols, categorical_cols, df
-
-def preprocess_for_mofa(df_raw):
-    df_pca_features, numerical_cols, categorical_cols, df = preprocess(df_raw, target="mofa")
 
     preprocessor = InvertibleColumnTransformer(
         transformers=[
             ('num', StandardScaler(), numerical_cols),
-            ('cat', OneHotEncoder(handle_unknown='ignore', drop='if_binary'), categorical_cols)
+            ('cat', OneHotEncoder(handle_unknown='ignore', drop=None), categorical_cols)
         ],
         remainder='drop'
     )
 
-    df_mofa = preprocessor.fit_transform(df_pca_features)
+    return df_features, numerical_cols, categorical_cols, df, preprocessor
+
+def generate_dynamic_view_mapping(preprocessor, view_mapping_unified):
+    """
+    Generates a dynamic mapping from transformed feature names to views,
+    ensuring no overgeneration by inspecting the fitted preprocessor.
+
+    Args:
+        preprocessor: A fitted InvertibleColumnTransformer.
+        view_mapping_unified (dict): The single source of truth for conceptual mappings.
+
+    Returns:
+        dict: A dictionary mapping transformed feature names to their corresponding view.
+    """
+    # 1. Create a lookup from original conceptual feature name to its view.
+    conceptual_name_to_view = {
+        feature: view
+        for view, features in view_mapping_unified.items()
+        for feature in features
+    }
+
+    # 2. Get the exact list of columns that were fed into the preprocessor.
+    input_features = preprocessor.feature_names_in_
+    # 3. Get the exact list of columns that came out of the preprocessor.
+    output_features = preprocessor.get_feature_names_out()
+
+    final_mapping = {}
+    # 4. Iterate through each output feature and work backwards to find its origin.
+    for t_name in output_features:
+        # e.g., t_name = 'cat__Stimulus_Stimulus_Congruency_Mapped_SS_Congruent'
+        # or 'num__Inter-task SOA'
+        original_name_from_transformer = t_name.split('__')[1]
+
+        # Find which of the input columns is the source of this transformed column.
+        # This works because OHE appends to the name, so startswith is a reliable check.
+        source_input_col = None
+        for input_name in input_features:
+            if original_name_from_transformer.startswith(input_name):
+                source_input_col = input_name
+                break
+        
+        if source_input_col:
+            # Now, map this source column (e.g., 'Stimulus-Stimulus Congruency Mapped')
+            # back to its conceptual name (e.g., 'Stimulus-Stimulus Congruency').
+            conceptual_name = None
+            if source_input_col.endswith(' Mapped') or source_input_col == 'SBC_Mapped':
+                if source_input_col == 'SBC_Mapped':
+                    conceptual_name = 'Stimulus Bivalence & Congruency'
+                else:
+                    # e.g., 'Stimulus-Stimulus Congruency Mapped' -> 'Stimulus-Stimulus Congruency'
+                    conceptual_name = source_input_col.replace(' Mapped', '')
+            else:
+                # It's a numerical or binary column that didn't get mapped.
+                conceptual_name = source_input_col
+
+            # Finally, find the view for that conceptual name.
+            view = conceptual_name_to_view.get(conceptual_name)
+            if view:
+                final_mapping[t_name] = view
+            else:
+                logging.warning(f"Could not find view for conceptual name: '{conceptual_name}' (from transformed: {t_name})")
+        else:
+            logging.warning(f"Could not find source input column for transformed feature: {t_name}")
+            
+    return final_mapping
+
+def prepare_mofa_data(df_features, preprocessor, df_raw, feature_to_view):
+    """
+    Takes preprocessed data and prepares it for MOFA by transforming it into a long format.
+
+    Args:
+        df_features (pd.DataFrame): The feature matrix from preprocess.
+        preprocessor (InvertibleColumnTransformer): The unfitted preprocessor from preprocess.
+        df_raw (pd.DataFrame): The original raw dataframe to get experiment names.
+        feature_to_view (dict): Mapping from transformed feature names to views.
+
+    Returns:
+        (pd.DataFrame, list): The long-format DataFrame for MOFA and the likelihoods list.
+    """
+    df_mofa = preprocessor.fit_transform(df_features)
     column_names = preprocessor.get_feature_names_out()
     df_mofa = pd.DataFrame(df_mofa, columns=column_names)
     df_mofa['Experiment'] = df_raw['Experiment']
 
-    value_vars = list(FEATURE_TO_VIEW.keys()) # All columns that are features
-    
     df_long = pd.melt(df_mofa, id_vars=['Experiment'], value_vars=column_names,
                       var_name='feature', value_name='value')
-    
-    # --- Step 4: Add 'view' and 'group' columns ---
-    df_long['view'] = df_long['feature'].map(FEATURE_TO_VIEW)
-    # Commented out: use paradigm classification for the 'group' column
-    # this is commented out because grouping them by paradigm yields no factors
-    #df_temp_for_group = df_pca_features.set_index('Experiment')
-    #df_long['group'] = df_long['Experiment'].apply(lambda x: classify_paradigm(df_temp_for_group.loc[x]))
+
+    df_long['view'] = df_long['feature'].map(feature_to_view)
     df_long['group'] = 'all_studies'
-    df_pca_features['Experiment'] = df_raw['Experiment']
     df_long.rename(columns={'Experiment': 'sample'}, inplace=True)
-    
-    # --- Step 5: Final Cleanup ---
+
     df_long.dropna(subset=['value', 'view'], inplace=True)
     df_long['value'] = pd.to_numeric(df_long['value'])
 
-    # --- Step 6: Define Likelihoods ---
-    # For now, let's start with gaussian for all views
-    # The order must be alphabetical by view name
     views_ordered = sorted(df_long['view'].unique())
     likelihoods = ['gaussian'] * len(views_ordered)
 
-    return df_long, preprocessor, likelihoods
-
-    return df_mofa, preprocessor
-
+    return df_long, likelihoods
 
 
 # =============================================================================
@@ -533,7 +612,7 @@ def create_pca_pipeline(numerical_cols, categorical_cols):
     preprocessor = InvertibleColumnTransformer(
         transformers=[
             ('num', StandardScaler(), numerical_cols),
-            ('cat', OneHotEncoder(handle_unknown='ignore', drop='if_binary'), categorical_cols)
+            ('cat', OneHotEncoder(handle_unknown='ignore', drop=None), categorical_cols)
         ],
         remainder='drop'
     )
