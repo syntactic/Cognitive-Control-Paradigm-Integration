@@ -109,10 +109,3 @@ def test_pca_pipeline_with_real_dataset():
             assert accuracy > 0.95, f"Binary column {col} accuracy too low: {accuracy:.3f}"
         elif col.endswith(' Mapped'):
             assert accuracy > 0.90, f"Categorical column {col} accuracy too low: {accuracy:.3f}"
-    
-    print("✓ All real dataset tests passed!")
-    print("=" * 50)
-
-
-if __name__ == "__main__":
-    test_pca_pipeline_with_real_dataset()

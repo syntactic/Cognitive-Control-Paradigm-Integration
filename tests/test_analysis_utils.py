@@ -4,6 +4,7 @@ import numpy as np
 import logging
 from analysis_utils import (
     preprocess,
+    prepare_mofa_data,
     create_pca_pipeline,
     find_centroids,
     interpolate_centroids,
@@ -195,9 +196,9 @@ def test_preprocess_merge_conflict_dimensions(raw_test_data_dict):
     assert df_processed.loc[1, 'Stimulus Bivalence & Congruency'] == 'N/A'
     assert df_features.loc[1, 'SBC_Mapped'] == 'N/A'
 
-    # Exp 3 (Task Switching): S-S is Neutral, S-R is Incompatible -> Merged should be Neutral
-    assert df_processed.loc[2, 'Stimulus Bivalence & Congruency'] == 'Neutral'
-    assert df_features.loc[2, 'SBC_Mapped'] == 'Neutral'
+    # Exp 3 (Task Switching): S-S is Neutral, S-R is Incompatible -> Merged should be Incongruent
+    assert df_processed.loc[2, 'Stimulus Bivalence & Congruency'] == 'Incongruent'
+    assert df_features.loc[2, 'SBC_Mapped'] == 'Incongruent'
 
 def test_generate_dynamic_view_mapping(raw_test_data_dict):
     """
@@ -378,4 +379,115 @@ def test_interpolation_and_reconstruction(raw_test_data_dict):
     # The inverse transform will pick the most likely category. We can't be too
     # strict here, but we can check that it's a valid category.
     assert reconstructed_params['Stimulus-Response Congruency Mapped'] in ['SR_Incongruent', 'SR_NA']
+
+
+def test_prepare_mofa_data_exclude_missing(raw_test_data_dict):
+    """
+    Tests the prepare_mofa_data function with exclude_missing_for_mofa=True.
+    Verifies that originally missing values are excluded and auxiliary features are removed.
+    """
+    df_raw = pd.DataFrame(raw_test_data_dict)
+    
+    # Preprocess the data
+    df_features, _, _, _, preprocessor = preprocess(df_raw)
+    
+    # Test with exclude_missing_for_mofa=True
+    df_long_filtered, likelihoods_filtered = prepare_mofa_data(df_features, preprocessor, df_raw, exclude_missing_for_mofa=True)
+    
+    # Test 1: Check that known missing features are excluded
+    # For Stroop_Incongruent, Inter-task SOA is 'N/A' in the raw data
+    stroop_inter_task_soa_rows = df_long_filtered[
+        (df_long_filtered['sample'] == 'Stroop_Incongruent') & 
+        (df_long_filtered['feature'] == 'num__Inter-task SOA')
+    ]
+    assert len(stroop_inter_task_soa_rows) == 0, "Expected no rows for Stroop_Incongruent Inter-task SOA (was N/A)"
+    
+    # For Stroop_Incongruent, Task 2 CSI is 'N/A' in the raw data
+    stroop_task2_csi_rows = df_long_filtered[
+        (df_long_filtered['sample'] == 'Stroop_Incongruent') & 
+        (df_long_filtered['feature'] == 'num__Task 2 CSI')
+    ]
+    assert len(stroop_task2_csi_rows) == 0, "Expected no rows for Stroop_Incongruent Task 2 CSI (was N/A)"
+    
+    # For Stroop_Incongruent, Task 2 Difficulty is 'N/A' in the raw data
+    stroop_task2_diff_rows = df_long_filtered[
+        (df_long_filtered['sample'] == 'Stroop_Incongruent') & 
+        (df_long_filtered['feature'] == 'num__Task 2 Difficulty')
+    ]
+    assert len(stroop_task2_diff_rows) == 0, "Expected no rows for Stroop_Incongruent Task 2 Difficulty (was N/A)"
+    
+    # Test 2: Check that known present features are included
+    # For PRP_Short_SOA, Inter-task SOA is 100 in the raw data
+    prp_inter_task_soa_rows = df_long_filtered[
+        (df_long_filtered['sample'] == 'PRP_Short_SOA') & 
+        (df_long_filtered['feature'] == 'num__Inter-task SOA')
+    ]
+    assert len(prp_inter_task_soa_rows) == 1, "Expected one row for PRP_Short_SOA Inter-task SOA (value: 100)"
+    
+    # Test 3: Check that auxiliary features are removed
+    # No feature should contain 'is NA' substring
+    is_na_features = df_long_filtered[df_long_filtered['feature'].str.contains('is NA')]
+    assert len(is_na_features) == 0, f"Expected no 'is NA' features, found: {is_na_features['feature'].unique()}"
+    
+    # No feature should end with '_NA'
+    na_category_features = df_long_filtered[df_long_filtered['feature'].str.endswith('_NA')]
+    assert len(na_category_features) == 0, f"Expected no '_NA' category features, found: {na_category_features['feature'].unique()}"
+    
+    # Test 4: Verify the function still returns proper structure
+    assert isinstance(df_long_filtered, pd.DataFrame)
+    assert isinstance(likelihoods_filtered, list)
+    assert len(likelihoods_filtered) == len(df_long_filtered['view'].unique())
+    assert all(likelihood == 'gaussian' for likelihood in likelihoods_filtered)
+    
+    # Test 5: Ensure required columns are present
+    required_columns = ['sample', 'feature', 'value', 'view', 'group']
+    for col in required_columns:
+        assert col in df_long_filtered.columns, f"Missing required column: {col}"
+
+
+def test_prepare_mofa_data_backward_compatibility(raw_test_data_dict):
+    """
+    Tests that prepare_mofa_data with exclude_missing_for_mofa=False preserves 
+    the original behavior (backward compatibility).
+    """
+    df_raw = pd.DataFrame(raw_test_data_dict)
+    
+    # Preprocess the data
+    df_features, _, _, _, preprocessor = preprocess(df_raw)
+    
+    # Test with exclude_missing_for_mofa=False (default)
+    df_long_original, likelihoods_original = prepare_mofa_data(df_features, preprocessor, df_raw, exclude_missing_for_mofa=False)
+    
+    # Also test default behavior (should be the same)
+    df_long_default, likelihoods_default = prepare_mofa_data(df_features, preprocessor, df_raw)
+    
+    # Test 1: Both calls should produce identical results
+    pd.testing.assert_frame_equal(df_long_original, df_long_default)
+    assert likelihoods_original == likelihoods_default
+    
+    # Test 2: Auxiliary features should be present in original behavior
+    # 'is NA' features should be present
+    is_na_features = df_long_original[df_long_original['feature'].str.contains('is NA')]
+    assert len(is_na_features) > 0, "Expected 'is NA' features to be present in original behavior"
+    
+    # '_NA' category features should be present
+    na_category_features = df_long_original[df_long_original['feature'].str.endswith('_NA')]
+    assert len(na_category_features) > 0, "Expected '_NA' category features to be present in original behavior"
+    
+    # Test 3: Originally missing values should have imputed entries
+    # For Stroop_Incongruent, Inter-task SOA should have an imputed value
+    stroop_inter_task_soa_rows = df_long_original[
+        (df_long_original['sample'] == 'Stroop_Incongruent') & 
+        (df_long_original['feature'] == 'num__Inter-task SOA')
+    ]
+    assert len(stroop_inter_task_soa_rows) == 1, "Expected imputed row for Stroop_Incongruent Inter-task SOA"
+    
+    # Test 4: Verify structure matches expected format
+    assert isinstance(df_long_original, pd.DataFrame)
+    assert isinstance(likelihoods_original, list)
+    assert len(likelihoods_original) == len(df_long_original['view'].unique())
+    
+    # Test 5: Compare sizes - filtered version should be smaller
+    df_long_filtered, _ = prepare_mofa_data(df_features, preprocessor, df_raw, exclude_missing_for_mofa=True)
+    assert len(df_long_filtered) < len(df_long_original), "Filtered version should have fewer rows than original"
 

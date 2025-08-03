@@ -311,7 +311,6 @@ def apply_conceptual_constraints(df):
 
     return df_out
 
-
 # =============================================================================
 # 2. Main Preprocessing Pipeline Function
 # =============================================================================
@@ -384,12 +383,28 @@ def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
 
     # --- Step 6: Map Categorical Features ---
     if merge_conflict_dimensions:
-        # Create the merged column
+        s_s_col = df['Stimulus-Stimulus Congruency']
+        s_r_col = df['Stimulus-Response Congruency']
+
+        conditions = [
+            (s_s_col == 'Incongruent') | (s_r_col == 'Incongruent'),  # Priority 1: If either is Incongruent
+            (s_s_col == 'Congruent') | (s_r_col == 'Congruent'),      # Priority 2: If either is Congruent
+            (s_s_col == 'Neutral') | (s_r_col == 'Neutral')          # Priority 3: If either is Neutral
+        ]
+
+        choices = [
+            'Incongruent',
+            'Congruent',
+            'Neutral'
+        ]
+
+        df['Stimulus Bivalence & Congruency'] = np.select(conditions, choices, default='N/A')
+        """# Create the merged column
         df['Stimulus Bivalence & Congruency'] = np.where(
             df['Stimulus-Stimulus Congruency'].notna() & (df['Stimulus-Stimulus Congruency'] != 'N/A'),
             df['Stimulus-Stimulus Congruency'],
             df['Stimulus-Response Congruency']
-        )
+        )"""
         df['SBC_Mapped'] = df['Stimulus Bivalence & Congruency'].apply(map_sbc)
     else:
         df['Stimulus-Stimulus Congruency Mapped'] = df['Stimulus-Stimulus Congruency'].apply(map_ss_congruency)
@@ -506,7 +521,7 @@ def generate_dynamic_view_mapping(preprocessor, view_mapping_unified):
             
     return final_mapping
 
-def prepare_mofa_data(df_features, preprocessor, df_raw, feature_to_view):
+def prepare_mofa_data(df_features, preprocessor, df_raw, exclude_missing_for_mofa=False):
     """
     Takes preprocessed data and prepares it for MOFA by transforming it into a long format.
 
@@ -514,13 +529,15 @@ def prepare_mofa_data(df_features, preprocessor, df_raw, feature_to_view):
         df_features (pd.DataFrame): The feature matrix from preprocess.
         preprocessor (InvertibleColumnTransformer): The unfitted preprocessor from preprocess.
         df_raw (pd.DataFrame): The original raw dataframe to get experiment names.
-        feature_to_view (dict): Mapping from transformed feature names to views.
+        exclude_missing_for_mofa (bool): If True, excludes rows corresponding to originally 
+            missing values from the long-format output for MOFA+. Default False.
 
     Returns:
         (pd.DataFrame, list): The long-format DataFrame for MOFA and the likelihoods list.
     """
     df_mofa = preprocessor.fit_transform(df_features)
     column_names = preprocessor.get_feature_names_out()
+    feature_to_view = generate_dynamic_view_mapping(preprocessor, VIEW_MAPPING_UNIFIED)
     df_mofa = pd.DataFrame(df_mofa, columns=column_names)
     df_mofa['Experiment'] = df_raw['Experiment']
 
@@ -533,6 +550,59 @@ def prepare_mofa_data(df_features, preprocessor, df_raw, feature_to_view):
 
     df_long.dropna(subset=['value', 'view'], inplace=True)
     df_long['value'] = pd.to_numeric(df_long['value'])
+
+    # Apply missing value filtering if requested
+    if exclude_missing_for_mofa:
+        # Create a missing value mask from the raw data
+        df_raw_clean = df_raw.copy()
+        # Replace string 'N/A' and 'Not Specified' with np.nan
+        with pd.option_context('future.no_silent_downcasting', True):
+            df_raw_clean = df_raw_clean.replace(['N/A', 'Not Specified'], np.nan)
+        
+        # Melt raw data to long format for missing value identification
+        df_raw_long = df_raw_clean.melt(id_vars=['Experiment'], var_name='original_feature', value_name='original_value')
+        
+        # Identify missing entries
+        missing_mask = df_raw_long['original_value'].isna()
+        missing_pairs = set(tuple(x) for x in df_raw_long.loc[missing_mask, ['Experiment', 'original_feature']].values)
+        
+        # Map transformed features back to original names
+        def map_to_original_feature(feature_name):
+            """Map transformed feature name back to original conceptual name"""
+            if '__' in feature_name:
+                after_underscore = feature_name.split('__')[1]
+                # Remove one-hot encoding suffixes (e.g., '_0', '_1', category suffixes)
+                # First handle features with ' Mapped' suffix
+                if ' Mapped' in after_underscore:
+                    original_name = after_underscore.split(' Mapped')[0]
+                else:
+                    # For features like 'Inter-task SOA is NA_0', remove the '_0' suffix
+                    # For features like 'RSI is Predictable_1', remove the '_1' suffix
+                    # Split on '_' and rejoin all but the last part if last part is a digit
+                    parts = after_underscore.split('_')
+                    if len(parts) > 1 and parts[-1].isdigit():
+                        original_name = '_'.join(parts[:-1])
+                    else:
+                        original_name = after_underscore
+                return original_name
+            return feature_name
+        
+        df_long['original_feature'] = df_long['feature'].apply(map_to_original_feature)
+        
+        # Filter out rows corresponding to originally missing values
+        keep_mask = ~df_long.apply(lambda row: (row['sample'], row['original_feature']) in missing_pairs, axis=1)
+        df_long = df_long[keep_mask].copy()
+        
+        # Remove auxiliary features (features ending with 'is NA' and '_NA' categories)
+        auxiliary_mask = (
+            df_long['original_feature'].str.endswith('is NA') |
+            df_long['feature'].str.contains('_NA_') |  # Handle one-hot encoded _NA categories
+            df_long['feature'].str.endswith('_NA')     # Handle direct _NA endings
+        )
+        df_long = df_long[~auxiliary_mask].copy()
+        
+        # Drop the temporary column
+        df_long = df_long.drop(columns=['original_feature'])
 
     views_ordered = sorted(df_long['view'].unique())
     likelihoods = ['gaussian'] * len(views_ordered)
