@@ -521,7 +521,93 @@ def generate_dynamic_view_mapping(preprocessor, view_mapping_unified):
             
     return final_mapping
 
-def preprocess_for_mofa(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, list, StandardScaler]:
+def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse') -> tuple:
+    """
+    Prepares data for MOFA+ analysis with support for different preprocessing strategies.
+    
+    This function serves as the unified entry point for MOFA+ data preparation, supporting
+    both sparse (ordinal encoding) and dense (one-hot encoding) preprocessing strategies.
+    
+    Args:
+        df_raw (pd.DataFrame): The raw experimental data from CSV.
+        strategy (str): Preprocessing strategy - either 'sparse' or 'dense'.
+                       Default is 'sparse'.
+    
+    Returns:
+        tuple: (df_long, likelihoods, preprocessor_obj, view_map)
+            - df_long: Long-format DataFrame for MOFA+ with columns 
+                      ['sample', 'feature', 'value', 'view', 'group']
+            - likelihoods: List of likelihoods ('gaussian' for all views)
+            - preprocessor_obj: Fitted preprocessor object for inverse transformation
+                               (StandardScaler for sparse, InvertibleColumnTransformer for dense)
+            - view_map: Dictionary mapping feature names to their conceptual view
+    """
+    if strategy == 'sparse':
+        # Use the sparse preprocessing strategy
+        df_long, likelihoods, scaler = _prepare_mofa_data_sparse(df_raw)
+        
+        # Generate view map for sparse case using original feature names
+        feature_to_view = {}
+        for view, features in VIEW_MAPPING_UNIFIED.items():
+            for feature in features:
+                feature_to_view[feature] = view
+        
+        return df_long, likelihoods, scaler, feature_to_view
+        
+    elif strategy == 'dense':
+        # Use the dense preprocessing strategy (existing PCA preprocessing)
+        df_features, numerical_cols, categorical_cols, df_processed, preprocessor = preprocess(
+            df_raw, merge_conflict_dimensions=False, target='mofa'
+        )
+        
+        # Fit the preprocessor and transform the data
+        df_features_transformed = preprocessor.fit_transform(df_features)
+        
+        # Convert to DataFrame for easier handling
+        feature_names = preprocessor.get_feature_names_out()
+        df_features_wide = pd.DataFrame(
+            df_features_transformed, 
+            columns=feature_names,
+            index=df_features.index
+        )
+        
+        # Add experiment names back
+        df_features_wide['Experiment'] = df_processed['Experiment'].values
+        
+        # Melt to long format
+        df_long = pd.melt(
+            df_features_wide, 
+            id_vars=['Experiment'], 
+            value_vars=[col for col in df_features_wide.columns if col != 'Experiment'],
+            var_name='feature', 
+            value_name='value'
+        )
+        
+        # Rename Experiment to sample
+        df_long.rename(columns={'Experiment': 'sample'}, inplace=True)
+        
+        # Generate dynamic view mapping using the fitted preprocessor
+        view_map = generate_dynamic_view_mapping(preprocessor, VIEW_MAPPING_UNIFIED)
+        
+        # Add view mapping to df_long
+        df_long['view'] = df_long['feature'].map(view_map)
+        
+        # Filter out rows where view couldn't be assigned
+        df_long = df_long.dropna(subset=['view'])
+        
+        # Add group column
+        df_long['group'] = 'all_studies'
+        
+        # Create likelihoods list
+        views_ordered = sorted(df_long['view'].unique())
+        likelihoods = ['gaussian'] * len(views_ordered)
+        
+        return df_long, likelihoods, preprocessor, view_map
+        
+    else:
+        raise ValueError(f"Unknown strategy: {strategy}. Must be either 'sparse' or 'dense'.")
+
+def _prepare_mofa_data_sparse(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, list, StandardScaler]:
     """
     Prepares data for MOFA+ by numerically encoding features, standardizing continuous variables,
     and handling missing values by omission.
@@ -675,58 +761,6 @@ def preprocess_for_mofa(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, list, Stand
     likelihoods = ['gaussian'] * len(views_ordered)
     
     return df_long, likelihoods, scaler
-
-def reconstruct_from_mofa_factors(factor_scores, model, scaler):
-    """
-    Reconstructs the original feature space from MOFA+ factor scores using the trained
-    model and fitted scaler for inverse transformation.
-    
-    This function performs a full inverse transform from the latent space back to the 
-    original, human-readable feature space by:
-    1. Using MOFA+ learned weights to reconstruct the preprocessed (scaled) space
-    2. Applying inverse standardization to continuous features
-    3. Returning data in the original numerical/ordinal format
-    
-    Args:
-        factor_scores (pd.DataFrame or pd.Series): Factor scores for one or more samples.
-        model: The trained mofax model with learned weights.
-        scaler (StandardScaler): The fitted StandardScaler from preprocessing.
-        
-    Returns:
-        pd.DataFrame: DataFrame with reconstructed data in original feature space,
-                     with samples as rows and features as columns.
-    """
-    # Ensure factor_scores is a 2D array for matrix multiplication
-    if isinstance(factor_scores, pd.Series):
-        factor_scores = factor_scores.to_frame().T
-        
-    Z = factor_scores.values
-    W = model.get_weights(df=True)  # Get weights as DataFrame
-    
-    # Reconstruct the preprocessed (scaled and encoded) space
-    reconstructed_data_scaled = pd.DataFrame(
-        Z @ W.T, 
-        columns=W.index,  # Feature names
-        index=factor_scores.index  # Sample names
-    )
-    
-    # Get the list of continuous features that were standardized
-    continuous_columns = [
-        'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA', 
-        'Task 1 CSI', 'Task 2 CSI', 'RSI', 'Switch Rate', 
-        'Task 1 Difficulty', 'Task 2 Difficulty'
-    ]
-    # Filter to only include columns that exist in the reconstructed data
-    continuous_columns_present = [col for col in continuous_columns if col in reconstructed_data_scaled.columns]
-    
-    # Apply inverse standardization to continuous features only
-    if continuous_columns_present and hasattr(scaler, 'scale_'):
-        reconstructed_data_scaled[continuous_columns_present] = scaler.inverse_transform(
-            reconstructed_data_scaled[continuous_columns_present]
-        )
-    
-    # The result is now in the human-readable numerical/ordinal format
-    return reconstructed_data_scaled
 
 
 # =============================================================================
@@ -891,14 +925,16 @@ def inverse_transform_point(point_pc, pipeline):
 
     return final_params
 
-def reconstruct_from_mofa_factors(factor_scores, model, preprocessor):
+def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
     """
-    Reconstructs the original feature space from MOFA+ factor scores.
+    Reconstructs the original feature space from MOFA+ factor scores using different
+    types of preprocessor objects.
 
     Args:
         factor_scores (pd.DataFrame or pd.Series): A dataframe or series of factor scores for one or more samples.
         model (mfx.mofa_model): The trained mofax model.
-        preprocessor (InvertibleColumnTransformer): The *fitted* preprocessor from the pipeline.
+        preprocessor_obj: The fitted preprocessor object - can be either StandardScaler 
+                         (for sparse strategy) or InvertibleColumnTransformer (for dense strategy).
 
     Returns:
         pd.DataFrame: A DataFrame with the de-normalized and decoded original parameters.
@@ -908,37 +944,87 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor):
         factor_scores = factor_scores.to_frame().T
         
     Z = factor_scores.values
-    W = model.get_weights(df=True) # Get weights as a DataFrame
-
-    # --- THE CRITICAL FIX ---
-    # 1. Get the exact feature order the preprocessor expects.
-    expected_feature_order = preprocessor.get_feature_names_out()
-
-    # 2. Re-index the weight matrix to match the preprocessor's order.
-    #    This ensures the columns of W.T are aligned before multiplication.
-    W_aligned = W.reindex(expected_feature_order)
-
-    # 3. Perform the dot product. The resulting numpy array's columns
-    #    are now implicitly in the correct order for the preprocessor.
-    # 1. Reconstruct. The result is a DataFrame with the right columns but a default integer index.
-    reconstructed_df = Z @ W_aligned.T
-
-    # 2. CRITICAL: Assign the correct experiment name(s) as the index.
-    reconstructed_df.index = factor_scores.index
-
-    # 3. Now the DataFrame is perfect. Pass it to the inverse_transform method.
-    reconstructed_original_data = preprocessor.inverse_transform(reconstructed_df)
-    # --- END OF DEBUGGING BLOCK ---
-
-    # Reconstruct the preprocessed data space
-
-    # Use the preprocessor to inverse transform back to the original space
-    #reconstructed_original_data = preprocessor.inverse_transform(reconstructed_data_array)
-
-    # Return as a nice DataFrame
-    return pd.DataFrame(reconstructed_original_data, 
-                        columns=preprocessor.feature_names_in_, 
-                        index=factor_scores.index)
+    W = model.get_weights(df=True)  # Get weights as DataFrame
+    
+    # Reconstruct the scaled/encoded data space
+    reconstructed_data_scaled = pd.DataFrame(
+        Z @ W.T, 
+        columns=W.index, 
+        index=factor_scores.index
+    )
+    
+    # Handle different preprocessor types
+    if isinstance(preprocessor_obj, ColumnTransformer):
+        # Dense case: Use InvertibleColumnTransformer
+        # The pipeline already knows how to reverse both scaling and one-hot encoding
+        
+        # Get the exact feature order the preprocessor expects
+        expected_feature_order = preprocessor_obj.get_feature_names_out()
+        
+        # Re-index the weight matrix to match the preprocessor's order
+        W_aligned = W.reindex(expected_feature_order)
+        
+        # Reconstruct with properly aligned features
+        reconstructed_df = pd.DataFrame(
+            Z @ W_aligned.T,
+            columns=expected_feature_order,
+            index=factor_scores.index
+        )
+        
+        # Apply inverse transformation
+        reconstructed_original_data = preprocessor_obj.inverse_transform(reconstructed_df)
+        
+        # Return as DataFrame with proper column names
+        return pd.DataFrame(
+            reconstructed_original_data, 
+            columns=preprocessor_obj.feature_names_in_, 
+            index=factor_scores.index
+        )
+        
+    elif isinstance(preprocessor_obj, StandardScaler):
+        # Sparse case: Manual inverse transformation for StandardScaler
+        
+        # Get the list of continuous features that were standardized
+        continuous_columns = [
+            'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA', 
+            'Task 1 CSI', 'Task 2 CSI', 'RSI', 'Switch Rate', 
+            'Task 1 Difficulty', 'Task 2 Difficulty'
+        ]
+        continuous_columns_present = [col for col in continuous_columns if col in reconstructed_data_scaled.columns]
+        
+        # Apply inverse standardization to continuous features only
+        if continuous_columns_present and hasattr(preprocessor_obj, 'scale_'):
+            reconstructed_data_scaled[continuous_columns_present] = preprocessor_obj.inverse_transform(
+                reconstructed_data_scaled[continuous_columns_present]
+            )
+        
+        # For ordinal features, map reconstructed float values back to nearest categories
+        ordinal_mappings = {
+            'Stimulus-Stimulus Congruency': {-1: -1.0, 0: 0.0, 1: 1.0},
+            'Stimulus-Response Congruency': {-1: -1.0, 0: 0.0, 1: 1.0},
+            'Response Set Overlap': {-1: -1.0, 1: 1.0},
+            'Task 1 Stimulus-Response Mapping': {-1: -1.0, 0: 0.0, 1: 1.0},
+            'Task 2 Stimulus-Response Mapping': {-1: -1.0, 0: 0.0, 1: 1.0},
+            'Trial Transition Type': {-0.5: -0.5, 0: 0.0, 0.5: 0.5},
+            'Task 1 Cue Type': {0: 0.0, 1: 1.0},
+            'Task 2 Cue Type': {0: 0.0, 1: 1.0},
+            'RSI is Predictable': {0: 0.0, 1: 1.0}
+        }
+        
+        for col, mapping in ordinal_mappings.items():
+            if col in reconstructed_data_scaled.columns:
+                # Map each reconstructed value to its nearest ordinal value
+                possible_values = list(mapping.values())
+                def map_to_nearest(value):
+                    return min(possible_values, key=lambda x: abs(x - value))
+                
+                reconstructed_data_scaled[col] = reconstructed_data_scaled[col].apply(map_to_nearest)
+        
+        return reconstructed_data_scaled
+        
+    else:
+        raise ValueError(f"Unsupported preprocessor type: {type(preprocessor_obj)}. "
+                        f"Expected StandardScaler or ColumnTransformer.")
 
 def sparseness_hoyer(x):
     """

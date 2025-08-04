@@ -4,16 +4,16 @@ import pytest
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from analysis_utils import preprocess_for_mofa
+from analysis_utils import prepare_mofa_data
 
 def test_preprocess_for_mofa_with_unified_fixture(raw_test_data_dict):
     """
-    Tests the preprocess_for_mofa function using the unified test fixture.
+    Tests the prepare_mofa_data function using the unified test fixture.
     Verifies correct numerical encoding and missing value handling.
     """
     df_raw = pd.DataFrame(raw_test_data_dict)
     
-    df_long, likelihoods, scaler = preprocess_for_mofa(df_raw)
+    df_long, likelihoods, scaler, view_map = prepare_mofa_data(df_raw, strategy='sparse')
 
     # --- Test 1: Check the output DataFrame structure ---
     expected_cols = ['sample', 'feature', 'value', 'view', 'group']
@@ -97,7 +97,7 @@ def test_preprocess_for_mofa_with_real_data(real_raw_data):
     """
     df_test = real_raw_data.copy()
 
-    df_long, likelihoods, scaler = preprocess_for_mofa(df_test)
+    df_long, likelihoods, scaler, view_map = prepare_mofa_data(df_test, strategy='sparse')
     
     # Test 1: Check output structure
     expected_cols = ['sample', 'feature', 'value', 'view', 'group']
@@ -128,7 +128,7 @@ def test_mofa_standardization_roundtrip(raw_test_data_dict):
     """
     df_raw = pd.DataFrame(raw_test_data_dict)
     
-    df_long, likelihoods, scaler = preprocess_for_mofa(df_raw)
+    df_long, likelihoods, scaler, view_map = prepare_mofa_data(df_raw, strategy='sparse')
     
     # Test round-trip for Inter-task SOA from PRP_Short_SOA sample
     prp_inter_task_rows = df_long[
