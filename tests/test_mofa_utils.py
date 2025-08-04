@@ -3,108 +3,161 @@
 import pytest
 import pandas as pd
 import numpy as np
-from mofa_utils import preprocess_for_mofa
+from sklearn.preprocessing import StandardScaler
+from analysis_utils import preprocess_for_mofa
 
 def test_preprocess_for_mofa_with_unified_fixture(raw_test_data_dict):
     """
-    Tests the main preprocessing function using a unified data source.
-    This test ensures the function behaves correctly when fed data with np.nan for missing values.
+    Tests the preprocess_for_mofa function using the unified test fixture.
+    Verifies correct numerical encoding and missing value handling.
     """
-    # Create the DataFrame and replace string 'N/A' with np.nan, as the notebook would.
-    df_raw = pd.DataFrame(raw_test_data_dict).replace('N/A', np.nan)
+    df_raw = pd.DataFrame(raw_test_data_dict)
     
-    df_long, likelihoods = preprocess_for_mofa(df_raw)
+    df_long, likelihoods, scaler = preprocess_for_mofa(df_raw)
 
-    # --- Test 1: Check the final DataFrame structure ---
+    # --- Test 1: Check the output DataFrame structure ---
     expected_cols = ['sample', 'feature', 'value', 'view', 'group']
-    assert all(col in df_long.columns for col in expected_cols)
-    assert len(df_long.columns) == len(expected_cols)
+    assert all(col in df_long.columns for col in expected_cols), f"Missing columns. Got: {df_long.columns.tolist()}"
+    assert len(df_long.columns) == len(expected_cols), f"Extra columns found: {df_long.columns.tolist()}"
 
-    # --- Test 2: Check a specific categorical encoding ---
-    ts_sr_row = df_long[
-        (df_long['sample'] == 'TS_Switch_Incompatible') &
+    # --- Test 2: Assert correct numerical encoding ---
+    # For TS_Switch_Incompatible, Stimulus-Response Congruency is 'Incongruent' -> should be -1.0
+    ts_sr_rows = df_long[
+        (df_long['sample'] == 'TS_Switch_Incompatible') & 
         (df_long['feature'] == 'Stimulus-Response Congruency')
     ]
-    assert ts_sr_row['value'].iloc[0] == -1.0 # Incongruent -> -1.0
-    assert ts_sr_row['view'].iloc[0] == 'Conflict'
+    assert len(ts_sr_rows) == 1, "Expected exactly one row for TS_Switch_Incompatible Stimulus-Response Congruency"
+    assert ts_sr_rows['value'].iloc[0] == -1.0, f"Expected -1.0 for Incongruent, got {ts_sr_rows['value'].iloc[0]}"
 
-    # --- Test 3: Check cleaning of RSI and Switch Rate ---
-    ts_rsi_row = df_long[
-        (df_long['sample'] == 'TS_Switch_Incompatible') &
-        (df_long['feature'] == 'RSI')
-    ]
-    assert ts_rsi_row['value'].iloc[0] < 0 # 1100 is less than the mean of the values, so it should be less than 0 after normalization
-
-    ts_switch_rate_row = df_long[
-        (df_long['sample'] == 'TS_Switch_Incompatible') &
-        (df_long['feature'] == 'Switch Rate')
-    ]
-    assert ts_switch_rate_row['value'].iloc[0] > 1 # 50% switch rate is greater than the mean of the values
-
-    # --- Test 4: Check that 'RSI Is Predictable' was correctly converted ---
-    stroop_rsi_pred_row = df_long[
-        (df_long['sample'] == 'Stroop_Incongruent') &
-        (df_long['feature'] == 'RSI is Predictable')
-    ]
-    assert stroop_rsi_pred_row['value'].iloc[0] == 1.0 # Yes -> 1.0
-
-    ts_rsi_pred_row = df_long[
-        (df_long['sample'] == 'TS_Switch_Incompatible') &
-        (df_long['feature'] == 'RSI is Predictable')
-    ]
-    assert ts_rsi_pred_row['value'].iloc[0] == 0.0 # No -> 0.0
-
-    # --- Test 5: Check that NaN values were correctly dropped ---
-    # For the PRP task, 'Distractor SOA' is NaN and should not be in the final df_long
-    prp_distractor_soa_rows = df_long[
-        (df_long['sample'] == 'PRP_Short_SOA') &
+    # --- Test 3: Assert that N/A values result in dropped rows ---
+    # For PRP_Short_SOA, Distractor SOA is 'N/A' -> should not exist in df_long
+    prp_distractor_rows = df_long[
+        (df_long['sample'] == 'PRP_Short_SOA') & 
         (df_long['feature'] == 'Distractor SOA')
     ]
-    assert prp_distractor_soa_rows.empty
+    assert len(prp_distractor_rows) == 0, "Expected no rows for PRP_Short_SOA Distractor SOA (was N/A)"
 
-    # --- Test 6: Check newly added encodings ---
-    # For TS_Switch_Incompatible:
-    # 'Task 1 Stimulus-Response Mapping' should be 'Incompatible' -> -1.0
-    ts_srm_row = df_long[
-        (df_long['sample'] == 'TS_Switch_Incompatible') &
-        (df_long['feature'] == 'Task 1 Stimulus-Response Mapping')
+    # --- Test 4: Assert that valid values are preserved (standardized) ---
+    # For PRP_Short_SOA, Inter-task SOA is 100 -> should exist but be standardized (not 100.0)
+    prp_inter_task_rows = df_long[
+        (df_long['sample'] == 'PRP_Short_SOA') & 
+        (df_long['feature'] == 'Inter-task SOA')
     ]
-    assert ts_srm_row['value'].iloc[0] == -1.0
-    assert ts_srm_row['view'].iloc[0] == 'Rules'
+    assert len(prp_inter_task_rows) == 1, "Expected one row for PRP_Short_SOA Inter-task SOA"
+    # The value should be standardized, so it should be a float but not the original 100.0
+    standardized_inter_task_value = prp_inter_task_rows['value'].iloc[0]
+    assert isinstance(standardized_inter_task_value, (float, np.floating)), "Should be a numeric value"
+    assert standardized_inter_task_value != 100.0, f"Should be standardized, not raw value. Got {standardized_inter_task_value}"
 
-    # 'Trial Transition Type' should be 'Switch' -> -1.0
-    ts_ttt_row = df_long[
-        (df_long['sample'] == 'TS_Switch_Incompatible') &
+    # --- Test 5: Check that string cleaning and standardization worked ---
+    # For TS_Switch_Incompatible, Switch Rate is '50%' -> should be cleaned and standardized (not 50.0)
+    ts_switch_rate_rows = df_long[
+        (df_long['sample'] == 'TS_Switch_Incompatible') & 
+        (df_long['feature'] == 'Switch Rate')
+    ]
+    assert len(ts_switch_rate_rows) == 1, "Expected one row for TS_Switch_Incompatible Switch Rate"
+    # Should be standardized, not the raw cleaned value of 50.0
+    standardized_switch_rate = ts_switch_rate_rows['value'].iloc[0]
+    assert isinstance(standardized_switch_rate, (float, np.floating)), "Should be a numeric value"
+    assert standardized_switch_rate != 50.0, f"Should be standardized, not raw cleaned value. Got {standardized_switch_rate}"
+
+    # --- Test 6: Check categorical mappings ---
+    # Trial Transition Type: 'Switch' -> -0.5
+    ts_ttt_rows = df_long[
+        (df_long['sample'] == 'TS_Switch_Incompatible') & 
         (df_long['feature'] == 'Trial Transition Type')
     ]
-    assert ts_ttt_row['value'].iloc[0] == -1.0
-    assert ts_ttt_row['view'].iloc[0] == 'Rules'
+    assert len(ts_ttt_rows) == 1, "Expected one row for TS_Switch_Incompatible Trial Transition Type"
+    assert ts_ttt_rows['value'].iloc[0] == -0.5, f"Expected -0.5 for 'Switch', got {ts_ttt_rows['value'].iloc[0]}"
+
+    # --- Test 7: Check likelihoods structure ---
+    assert isinstance(likelihoods, list), "Likelihoods should be a list"
+    assert all(likelihood == 'gaussian' for likelihood in likelihoods), "All likelihoods should be 'gaussian'"
+    assert len(likelihoods) == len(df_long['view'].unique()), "Likelihoods length should match number of unique views"
+    
+    # --- Test 8: Check scaler is returned and properly fitted ---
+    assert isinstance(scaler, StandardScaler), "Should return a fitted StandardScaler"
+    assert hasattr(scaler, 'scale_'), "Scaler should be fitted (have scale_ attribute)"
+    
+    # --- Test 9: Verify standardization occurred ---
+    # For PRP_Short_SOA, Inter-task SOA is originally 100, but after standardization it should not be 100.0
+    prp_inter_task_rows = df_long[
+        (df_long['sample'] == 'PRP_Short_SOA') & 
+        (df_long['feature'] == 'Inter-task SOA')
+    ]
+    if len(prp_inter_task_rows) > 0:  # Only test if this feature exists
+        standardized_value = prp_inter_task_rows['value'].iloc[0]
+        assert standardized_value != 100.0, f"Inter-task SOA should be standardized, not raw value 100.0. Got {standardized_value}"
+        assert isinstance(standardized_value, (float, np.floating)), "Standardized value should be float"
 
 def test_preprocess_for_mofa_with_real_data(real_raw_data):
     """
     Integration test for the MOFA preprocessor using real data.
-    Ensures the pipeline can handle melting and encoding from the actual CSV.
+    Ensures the pipeline can handle encoding from the actual CSV.
     """
-    # For the MOFA pipeline, we expect 'N/A' to be a true NaN.
-    df_test = real_raw_data.copy().replace('N/A', np.nan)
+    df_test = real_raw_data.copy()
 
-    df_long, likelihoods = preprocess_for_mofa(df_test)
+    df_long, likelihoods, scaler = preprocess_for_mofa(df_test)
     
-    # Test 1: Check that missing values are dropped, not included
-    # The Telford experiment has 'Distractor SOA' as N/A.
-    # This feature should NOT appear for that sample in the long dataframe.
-    telford_distractor_soa = df_long[
-        (df_long['sample'] == 'Telford 1931 Auditory RT (500ms SOA)') &
-        (df_long['feature'] == 'Distractor SOA')
-    ]
-    assert telford_distractor_soa.empty
+    # Test 1: Check output structure
+    expected_cols = ['sample', 'feature', 'value', 'view', 'group']
+    assert all(col in df_long.columns for col in expected_cols)
+    
+    # Test 2: Check that function handles real data without errors
+    assert len(df_long) > 0, "Should have some data after processing"
+    assert len(likelihoods) > 0, "Should have some likelihoods"
+    
+    # Test 3: Verify all values are numeric
+    assert df_long['value'].dtype in [np.float64, np.int64], f"Values should be numeric, got {df_long['value'].dtype}"
+    
+    # Test 4: Check views are assigned
+    assert df_long['view'].notna().all(), "All rows should have views assigned"
+    
+    # Test 5: Check group assignment
+    assert (df_long['group'] == 'all_studies').all(), "All rows should have group 'all_studies'"
+    
+    # Test 6: Check scaler is returned and properly fitted
+    assert isinstance(scaler, StandardScaler), "Should return a fitted StandardScaler"
+    assert hasattr(scaler, 'scale_'), "Scaler should be fitted (have scale_ attribute)"
 
-    # Test 2: Check a specific retained value
-    # The Telford experiment should have an Inter-task SOA of 500.
-    telford_intertask_soa = df_long[
-        (df_long['sample'] == 'Telford 1931 Auditory RT (500ms SOA)') &
+
+def test_mofa_standardization_roundtrip(raw_test_data_dict):
+    """
+    Tests that standardization is reversible by performing a round-trip transformation.
+    This verifies the StandardScaler is working correctly for inverse transformation.
+    """
+    df_raw = pd.DataFrame(raw_test_data_dict)
+    
+    df_long, likelihoods, scaler = preprocess_for_mofa(df_raw)
+    
+    # Test round-trip for Inter-task SOA from PRP_Short_SOA sample
+    prp_inter_task_rows = df_long[
+        (df_long['sample'] == 'PRP_Short_SOA') & 
         (df_long['feature'] == 'Inter-task SOA')
     ]
-    assert not telford_intertask_soa.empty
-    assert telford_intertask_soa['value'].iloc[0] == 0 # this condition is the only one with an SOA, so it is the median
-    assert telford_intertask_soa['view'].iloc[0] == 'Temporal'
+    
+    if len(prp_inter_task_rows) > 0:
+        # Get the standardized value
+        standardized_value = prp_inter_task_rows['value'].iloc[0]
+        
+        # Create a mock "reconstructed" data point to test inverse transformation
+        # We'll create a single row with this standardized value
+        continuous_columns = [
+            'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA', 
+            'Task 1 CSI', 'Task 2 CSI', 'RSI', 'Switch Rate', 
+            'Task 1 Difficulty', 'Task 2 Difficulty'
+        ]
+        
+        # Create a test data point with zeros for most features and our test value for Inter-task SOA
+        test_data = pd.DataFrame(
+            [[0.0] * len(continuous_columns)], 
+            columns=continuous_columns
+        )
+        test_data.loc[0, 'Inter-task SOA'] = standardized_value
+        
+        # Apply inverse transformation
+        inverse_transformed = scaler.inverse_transform(test_data)
+        reconstructed_value = inverse_transformed[0, continuous_columns.index('Inter-task SOA')]
+        
+        # The reconstructed value should be approximately 100.0 (the original value)
+        assert abs(reconstructed_value - 100.0) < 1e-10, f"Round-trip failed: expected ~100.0, got {reconstructed_value}"

@@ -8,27 +8,32 @@ def raw_test_data_dict():
     """
     Provides a dictionary of raw test data, mimicking the CSV format.
     This serves as a single source of truth for test data structure.
+    Expanded to include more comprehensive and realistic test scenarios.
     """
     return {
-        'Experiment': ['Stroop_Incongruent', 'PRP_Short_SOA', 'TS_Switch_Incompatible'],
-        'Task 2 Response Probability': [0.0, 1.0, 0.0],
-        'Inter-task SOA': ['N/A', 100, 'N/A'],
-        'Distractor SOA': [0, 'N/A', 0],
-        'Task 1 CSI': [0, 0, 200],
-        'Task 2 CSI': ['N/A', 0, 200],
-        'Switch Rate': ['0%', '0%', '50%'],
-        'Trial Transition Type': ['Pure', 'Pure', 'Switch'],
-        'Stimulus-Stimulus Congruency': ['Incongruent', 'N/A', 'Neutral'],
-        'Stimulus-Response Congruency': ['N/A', 'N/A', 'Incongruent'],
-        'Response Set Overlap': ['N/A', 'Disjoint - Modality', 'Identical'],
-        'Task 1 Stimulus-Response Mapping': ['Compatible', 'Compatible', 'Incompatible'],
-        'Task 2 Stimulus-Response Mapping': ['N/A', 'Compatible', 'Arbitrary'],
-        'Task 1 Cue Type': ['None/Implicit', 'None/Implicit', 'Arbitrary'],
-        'Task 2 Cue Type': ['N/A', 'None/Implicit', 'Arbitrary'],
-        'RSI is Predictable': ['Yes', 'Yes', 'No'],
-        'RSI': ['1000', '1500', '1100'],
-        'Task 1 Difficulty': [3, 2, 3],
-        'Task 2 Difficulty': ['N/A', 2, 3],
+        'Experiment': [
+            'Stroop_Incongruent', 'PRP_Short_SOA', 'TS_Switch_Incompatible', 
+            'Flanker_Congruent', 'PRP_Long_SOA', 'TS_Repeat_Compatible',
+            'Simon_Neutral', 'DualTask_Concurrent'
+        ],
+        'Task 2 Response Probability': [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0],
+        'Inter-task SOA': ['N/A', 100, 'N/A', 'N/A', 500, 'N/A', 'N/A', 200],
+        'Distractor SOA': [0, 'N/A', 0, -200, 'N/A', 0, -100, 'N/A'],
+        'Task 1 CSI': [0, 0, 200, 100, 150, 300, 50, 0],
+        'Task 2 CSI': ['N/A', 0, 200, 'N/A', 100, 250, 'N/A', 0],
+        'Switch Rate': ['0%', '0%', '50%', '0%', '0%', '25%', '0%', '0%'],
+        'Trial Transition Type': ['Pure', 'Pure', 'Switch', 'Pure', 'Pure', 'Repeat', 'Pure', 'Pure'],
+        'Stimulus-Stimulus Congruency': ['Incongruent', 'N/A', 'Neutral', 'Congruent', 'N/A', 'Incongruent', 'Neutral', 'N/A'],
+        'Stimulus-Response Congruency': ['N/A', 'N/A', 'Incongruent', 'Congruent', 'N/A', 'Compatible', 'Neutral', 'N/A'],
+        'Response Set Overlap': ['N/A', 'Disjoint - Modality', 'Identical', 'N/A', 'Disjoint', 'Identical', 'N/A', 'Disjoint - Spatial'],
+        'Task 1 Stimulus-Response Mapping': ['Compatible', 'Compatible', 'Incompatible', 'Compatible', 'Arbitrary', 'Incompatible', 'Compatible', 'Arbitrary'],
+        'Task 2 Stimulus-Response Mapping': ['N/A', 'Compatible', 'Arbitrary', 'N/A', 'Compatible', 'Incompatible', 'N/A', 'Arbitrary'],
+        'Task 1 Cue Type': ['None/Implicit', 'None/Implicit', 'Arbitrary', 'None/Implicit', 'Arbitrary', 'Arbitrary', 'None/Implicit', 'None/Implicit'],
+        'Task 2 Cue Type': ['N/A', 'None/Implicit', 'Arbitrary', 'N/A', 'Arbitrary', 'Arbitrary', 'N/A', 'None/Implicit'],
+        'RSI is Predictable': ['Yes', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'No'],
+        'RSI': ['1000', '1500', 'Varied (choice: 600, 1600)', '800', '2000', '1200', '1000', '1800'],
+        'Task 1 Difficulty': [3, 2, 3, 2, 4, 1, 3, 2],
+        'Task 2 Difficulty': ['N/A', 2, 3, 'N/A', 3, 4, 'N/A', 1],
     }
 
 @pytest.fixture(scope="module")

@@ -521,93 +521,212 @@ def generate_dynamic_view_mapping(preprocessor, view_mapping_unified):
             
     return final_mapping
 
-def prepare_mofa_data(df_features, preprocessor, df_raw, exclude_missing_for_mofa=False):
+def preprocess_for_mofa(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, list, StandardScaler]:
     """
-    Takes preprocessed data and prepares it for MOFA by transforming it into a long format.
-
+    Prepares data for MOFA+ by numerically encoding features, standardizing continuous variables,
+    and handling missing values by omission.
+    
+    This function transforms raw experimental data into the precise long-format DataFrame that 
+    mofapy2 expects, with categorical features mapped to meaningful numerical scales, continuous
+    features standardized for proper MOFA+ analysis, and missing values handled by dropping 
+    the corresponding rows (MOFA+ native approach).
+    
     Args:
-        df_features (pd.DataFrame): The feature matrix from preprocess.
-        preprocessor (InvertibleColumnTransformer): The unfitted preprocessor from preprocess.
-        df_raw (pd.DataFrame): The original raw dataframe to get experiment names.
-        exclude_missing_for_mofa (bool): If True, excludes rows corresponding to originally 
-            missing values from the long-format output for MOFA+. Default False.
-
+        df_raw (pd.DataFrame): The raw experimental data from CSV.
+        
     Returns:
-        (pd.DataFrame, list): The long-format DataFrame for MOFA and the likelihoods list.
+        tuple[pd.DataFrame, list, StandardScaler]: 
+            - Long-format DataFrame with columns ['sample', 'feature', 'value', 'view', 'group']
+            - List of likelihoods ('gaussian' for all views)
+            - Fitted StandardScaler for inverse transformation of continuous features
     """
-    df_mofa = preprocessor.fit_transform(df_features)
-    column_names = preprocessor.get_feature_names_out()
-    feature_to_view = generate_dynamic_view_mapping(preprocessor, VIEW_MAPPING_UNIFIED)
-    df_mofa = pd.DataFrame(df_mofa, columns=column_names)
-    df_mofa['Experiment'] = df_raw['Experiment']
-
-    df_long = pd.melt(df_mofa, id_vars=['Experiment'], value_vars=column_names,
+    logger = logging.getLogger(__name__)
+    df = df_raw.copy()
+    
+    # --- Step 1: Initial Data Cleaning ---
+    # Replace string 'N/A' and 'Not Specified' with np.nan
+    with pd.option_context('future.no_silent_downcasting', True):
+        df = df.replace(['N/A', 'Not Specified'], np.nan)
+    
+    # Apply special cleaning functions
+    if 'RSI' in df.columns:
+        df['RSI'] = df['RSI'].apply(clean_rsi)
+    if 'Switch Rate' in df.columns:
+        df['Switch Rate'] = df['Switch Rate'].apply(clean_switch_rate)
+    
+    # Convert numeric columns to proper types
+    numeric_cols_to_clean = [
+        'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA',
+        'Task 1 CSI', 'Task 2 CSI', 'Task 1 Difficulty', 'Task 2 Difficulty'
+    ]
+    for col in numeric_cols_to_clean:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+    # --- Step 2: Numerical and Ordinal Encoding ---
+    # Congruency features: Congruent=1.0, Neutral=0.0, Incongruent=-1.0
+    congruency_mapping = {'Congruent': 1.0, 'Neutral': 0.0, 'Incongruent': -1.0}
+    
+    if 'Stimulus-Stimulus Congruency' in df.columns:
+        df['Stimulus-Stimulus Congruency'] = df['Stimulus-Stimulus Congruency'].map(congruency_mapping)
+    if 'Stimulus-Response Congruency' in df.columns:
+        df['Stimulus-Response Congruency'] = df['Stimulus-Response Congruency'].map(congruency_mapping)
+    
+    # Response Set Overlap: Identical=1.0, Disjoint variants=-1.0
+    def map_response_set_overlap(val):
+        if pd.isna(val):
+            return np.nan
+        val_str = str(val).lower()
+        if 'identical' in val_str:
+            return 1.0
+        elif 'disjoint' in val_str:
+            return -1.0
+        else:
+            return np.nan
+    
+    if 'Response Set Overlap' in df.columns:
+        df['Response Set Overlap'] = df['Response Set Overlap'].apply(map_response_set_overlap)
+    
+    # Stimulus-Response Mapping: Compatible=1.0, Arbitrary=0.0, Incompatible=-1.0
+    srm_mapping = {'Compatible': 1.0, 'Arbitrary': 0.0, 'Incompatible': -1.0}
+    
+    if 'Task 1 Stimulus-Response Mapping' in df.columns:
+        df['Task 1 Stimulus-Response Mapping'] = df['Task 1 Stimulus-Response Mapping'].map(srm_mapping)
+    if 'Task 2 Stimulus-Response Mapping' in df.columns:
+        df['Task 2 Stimulus-Response Mapping'] = df['Task 2 Stimulus-Response Mapping'].map(srm_mapping)
+    
+    # Trial Transition Type: Pure=0.0, Repeat=0.5, Switch=-0.5
+    ttt_mapping = {'Pure': 0.0, 'Repeat': 0.5, 'Switch': -0.5}
+    
+    if 'Trial Transition Type' in df.columns:
+        df['Trial Transition Type'] = df['Trial Transition Type'].map(ttt_mapping)
+    
+    # Task Cue Type: None/Implicit=0.0, Arbitrary=1.0
+    cue_mapping = {'None/Implicit': 0.0, 'Arbitrary': 1.0}
+    
+    if 'Task 1 Cue Type' in df.columns:
+        df['Task 1 Cue Type'] = df['Task 1 Cue Type'].map(cue_mapping)
+    if 'Task 2 Cue Type' in df.columns:
+        df['Task 2 Cue Type'] = df['Task 2 Cue Type'].map(cue_mapping)
+    
+    # RSI is Predictable: Yes=1.0, No=0.0
+    if 'RSI is Predictable' in df.columns:
+        df['RSI is Predictable'] = df['RSI is Predictable'].apply(lambda x: 1.0 if str(x).lower() == 'yes' else 0.0)
+    
+    # --- Step 2.5: Standardize Continuous Numerical Features ---
+    # Identify continuous numerical columns (those that were NOT created from categorical mappings)
+    continuous_columns = [
+        'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA', 
+        'Task 1 CSI', 'Task 2 CSI', 'RSI', 'Switch Rate', 
+        'Task 1 Difficulty', 'Task 2 Difficulty'
+    ]
+    # Filter to only include columns that actually exist in the DataFrame
+    continuous_columns = [col for col in continuous_columns if col in df.columns]
+    
+    # Initialize and fit StandardScaler on continuous columns only
+    scaler = StandardScaler()
+    if continuous_columns:
+        # Fit scaler on non-NaN values and transform
+        continuous_data = df[continuous_columns]
+        # Only fit/transform if we have some non-NaN data
+        if not continuous_data.isna().all().all():
+            df[continuous_columns] = scaler.fit_transform(continuous_data)
+        else:
+            # Edge case: if all continuous data is NaN, create a dummy scaler
+            scaler.fit([[0.0] * len(continuous_columns)])
+    else:
+        # Edge case: if no continuous columns, create a dummy scaler
+        scaler.fit([[0.0]])
+    
+    # --- Step 3: Melt to Long Format ---
+    # Select all columns except 'Experiment' for melting
+    feature_columns = [col for col in df.columns if col != 'Experiment']
+    
+    df_long = pd.melt(df, id_vars=['Experiment'], value_vars=feature_columns,
                       var_name='feature', value_name='value')
-
-    df_long['view'] = df_long['feature'].map(feature_to_view)
-    df_long['group'] = 'all_studies'
+    
+    # Rename Experiment to sample
     df_long.rename(columns={'Experiment': 'sample'}, inplace=True)
-
-    df_long.dropna(subset=['value', 'view'], inplace=True)
-    df_long['value'] = pd.to_numeric(df_long['value'])
-
-    # Apply missing value filtering if requested
-    if exclude_missing_for_mofa:
-        # Create a missing value mask from the raw data
-        df_raw_clean = df_raw.copy()
-        # Replace string 'N/A' and 'Not Specified' with np.nan
-        with pd.option_context('future.no_silent_downcasting', True):
-            df_raw_clean = df_raw_clean.replace(['N/A', 'Not Specified'], np.nan)
-        
-        # Melt raw data to long format for missing value identification
-        df_raw_long = df_raw_clean.melt(id_vars=['Experiment'], var_name='original_feature', value_name='original_value')
-        
-        # Identify missing entries
-        missing_mask = df_raw_long['original_value'].isna()
-        missing_pairs = set(tuple(x) for x in df_raw_long.loc[missing_mask, ['Experiment', 'original_feature']].values)
-        
-        # Map transformed features back to original names
-        def map_to_original_feature(feature_name):
-            """Map transformed feature name back to original conceptual name"""
-            if '__' in feature_name:
-                after_underscore = feature_name.split('__')[1]
-                # Remove one-hot encoding suffixes (e.g., '_0', '_1', category suffixes)
-                # First handle features with ' Mapped' suffix
-                if ' Mapped' in after_underscore:
-                    original_name = after_underscore.split(' Mapped')[0]
-                else:
-                    # For features like 'Inter-task SOA is NA_0', remove the '_0' suffix
-                    # For features like 'RSI is Predictable_1', remove the '_1' suffix
-                    # Split on '_' and rejoin all but the last part if last part is a digit
-                    parts = after_underscore.split('_')
-                    if len(parts) > 1 and parts[-1].isdigit():
-                        original_name = '_'.join(parts[:-1])
-                    else:
-                        original_name = after_underscore
-                return original_name
-            return feature_name
-        
-        df_long['original_feature'] = df_long['feature'].apply(map_to_original_feature)
-        
-        # Filter out rows corresponding to originally missing values
-        keep_mask = ~df_long.apply(lambda row: (row['sample'], row['original_feature']) in missing_pairs, axis=1)
-        df_long = df_long[keep_mask].copy()
-        
-        # Remove auxiliary features (features ending with 'is NA' and '_NA' categories)
-        auxiliary_mask = (
-            df_long['original_feature'].str.endswith('is NA') |
-            df_long['feature'].str.contains('_NA_') |  # Handle one-hot encoded _NA categories
-            df_long['feature'].str.endswith('_NA')     # Handle direct _NA endings
-        )
-        df_long = df_long[~auxiliary_mask].copy()
-        
-        # Drop the temporary column
-        df_long = df_long.drop(columns=['original_feature'])
-
+    
+    # --- Step 4: Drop Missing Values (MOFA+ native approach) ---
+    df_long.dropna(subset=['value'], inplace=True)
+    
+    # Convert values to numeric (handle any remaining object types)
+    df_long['value'] = pd.to_numeric(df_long['value'], errors='coerce')
+    df_long.dropna(subset=['value'], inplace=True)  # Drop any values that couldn't be converted
+    
+    # --- Step 5: Add View Mapping ---
+    # Map features to views using VIEW_MAPPING_UNIFIED
+    feature_to_view = {}
+    for view, features in VIEW_MAPPING_UNIFIED.items():
+        for feature in features:
+            feature_to_view[feature] = view
+    
+    df_long['view'] = df_long['feature'].map(feature_to_view)
+    
+    # Filter out rows where view couldn't be assigned
+    df_long = df_long.dropna(subset=['view'])
+    
+    # --- Step 6: Add Group Column ---
+    df_long['group'] = 'all_studies'
+    
+    # --- Step 7: Create Likelihoods List ---
     views_ordered = sorted(df_long['view'].unique())
     likelihoods = ['gaussian'] * len(views_ordered)
+    
+    return df_long, likelihoods, scaler
 
-    return df_long, likelihoods
+def reconstruct_from_mofa_factors(factor_scores, model, scaler):
+    """
+    Reconstructs the original feature space from MOFA+ factor scores using the trained
+    model and fitted scaler for inverse transformation.
+    
+    This function performs a full inverse transform from the latent space back to the 
+    original, human-readable feature space by:
+    1. Using MOFA+ learned weights to reconstruct the preprocessed (scaled) space
+    2. Applying inverse standardization to continuous features
+    3. Returning data in the original numerical/ordinal format
+    
+    Args:
+        factor_scores (pd.DataFrame or pd.Series): Factor scores for one or more samples.
+        model: The trained mofax model with learned weights.
+        scaler (StandardScaler): The fitted StandardScaler from preprocessing.
+        
+    Returns:
+        pd.DataFrame: DataFrame with reconstructed data in original feature space,
+                     with samples as rows and features as columns.
+    """
+    # Ensure factor_scores is a 2D array for matrix multiplication
+    if isinstance(factor_scores, pd.Series):
+        factor_scores = factor_scores.to_frame().T
+        
+    Z = factor_scores.values
+    W = model.get_weights(df=True)  # Get weights as DataFrame
+    
+    # Reconstruct the preprocessed (scaled and encoded) space
+    reconstructed_data_scaled = pd.DataFrame(
+        Z @ W.T, 
+        columns=W.index,  # Feature names
+        index=factor_scores.index  # Sample names
+    )
+    
+    # Get the list of continuous features that were standardized
+    continuous_columns = [
+        'Task 2 Response Probability', 'Inter-task SOA', 'Distractor SOA', 
+        'Task 1 CSI', 'Task 2 CSI', 'RSI', 'Switch Rate', 
+        'Task 1 Difficulty', 'Task 2 Difficulty'
+    ]
+    # Filter to only include columns that exist in the reconstructed data
+    continuous_columns_present = [col for col in continuous_columns if col in reconstructed_data_scaled.columns]
+    
+    # Apply inverse standardization to continuous features only
+    if continuous_columns_present and hasattr(scaler, 'scale_'):
+        reconstructed_data_scaled[continuous_columns_present] = scaler.inverse_transform(
+            reconstructed_data_scaled[continuous_columns_present]
+        )
+    
+    # The result is now in the human-readable numerical/ordinal format
+    return reconstructed_data_scaled
 
 
 # =============================================================================
