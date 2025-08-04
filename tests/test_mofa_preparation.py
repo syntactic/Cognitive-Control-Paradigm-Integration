@@ -34,13 +34,13 @@ def test_prepare_mofa_data_sparse_strategy(raw_test_data_dict):
     ]
     assert len(prp_distractor_rows) == 0, "Expected no rows for PRP_Short_SOA Distractor SOA (was N/A)"
     
-    # Test 4: Assert correct ordinal encoding
+    # Test 4: Assert correct ordinal encoding  
     # For TS_Switch_Incompatible, Stimulus-Response Congruency is 'Incongruent' -> should be -1.0
     ts_sr_rows = df_long[
         (df_long['sample'] == 'TS_Switch_Incompatible') & 
-        (df_long['feature'] == 'Stimulus-Response Congruency')
+        (df_long['feature'] == 'Stimulus-Response Congruency Mapped')
     ]
-    assert len(ts_sr_rows) == 1, "Expected exactly one row for TS_Switch_Incompatible Stimulus-Response Congruency"
+    assert len(ts_sr_rows) == 1, "Expected exactly one row for TS_Switch_Incompatible Stimulus-Response Congruency Mapped"
     assert ts_sr_rows['value'].iloc[0] == -1.0, f"Expected -1.0 for Incongruent, got {ts_sr_rows['value'].iloc[0]}"
     
     # Test 5: Check likelihoods
@@ -112,6 +112,73 @@ def test_prepare_mofa_data_default_strategy(raw_test_data_dict):
     
     # Should default to sparse strategy
     assert isinstance(preprocessor_obj, StandardScaler), "Should use StandardScaler with default strategy"
+
+def test_prepare_mofa_data_merge_conflict_dimensions_sparse(raw_test_data_dict):
+    """
+    Tests merge_conflict_dimensions functionality with sparse strategy.
+    """
+    df_raw = pd.DataFrame(raw_test_data_dict)
+    
+    # Test with merge_conflict_dimensions=True
+    df_long_merged, likelihoods_merged, scaler_merged, view_map_merged = prepare_mofa_data(
+        df_raw, strategy='sparse', merge_conflict_dimensions=True
+    )
+    
+    # Test with merge_conflict_dimensions=False  
+    df_long_separate, likelihoods_separate, scaler_separate, view_map_separate = prepare_mofa_data(
+        df_raw, strategy='sparse', merge_conflict_dimensions=False
+    )
+    
+    # Test 1: Merged version should have SBC_Mapped feature
+    sbc_features_merged = [f for f in df_long_merged['feature'].unique() if 'SBC' in f]
+    assert len(sbc_features_merged) > 0, "Should have SBC_Mapped feature when merge_conflict_dimensions=True"
+    
+    # Test 2: Separate version should have individual CONGRUENCY features (if they exist in data)
+    ss_congruency_separate = [f for f in df_long_separate['feature'].unique() if 'Stimulus-Stimulus Congruency' in f]
+    sr_congruency_separate = [f for f in df_long_separate['feature'].unique() if 'Stimulus-Response Congruency' in f]
+    
+    # Test 3: Merged version should NOT have separate CONGRUENCY features
+    ss_congruency_merged = [f for f in df_long_merged['feature'].unique() if 'Stimulus-Stimulus Congruency' in f]
+    sr_congruency_merged = [f for f in df_long_merged['feature'].unique() if 'Stimulus-Response Congruency' in f]
+    assert len(ss_congruency_merged) == 0, "Should not have separate SS congruency when merged"
+    assert len(sr_congruency_merged) == 0, "Should not have separate SR congruency when merged"
+    
+    # Note: Stimulus-Response MAPPING features should still exist in both cases as they're not conflict dimensions
+    
+    # Test 4: Check that SBC values are properly mapped to ordinal scale
+    sbc_rows = df_long_merged[df_long_merged['feature'] == 'SBC_Mapped']
+    if len(sbc_rows) > 0:
+        sbc_values = sbc_rows['value'].unique()
+        valid_sbc_values = {-1.0, 0.0, 1.0}  # Incongruent, Neutral, Congruent
+        assert all(val in valid_sbc_values for val in sbc_values), f"SBC values should be ordinal, got {sbc_values}"
+
+def test_prepare_mofa_data_merge_conflict_dimensions_dense(raw_test_data_dict):
+    """
+    Tests merge_conflict_dimensions functionality with dense strategy.
+    """
+    df_raw = pd.DataFrame(raw_test_data_dict)
+    
+    # Test with merge_conflict_dimensions=True
+    df_long_merged, likelihoods_merged, preprocessor_merged, view_map_merged = prepare_mofa_data(
+        df_raw, strategy='dense', merge_conflict_dimensions=True
+    )
+    
+    # Test with merge_conflict_dimensions=False
+    df_long_separate, likelihoods_separate, preprocessor_separate, view_map_separate = prepare_mofa_data(
+        df_raw, strategy='dense', merge_conflict_dimensions=False
+    )
+    
+    # Test 1: Merged version should have SBC-related one-hot features
+    sbc_features_merged = [f for f in df_long_merged['feature'].unique() if 'SBC' in f]
+    assert len(sbc_features_merged) > 0, "Should have SBC one-hot features when merge_conflict_dimensions=True"
+    
+    # Test 2: Separate version should have more individual congruency features
+    ss_features_separate = [f for f in df_long_separate['feature'].unique() if 'Stimulus_Stimulus' in f]
+    sr_features_separate = [f for f in df_long_separate['feature'].unique() if 'Stimulus_Response' in f]
+    
+    # Test 3: Total features should be different between merged and separate
+    assert len(df_long_merged['feature'].unique()) != len(df_long_separate['feature'].unique()), \
+        "Merged and separate should have different numbers of features"
 
 def test_reconstruction_sparse_strategy(raw_test_data_dict):
     """

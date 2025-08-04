@@ -18,8 +18,14 @@ VIEW_MAPPING_UNIFIED = {
     'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty'],
     'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency', 'Stimulus Bivalence & Congruency'],
     'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap'],
-    'Structure': ['Task 2 Response Probability', 'Task 1 Cue Type', 'Task 2 Cue Type', 'Inter task SOA is NA', 'Distractor SOA is NA', 'Task 2 CSI is NA', 'Task 2 Difficulty is NA']
+    'Structure': ['Task 2 Response Probability', 'Task 1 Cue Type', 'Task 2 Cue Type']
 }
+
+def get_view_mapping_unified(binary_flags=False):
+    view_mapping_unified = VIEW_MAPPING_UNIFIED
+    if binary_flags:
+        view_mapping_unified["Structure"].extend(['Inter task SOA is NA', 'Distractor SOA is NA', 'Task 2 CSI is NA', 'Task 2 Difficulty is NA'])
+    return view_mapping_unified
 
 # =============================================================================
 # 1. Helper Functions for Data Cleaning
@@ -290,11 +296,10 @@ def apply_conceptual_constraints(df):
     is_single_task = sum([df_out['Task 2 Response Probability'] < THRESHOLD,
                           df_out['Trial Transition Type'] == 'Pure',
                           df_out['Response Set Overlap'] == 'N/A',
-                          df_out['Task 2 Difficulty is NA'] > THRESHOLD,
-                          df_out['Task 2 CSI is NA'] > THRESHOLD,
+                          'Task 2 Difficulty is NA' not in df_out.columns or df_out['Task 2 Difficulty is NA'] > THRESHOLD,
+                          'Task 2 CSI is NA' not in df_out.columns or df_out['Task 2 CSI is NA'] > THRESHOLD,
                           df_out['Task 2 Stimulus-Response Mapping'] == 'N/A',
                           df_out['Task 2 Cue Type'] == 'N/A']) > 4
-    logger.warning(f"Is single task: {is_single_task}")
 
     # For these rows, nullify all Task 2-specific parameters
     t2_columns_to_nullify = [
@@ -521,17 +526,23 @@ def generate_dynamic_view_mapping(preprocessor, view_mapping_unified):
             
     return final_mapping
 
-def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse') -> tuple:
+def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse', 
+                     merge_conflict_dimensions: bool = False) -> tuple:
     """
     Prepares data for MOFA+ analysis with support for different preprocessing strategies.
     
     This function serves as the unified entry point for MOFA+ data preparation, supporting
     both sparse (ordinal encoding) and dense (one-hot encoding) preprocessing strategies.
+    Both strategies now use the same underlying preprocessing pipeline for data cleaning
+    and feature engineering.
     
     Args:
         df_raw (pd.DataFrame): The raw experimental data from CSV.
         strategy (str): Preprocessing strategy - either 'sparse' or 'dense'.
                        Default is 'sparse'.
+        merge_conflict_dimensions (bool): Whether to merge conflict dimensions (S-S and S-R congruency)
+                                        into a single 'Stimulus Bivalence & Congruency' dimension.
+                                        Default is False.
     
     Returns:
         tuple: (df_long, likelihoods, preprocessor_obj, view_map)
@@ -542,25 +553,13 @@ def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse') -> tuple:
                                (StandardScaler for sparse, InvertibleColumnTransformer for dense)
             - view_map: Dictionary mapping feature names to their conceptual view
     """
-    if strategy == 'sparse':
-        # Use the sparse preprocessing strategy
-        df_long, likelihoods, scaler = _prepare_mofa_data_sparse(df_raw)
-        
-        # Generate view map for sparse case using original feature names
-        feature_to_view = {}
-        for view, features in VIEW_MAPPING_UNIFIED.items():
-            for feature in features:
-                feature_to_view[feature] = view
-        
-        return df_long, likelihoods, scaler, feature_to_view
-        
-    elif strategy == 'dense':
-        # Use the dense preprocessing strategy (existing PCA preprocessing)
-        df_features, numerical_cols, categorical_cols, df_processed, preprocessor = preprocess(
-            df_raw, merge_conflict_dimensions=False, target='mofa'
-        )
-        
-        # Fit the preprocessor and transform the data
+    # Always use preprocess() for data cleaning and feature engineering
+    df_features, numerical_cols, categorical_cols, df_processed, preprocessor = preprocess(
+        df_raw, merge_conflict_dimensions=merge_conflict_dimensions, target='mofa'
+    )
+    
+    if strategy == 'dense':
+        # Dense strategy: Use the preprocessor as-is (one-hot encoding)
         df_features_transformed = preprocessor.fit_transform(df_features)
         
         # Convert to DataFrame for easier handling
@@ -603,6 +602,142 @@ def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse') -> tuple:
         likelihoods = ['gaussian'] * len(views_ordered)
         
         return df_long, likelihoods, preprocessor, view_map
+        
+    elif strategy == 'sparse':
+        # Sparse strategy: Post-process the cleaned features with ordinal encoding
+        df_sparse = df_features.copy()
+        
+        # For sparse strategy, we need to re-introduce NaN values where the original data was 'N/A'
+        # The preprocess() function imputes these, but we want them to be missing for sparsity
+        for col in numerical_cols:
+            if col in df_sparse.columns:
+                # Check the corresponding "is NA" indicator column
+                na_indicator_col = f'{col} is NA'
+                if na_indicator_col in df_sparse.columns:
+                    # Where the indicator is 1, set the value back to NaN
+                    df_sparse.loc[df_sparse[na_indicator_col] == 1, col] = np.nan
+        
+        # Apply ordinal encoding to categorical features (ignoring the one-hot preprocessor)
+        for col in categorical_cols:
+            if col in df_sparse.columns:
+                if col == 'SBC_Mapped':
+                    # Handle merged conflict dimension (Stimulus Bivalence & Congruency)
+                    # Only map actual values, leave N/A as NaN so they get dropped later
+                    sbc_mapping = {
+                        'Congruent': 1.0, 'Neutral': 0.0, 'Incongruent': -1.0
+                        # Note: 'N/A' is intentionally not mapped - it stays as NaN and gets dropped
+                    }
+                    df_sparse[col] = df_sparse[col].map(sbc_mapping)
+                    
+                elif 'Congruency' in col:
+                    # Map congruency columns to ordinal scale: Congruent=1.0, Neutral=0.0, Incongruent=-1.0
+                    congruency_mapping = {
+                        'SS_Congruent': 1.0, 'SS_Neutral': 0.0, 'SS_Incongruent': -1.0,
+                        'SR_Congruent': 1.0, 'SR_Neutral': 0.0, 'SR_Incongruent': -1.0,
+                        'Congruent': 1.0, 'Neutral': 0.0, 'Incongruent': -1.0
+                        # Note: mapped N/A values stay as NaN and get dropped
+                    }
+                    df_sparse[col] = df_sparse[col].map(congruency_mapping)
+                    
+                elif 'Response Set Overlap' in col:
+                    # Map RSO to ordinal scale: Identical=1.0, Disjoint variants=-1.0
+                    # RSO_NA values stay as NaN and get dropped
+                    rso_mapping = {
+                        'RSO_Identical': 1.0,
+                        'RSO_Disjoint': -1.0
+                    }
+                    df_sparse[col] = df_sparse[col].map(rso_mapping)
+                    
+                elif 'Stimulus-Response Mapping' in col:
+                    # Map SRM to ordinal scale: Compatible=1.0, Arbitrary=0.0, Incompatible=-1.0
+                    # SRM_NA/SRM2_NA values stay as NaN and get dropped
+                    srm_mapping = {
+                        'SRM_Compatible': 1.0, 'SRM_Arbitrary': 0.0, 'SRM_Incompatible': -1.0,
+                        'SRM2_Compatible': 1.0, 'SRM2_Arbitrary': 0.0, 'SRM2_Incompatible': -1.0
+                    }
+                    df_sparse[col] = df_sparse[col].map(srm_mapping)
+                    
+                elif 'Trial Transition Type' in col:
+                    # Map TTT to ordinal scale: Pure=0.0, Repeat=0.5, Switch=-0.5
+                    # TTT_NA values stay as NaN and get dropped
+                    ttt_mapping = {
+                        'TTT_Pure': 0.0, 'TTT_Repeat': 0.5, 'TTT_Switch': -0.5
+                    }
+                    df_sparse[col] = df_sparse[col].map(ttt_mapping)
+                    
+                elif 'Cue Type' in col:
+                    # Map cue type to ordinal scale: None/Implicit=0.0, Arbitrary=1.0
+                    # TCT_NA/TCT2_NA values stay as NaN and get dropped
+                    cue_mapping = {
+                        'TCT_Implicit': 0.0, 'TCT_Arbitrary': 1.0,
+                        'TCT2_Implicit': 0.0, 'TCT2_Arbitrary': 1.0
+                    }
+                    df_sparse[col] = df_sparse[col].map(cue_mapping)
+                    
+                elif col == 'RSI is Predictable':
+                    # Already binary (0/1), keep as-is
+                    pass
+                    
+                else:
+                    # For other binary/indicator columns, keep as-is (0/1)
+                    pass
+        
+        # Standardize continuous features
+        scaler = StandardScaler()
+        if numerical_cols:
+            # Only fit/transform if we have continuous columns
+            continuous_data = df_sparse[numerical_cols]
+            if not continuous_data.isna().all().all():
+                df_sparse[numerical_cols] = scaler.fit_transform(continuous_data)
+            else:
+                # Edge case: if all continuous data is NaN, create a dummy scaler
+                scaler.fit([[0.0] * len(numerical_cols)])
+        else:
+            # Edge case: if no continuous columns, create a dummy scaler
+            scaler.fit([[0.0]])
+        
+        # Melt to long format
+        feature_columns = [col for col in df_sparse.columns]
+        df_sparse['Experiment'] = df_processed['Experiment'].values
+        
+        df_long = pd.melt(df_sparse, id_vars=['Experiment'], value_vars=feature_columns,
+                          var_name='feature', value_name='value')
+        
+        # Rename Experiment to sample
+        df_long.rename(columns={'Experiment': 'sample'}, inplace=True)
+        
+        # Drop missing values (MOFA+ native approach)
+        df_long.dropna(subset=['value'], inplace=True)
+        
+        # Convert values to numeric (handle any remaining object types)
+        df_long['value'] = pd.to_numeric(df_long['value'], errors='coerce')
+        df_long.dropna(subset=['value'], inplace=True)
+        
+        # Generate view mapping for cleaned features
+        # Map the processed feature names back to their conceptual names for view assignment
+        feature_to_view = {}
+        for view, features in VIEW_MAPPING_UNIFIED.items():
+            for feature in features:
+                # Handle mapped column names
+                for col in df_sparse.columns:
+                    if (col.replace(' Mapped', '').replace('SBC_Mapped', 'Stimulus Bivalence & Congruency') == feature or
+                        col == feature):
+                        feature_to_view[col] = view
+        
+        # Add view mapping to df_long
+        df_long['view'] = df_long['feature'].map(feature_to_view)
+        
+        # Filter out rows where view couldn't be assigned
+        df_long = df_long.dropna(subset=['view'])
+        
+        # Add group column
+        df_long['group'] = 'all_studies'
+        
+        # Create likelihoods list
+        views_ordered = sorted(df_long['view'].unique())
+        likelihoods = ['gaussian'] * len(views_ordered)
+        
+        return df_long, likelihoods, scaler, feature_to_view
         
     else:
         raise ValueError(f"Unknown strategy: {strategy}. Must be either 'sparse' or 'dense'.")
@@ -1089,3 +1224,130 @@ def check_skewness(data_column: np.ndarray, threshold: float = 0.5) -> str:
         return f"Moderately Skewed (Skewness: {skewness:.4f})"
     else:
         return f"Highly Skewed (Skewness: {skewness:.4f})"
+
+def generate_interpolated_points(
+    latent_space_df: pd.DataFrame,
+    model_artifacts: dict,
+    interpolation_pairs: list
+) -> pd.DataFrame:
+    """
+    Generates interpolated points between paradigm centroids in a latent space,
+    and reconstructs them back to the original feature space.
+
+    This function is agnostic to the model (PCA or MOFA) and handles the
+    appropriate inverse transformation.
+
+    Args:
+        latent_space_df (pd.DataFrame): DataFrame containing latent space coordinates
+                                      and a 'Paradigm' column for labeling.
+        model_artifacts (dict): A dictionary containing the necessary objects for reconstruction.
+                                For PCA: {'type': 'pca', 'pipeline': sklearn.Pipeline}
+                                For MOFA: {'type': 'mofa', 'model': mfx.mofa_model, 'preprocessor': object}
+        interpolation_pairs (list): A list of tuples, where each tuple contains two
+                                    paradigm names to interpolate between.
+
+    Returns:
+        pd.DataFrame: A DataFrame of the newly generated interpolated points, with
+                      reconstructed features and metadata for plotting.
+    """
+    factors = [c for c in latent_space_df.columns if c.startswith("Factor")]
+    pcs = [c for c in latent_space_df.columns if c.startswith("PC")]
+    assert (bool(factors) and not bool(pcs)) or (not bool(factors) and bool(pcs)), "Either there are no factors or PCs, or both have been found"
+    latent_cols = factors if factors else pcs
+    latent_col_prefix = longest_common_prefix(latent_cols)
+    
+    # 1. Find the centroids in the latent space
+    if not (latent_space_df["Point Type"] == "Centroid").any():
+        paradigm_centroids = find_centroids(latent_space_df[latent_cols + ["Paradigm"]], paradigm_col='Paradigm')
+
+    interpolated_points_list = []
+
+    for p1_name, p2_name in interpolation_pairs:
+        centroid1 = paradigm_centroids.get(p1_name)
+        centroid2 = paradigm_centroids.get(p2_name)
+        
+        if not centroid1 or not centroid2:
+            logging.warning(f"Could not find centroids for pair ({p1_name}, {p2_name}). Skipping interpolation.")
+            continue
+
+        # 2. Interpolate to find the midpoint in the latent space
+        interpolated_coords = interpolate_centroids(
+            {k: v for k, v in centroid1.items() if k in latent_cols},
+            {k: v for k, v in centroid2.items() if k in latent_cols},
+            alpha=0.5
+        )
+
+        # 3. Reconstruct the point back to the original feature space
+        if model_artifacts['type'] == 'pca':
+            original_space_params = inverse_transform_point(interpolated_coords, model_artifacts['pipeline'])
+        elif model_artifacts['type'] == 'mofa':
+            # Create a Series for reconstruction
+            factor_scores = pd.Series(interpolated_coords, index=latent_cols)
+            # The reconstruction returns a DataFrame, so we take the first row
+            original_space_params = reconstruct_from_mofa_factors(
+                factor_scores, 
+                model_artifacts['model'], 
+                model_artifacts['preprocessor']
+            ).iloc[0]
+        else:
+            raise ValueError("model_artifacts['type'] must be 'pca' or 'mofa'")
+
+        # 4. Create a dictionary for the new point, including metadata
+        new_point = original_space_params.to_dict()
+        for i, coord in enumerate(interpolated_coords):
+            new_point[f'{latent_col_prefix}{i+1}'] = coord
+        
+        new_point.update({
+            'Point Type': 'Interpolated',
+            'Experiment': f"Interpolation: {p1_name} <-> {p2_name}",
+            'Paradigm': 'Interpolated Point',
+            'Parent1': p1_name,
+            'Parent2': p2_name
+        })
+        
+        interpolated_points_list.append(new_point)
+
+    # 5. Finalize the DataFrame
+    if not interpolated_points_list:
+        return pd.DataFrame() # Return empty if no points were generated
+
+    interpolated_df = pd.DataFrame(interpolated_points_list)
+    # Perform post-reconstruction cleanup
+    interpolated_df = reverse_map_categories(interpolated_df)
+    interpolated_df = apply_conceptual_constraints(interpolated_df)
+    
+    return interpolated_df
+
+def longest_common_prefix(strs: list[str]) -> str:
+    """
+    Finds the longest common prefix string amongst an array of strings.
+
+    If there is no common prefix, it returns an empty string.
+
+    Args:
+        strs: A list of strings.
+
+    Returns:
+        The longest common prefix of all strings in the list.
+    """
+    # Handle edge cases: an empty list or a list with only one string
+    if not strs:
+        return ""
+    if len(strs) == 1:
+        return strs[0]
+
+    # Use the first string as the initial prefix
+    prefix = strs[0]
+
+    # Iterate through the rest of the strings in the list
+    for s in strs[1:]:
+        # While the current string does not start with the prefix,
+        # shorten the prefix by one character from the end
+        while not s.startswith(prefix):
+            prefix = prefix[:-1]
+            
+            # If the prefix becomes empty, there is no common prefix
+            if not prefix:
+                return ""
+
+    return prefix

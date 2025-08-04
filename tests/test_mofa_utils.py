@@ -24,9 +24,9 @@ def test_preprocess_for_mofa_with_unified_fixture(raw_test_data_dict):
     # For TS_Switch_Incompatible, Stimulus-Response Congruency is 'Incongruent' -> should be -1.0
     ts_sr_rows = df_long[
         (df_long['sample'] == 'TS_Switch_Incompatible') & 
-        (df_long['feature'] == 'Stimulus-Response Congruency')
+        (df_long['feature'] == 'Stimulus-Response Congruency Mapped')
     ]
-    assert len(ts_sr_rows) == 1, "Expected exactly one row for TS_Switch_Incompatible Stimulus-Response Congruency"
+    assert len(ts_sr_rows) == 1, "Expected exactly one row for TS_Switch_Incompatible Stimulus-Response Congruency Mapped"
     assert ts_sr_rows['value'].iloc[0] == -1.0, f"Expected -1.0 for Incongruent, got {ts_sr_rows['value'].iloc[0]}"
 
     # --- Test 3: Assert that N/A values result in dropped rows ---
@@ -65,9 +65,9 @@ def test_preprocess_for_mofa_with_unified_fixture(raw_test_data_dict):
     # Trial Transition Type: 'Switch' -> -0.5
     ts_ttt_rows = df_long[
         (df_long['sample'] == 'TS_Switch_Incompatible') & 
-        (df_long['feature'] == 'Trial Transition Type')
+        (df_long['feature'] == 'Trial Transition Type Mapped')
     ]
-    assert len(ts_ttt_rows) == 1, "Expected one row for TS_Switch_Incompatible Trial Transition Type"
+    assert len(ts_ttt_rows) == 1, "Expected one row for TS_Switch_Incompatible Trial Transition Type Mapped"
     assert ts_ttt_rows['value'].iloc[0] == -0.5, f"Expected -0.5 for 'Switch', got {ts_ttt_rows['value'].iloc[0]}"
 
     # --- Test 7: Check likelihoods structure ---
