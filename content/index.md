@@ -1,7 +1,7 @@
 ---
 title: Home
 ---
-Welcome to the digital home of a Master's thesis project focused on unifying the study of human cognitive control. For decades, researchers have investigated our ability to manage thoughts and actions using a variety of seemingly disparate paradigms like the Stroop Task, Task Switching, and the Psychological Refractory Period (PRP). This project's central goal is to demonstrate that these are not isolated islands of research, but rather distinct regions within a single, continuous [[Parametric Design Space]].
+Welcome to the digital home of a Master's thesis project focused on unifying the study of human cognitive control. For decades, researchers have investigated our ability to manage executive function using a variety of seemingly disparate paradigms like the Stroop Task, Task Switching, and the Psychological Refractory Period (PRP). This project's central goal is to demonstrate that these are not isolated islands of research, but rather distinct regions within a single, continuous [[Parametric Design Space]].
 
 This vault serves as the living knowledge base and conceptual backbone for this research. It contains the theoretical framework, literature notes, data definitions, and open questions that have guided the work.
 
