@@ -1,0 +1,8 @@
+pandas
+numpy
+scikit-learn
+pytest
+matplotlib
+seaborn
+mofapy2
+git+https://github.com/syntactic/mofax.git@plot_r2_with_provided_ax
