@@ -1,3 +1,30 @@
 content/.obsidian
 tests/__pycache__
-__pycache__
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+# If you use a virtual environment, uncomment one of these lines:
+# venv/
+# .venv/
+# env/
+
+# Node.js
+node_modules/
+package/dist/
+
+# Generated analysis output and artifacts
+*.png
+*.pkl
+*.hdf5
+mofa_models*/
+repomix-output.xml
+
+# Quartz (static site generator)
+public/
+
+# Obsidian user settings
+content/.obsidian/
+
+# macOS
+.DS_Store
