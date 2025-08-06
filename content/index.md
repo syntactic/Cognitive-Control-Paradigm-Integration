@@ -71,7 +71,7 @@ This section details how the conceptual framework is operationalized and analyze
 *   **Analytical Methods**: We use a dual-analysis approach to explore the structure of the design space:
     *   **[[Thesis Considerations/PCA Input Dimensions|Principal Component Analysis (PCA)]]**: Our primary method for identifying the orthogonal axes of maximal variance in the design space. See our notes on [[Thesis Considerations/PCA Feature Selection|feature selection]] and [[Thesis Considerations/PCA Input Dimensions|input dimensions]].
     *   **[[Thesis Considerations/MOFA+ as an Exploratory Analytical Tool|MOFA+]]**: A secondary, theory-driven method used to explore how latent factors are distributed across conceptually-defined "views" of the data.
-*   **[[Parameter Overrides and Sequence Metadata]]**: A note on the system used to handle special cases and non-standard timings from the literature.
+*   **[[Super Experiment Mapping Notes Guide]]**: A note on the system used to handle special cases and non-standard timings from the literature.
 
 ### Project Status and Open Questions
 
