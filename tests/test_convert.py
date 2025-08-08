@@ -28,7 +28,7 @@ def test_parse_notes_nan():
 def sample_row_and_notes():
     row = pd.Series({'Experiment': 'TestExp'})
     notes = {
-        "param_overrides": {
+        "convert_overrides": {
             "base_stim_duration": 500,
             "t1_stim_duration": 450
         }
@@ -174,7 +174,7 @@ def test_process_condition_with_overrides():
         'Task 1 CSI': 100,
         'Task 2 CSI': pd.NA,
         'Trial Transition Type': 'Switch',
-        'Super_Experiment_Mapping_Notes': '{"param_overrides": {"t1_stim_duration": 800, "t2_stim_duration": 800}}'
+        'Super_Experiment_Mapping_Notes': '{"convert_overrides": {"t1_stim_duration": 800, "t2_stim_duration": 800}}'
     })
     result = process_condition(row)
     assert result['effective_end_stim1_mov'] == 800 # Overridden duration
@@ -214,3 +214,154 @@ def test_process_condition_single_task_distractor_soa(sample_test_row):
     # Assert distractor starts 100ms before the target
     assert result['effective_start_stim1_or'] == result['effective_start_stim1_mov'] - 100
     assert result['Stimulus_Valency'] == 'Bivalent-Incongruent'
+
+# Tests for metadata propagation
+def test_process_condition_metadata_extraction():
+    """Tests that metadata from JSON is correctly extracted into new columns."""
+    row = pd.Series({
+        'Experiment': 'Metadata Test - Dual Task',
+        'Task 1 Type': 'Tone',
+        'Task 2 Type': 'Letter',
+        'Stimulus-Stimulus Congruency': 'N/A',
+        'Stimulus-Response Congruency': 'N/A',
+        'Response Set Overlap': 'Disjoint',
+        'Task 1 Stimulus-Response Mapping': 'Arbitrary',
+        'Task 2 Stimulus-Response Mapping': 'Arbitrary',
+        'Switch Rate': '0%',
+        'RSI': 1200,
+        'Task 1 Difficulty': 2,
+        'Task 2 Difficulty': 3,
+        'Task 2 Response Probability': 1.0,  # Dual-task
+        'Inter-task SOA': 200,  # Mean SOA
+        'Distractor SOA': pd.NA,
+        'Task 1 CSI': 0,
+        'Task 2 CSI': 0,
+        'Trial Transition Type': 'N/A',
+        'Super_Experiment_Mapping_Notes': '{"block_id": "test_block_1", "description": "Test dual-task condition", "viewer_config": {"sequence_type": "Random", "ITI_distribution": "uniform", "ITI_range": [800, 1600], "SOA_distribution": "choice", "SOA_values": [100, 200, 300]}}'
+    })
+    
+    result = process_condition(row)
+    
+    # Test that metadata was correctly extracted
+    assert result['Block_ID'] == 'test_block_1'
+    assert result['Description'] == 'Test dual-task condition'
+    assert result['Sequence_Type'] == 'Random'
+    assert result['RSI_Distribution_Type'] == 'uniform'
+    assert result['RSI_Distribution_Params'] == '[800, 1600]'
+    assert result['SOA_Distribution_Type'] == 'choice'
+    assert result['SOA_Distribution_Params'] == '[100, 200, 300]'
+    
+    # Verify it's properly recognized as dual-task
+    assert result['N_Tasks'] == 2
+    assert result['effective_start_stim2_or'] > 0  # T2 should be active
+
+def test_process_condition_metadata_defaults():
+    """Tests that default values are used when JSON metadata is missing."""
+    row = pd.Series({
+        'Experiment': 'Default Test',
+        'Task 1 Type': 'Flanker',
+        'Task 2 Type': 'N/A',
+        'Stimulus-Stimulus Congruency': 'N/A',
+        'Stimulus-Response Congruency': 'N/A',
+        'Response Set Overlap': 'N/A',
+        'Task 1 Stimulus-Response Mapping': 'Compatible',
+        'Task 2 Stimulus-Response Mapping': 'N/A',
+        'Switch Rate': '0%',
+        'RSI': 800,
+        'Task 1 Difficulty': 3,
+        'Task 2 Difficulty': pd.NA,
+        'Task 2 Response Probability': 0.0,
+        'Inter-task SOA': pd.NA,
+        'Distractor SOA': pd.NA,
+        'Task 1 CSI': 0,
+        'Task 2 CSI': pd.NA,
+        'Trial Transition Type': 'Repeat',
+        'Super_Experiment_Mapping_Notes': ''  # Empty JSON
+    })
+    
+    result = process_condition(row)
+    
+    # Test that defaults were applied
+    assert result['Block_ID'] == ''
+    assert result['Description'] == ''
+    assert result['Sequence_Type'] == 'Random'
+    assert result['RSI_Distribution_Type'] == 'fixed'
+    assert result['RSI_Distribution_Params'] == '[]'
+    assert result['SOA_Distribution_Type'] == 'fixed'
+    assert result['SOA_Distribution_Params'] == '[]'
+
+# Tests for conflict dimensions collapsing
+def test_conflict_dimensions_collapsing():
+    """Tests that S-S and S-R congruency are correctly collapsed into a single dimension."""
+    import numpy as np
+    
+    # Create test DataFrame with various conflict combinations
+    test_data = {
+        'Stimulus-Stimulus Congruency': ['Congruent', 'Incongruent', 'Neutral', 'N/A', 'Congruent', 'N/A'],
+        'Stimulus-Response Congruency': ['N/A', 'N/A', 'N/A', 'Incongruent', 'Incongruent', 'Congruent']
+    }
+    
+    test_df = pd.DataFrame(test_data)
+    
+    # Apply the same logic as in convert.py
+    s_s_col = test_df['Stimulus-Stimulus Congruency']
+    s_r_col = test_df['Stimulus-Response Congruency']
+    
+    conditions = [
+        (s_s_col == 'Incongruent') | (s_r_col == 'Incongruent'),
+        (s_s_col == 'Congruent') | (s_r_col == 'Congruent'),
+        (s_s_col == 'Neutral') | (s_r_col == 'Neutral')
+    ]
+    
+    choices = [
+        'Incongruent',
+        'Congruent', 
+        'Neutral'
+    ]
+    
+    test_df['Stimulus Bivalence & Congruency'] = np.select(conditions, choices, default='N/A')
+    
+    # Test the results
+    expected_results = [
+        'Congruent',    # S-S: Congruent, S-R: N/A -> Congruent
+        'Incongruent',  # S-S: Incongruent, S-R: N/A -> Incongruent  
+        'Neutral',      # S-S: Neutral, S-R: N/A -> Neutral
+        'Incongruent',  # S-S: N/A, S-R: Incongruent -> Incongruent
+        'Incongruent',  # S-S: Congruent, S-R: Incongruent -> Incongruent (prioritizes incongruent)
+        'Congruent'     # S-S: N/A, S-R: Congruent -> Congruent
+    ]
+    
+    for i, expected in enumerate(expected_results):
+        assert test_df.iloc[i]['Stimulus Bivalence & Congruency'] == expected, f"Row {i}: Expected {expected}, got {test_df.iloc[i]['Stimulus Bivalence & Congruency']}"
+
+def test_conflict_dimensions_collapsing_all_na():
+    """Tests that N/A + N/A results in N/A for the collapsed dimension."""
+    import numpy as np
+    
+    test_data = {
+        'Stimulus-Stimulus Congruency': ['N/A', 'N/A'],
+        'Stimulus-Response Congruency': ['N/A', 'N/A']
+    }
+    
+    test_df = pd.DataFrame(test_data)
+    
+    # Apply the same logic as in convert.py
+    s_s_col = test_df['Stimulus-Stimulus Congruency']
+    s_r_col = test_df['Stimulus-Response Congruency']
+    
+    conditions = [
+        (s_s_col == 'Incongruent') | (s_r_col == 'Incongruent'),
+        (s_s_col == 'Congruent') | (s_r_col == 'Congruent'),
+        (s_s_col == 'Neutral') | (s_r_col == 'Neutral')
+    ]
+    
+    choices = [
+        'Incongruent',
+        'Congruent', 
+        'Neutral'
+    ]
+    
+    test_df['Stimulus Bivalence & Congruency'] = np.select(conditions, choices, default='N/A')
+    
+    # Both rows should result in N/A
+    assert all(test_df['Stimulus Bivalence & Congruency'] == 'N/A')

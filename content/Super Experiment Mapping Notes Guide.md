@@ -3,97 +3,118 @@ tags:
   - methodology
   - data_processing
   - guide
+  - canonical_schema
 ---
+
 ## 1. Purpose and Rationale
 
-This document provides the canonical guidelines for using the `Super_Experiment_Mapping_Notes` column in the `super_experiment_design_space.csv` dataset. This column contains a JSON object that serves two critical functions:
+This document provides the canonical guidelines for using the `Super_Experiment_Mapping_Notes` column in the `super_experiment_design_space.csv` dataset. This column contains a JSON object that serves two critical, distinct functions:
 
-1.  **It allows for precise overrides** of default within-trial timing calculations performed by `convert.py`, ensuring maximum fidelity to the source literature.
-2.  **It provides essential metadata** about between-trial sequencing and randomization for the `viewer.js` client, enabling high-fidelity interactive simulations.
+1.  **It allows `convert.py` to apply precise overrides** to its default within-trial timing calculations, ensuring maximum fidelity to the source literature for analysis.
+2.  **It provides `viewer.js` with essential metadata** about between-trial sequencing and randomization, enabling high-fidelity interactive simulations.
 
-The principle is to keep the main CSV columns clean and optimized for quantitative analysis (PCA, MOFA+) while using this JSON object to capture the necessary nuances for accurate operationalization.
+The principle is to keep the main CSV columns clean and optimized for quantitative analysis while using this JSON object to capture the necessary nuances for accurate operationalization.
 
-## 2. JSON Schema Overview
+## 2. The RSI vs. ITI Abstraction: A Methodological Note
 
-The JSON object has a flat structure with several optional keys. For any given experimental condition (row), a key should only be included if its value deviates from the project's standard defaults.
+A core challenge is translating literature concepts to the framework's capabilities. A prime example is the **Response-Stimulus Interval (RSI)**.
+*   **Conceptual RSI:** A dynamic interval that begins after a participant's response.
+*   **Operational ITI:** A static, pre-defined Inter-Trial Interval (`regen` time in `super-experiment`) that begins at the end of a trial's fixed duration.
+
+The framework **implements an ITI**. However, to maintain fidelity with the task-switching literature, we code the conceptual interval in the main CSV under the `RSI` column. The JSON configuration below uses `ITI` prefixes to make it clear that we are controlling the *implemented* parameter in the viewer. This is a deliberate, documented abstraction.
+
+## 3. JSON Schema Overview
+
+The JSON object has a nested structure to clearly separate concerns. For any given experimental condition (row), a key should only be included if its value deviates from the project's standard defaults.
+
 ```json
 {
-  "block_id": "string",
-  "description": "string",
+  "block_id": "unique_string_identifier_for_the_block",
+  "description": "A brief, human-readable note about this condition's role.",
+  
   "convert_overrides": {
-    "t1_stim_duration": integer,
-    "t2_stim_duration": integer,
-    "t1_cue_go_duration": integer,
-    "t2_cue_go_duration": integer
+    "t1_stim_duration": 300,
+    "t2_stim_duration": 5000,
+    "t1_cue_go_duration": 5000
   },
+
   "viewer_config": {
-    "sequence_type": "string",
-    "RSI_distribution": "string",
-    "RSI_range": [min, max],
-    "RSI_values": [val1, val2],
-    "SOA_distribution": "string",
-    "SOA_range": [min, max],
-    "SOA_values": [val1, val2]
+    "sequence_type": "AABB",
+    "ITI_distribution": "uniform",
+    "ITI_range": [1000, 1500],
+    "SOA_distribution": "uniform",
+    "SOA_range": [-1000, 1000]
   }
 }
 ```
 
 ---
 
-## 3. Detailed Key Definitions
+## 4. Top-Level Keys: Identification and Context
 
-### 3.1. Block and Condition Identifiers
+These keys exist at the root of the JSON object.
 
 *   **`block_id`** (string)
     *   **Purpose:** The most critical key for grouping. It uniquely identifies an experimental block. All trial conditions (rows) that are part of the same mixed-task block **must share the exact same `block_id` string.** This solves the grouping problem efficiently and without redundancy.
-    *   **Example:** For all conditions in Rogers & Monsell's (1995) Experiment 2, the ID could be `"rogers_monsell_1995_exp2"`.
+    *   **Pipeline Role:** `convert.py` will propagate this value to a `Block_ID` column in `resolved_design_space.csv`. `viewer.js` will then use this column to assemble complete blocks for simulation.
+    *   **Example ID:** `"rogers_monsell_1995_exp2_random_rsi"`
 
-*   **`description`** (string)
+*   **`description`** (string, optional but recommended)
     *   **Purpose:** A brief, human-readable note to clarify the specific nature of the condition. Invaluable for debugging and context.
-    *   **Example:** `"Switch trial with incongruent distractor, short RSI block."`
+    *   **Pipeline Role:** Propagated to a `Description` column for display in the viewer.
+    *   **Example:** `"Incongruent trials within the 75% congruent block."`
 
-### 3.2. Within-Trial Timing Overrides (for `convert.py`)
+## 5. `convert_overrides` Section (for `convert.py`)
 
-These keys are parsed by `convert.py` to override its default timing calculations. They are only needed when a paper specifies non-standard durations.
+This section contains keys that are parsed exclusively by the `convert.py` script. They are used to **override default within-trial timing calculations** when a paper specifies non-standard durations that cannot be captured by the main derived dimensions alone.
 
 *   **`t1_stim_duration`** (integer, in ms)
     *   **Purpose:** Sets the duration of the Task 1 stimulus (or the target in a single-task paradigm).
-    *   **Example:** `300` (for the auditory tone in [[Hazeltine et al. (2006)]]).
+    *   **Example:** `300` (for the short auditory tone in [[Hazeltine et al. (2006)]]).
 
 *   **`t2_stim_duration`** (integer, in ms)
     *   **Purpose:** Sets the duration of the Task 2 stimulus (or the distractor in a single-task paradigm).
     *   **Example:** `5000` (to approximate "visible until response").
 
 *   **`t1_cue_go_duration`** (integer, in ms)
-    *   **Purpose:** Sets the duration of the cue and go-signal intervals for Task 1. *Note: As you correctly observed, the current `convert.py` script assumes cue and go signals have identical timing. This override affects both.*
+    *   **Purpose:** Sets the duration of the cue and go-signal intervals for Task 1. *Note: The current `super-experiment` framework assumes cue and go signals have identical timing. This override affects both.*
     *   **Example:** `5000` (for a long response window).
 
 *   **`t2_cue_go_duration`** (integer, in ms)
     *   **Purpose:** Sets the duration of the cue and go-signal intervals for Task 2.
-    *   **Example:** `5000`
 
-### 3.3. Between-Trial Sequence Configuration (for `viewer.js`)
+## 6. `viewer_config` Section (for `viewer.js`)
 
-These keys are propagated by `convert.py` into the `resolved_design_space.csv` and are used by `viewer.js` to structure the sequence of trials during simulation.
+This section contains keys that are propagated by `convert.py` into the `resolved_design_space.csv` and are used by the `viewer.js` client to **structure the sequence of trials and handle randomization** during an interactive simulation.
+
+### 6.1. Task Sequencing
 
 *   **`sequence_type`** (string)
-    *   **Purpose:** Defines a non-random task sequence for task-switching paradigms, overriding the simple `Switch Rate` percentage.
+    *   **Purpose:** Defines a non-random task sequence for task-switching paradigms, overriding the simple `Switch Rate` percentage from the main CSV.
     *   **Values:** `"AABB"`, `"ABAB"`, `"AAAABBBB"`. Defaults to `"Random"` if not present.
 
-*   **`RSI_distribution`** (string)
-    *   **Purpose:** Specifies how the RSI/ITI should be determined on each trial. The main `RSI` column in the CSV should contain the *mean* of this distribution for PCA.
-    *   **Values:** `"uniform"`, `"choice"`. Defaults to `"fixed"` if not present.
+### 6.2. Inter-Trial Interval (ITI) Randomization
 
-*   **`RSI_range`** (array of 2 numbers)
+These keys control the `regen` time between trials. They are used when a study randomizes the interval *between* trials, as in [[Rogers & Monsell (1995)]] Exp. 2.
+
+*   **`ITI_distribution`** (string)
+    *   **Purpose:** Specifies how the ITI should be determined on each trial. The main `RSI` column in the CSV should contain the *mean* of this distribution for analysis.
+    *   **Values:** `"uniform"`, `"choice"`. Defaults to `"fixed"`.
+
+*   **`ITI_range`** (array of 2 numbers)
     *   **Purpose:** Used with `"uniform"` distribution. Defines the `[min, max]` values.
     *   **Example:** `[150, 1200]`
 
-*   **`RSI_values`** (array of numbers)
+*   **`ITI_values`** (array of numbers)
     *   **Purpose:** Used with `"choice"` distribution. Defines the discrete set of possible values.
     *   **Example:** `[600, 1600]`
 
+### 6.3. Stimulus Onset Asynchrony (SOA) Randomization
+
+These keys are used for dual-task paradigms where the `Inter-task SOA` is randomized on a trial-by-trial basis.
+
 *   **`SOA_distribution`** (string)
-    *   **Purpose:** Specifies how the Inter-task SOA should be determined on each trial in dual-task paradigms. The main `Inter-task SOA` column should contain the *mean* of this distribution.
+    *   **Purpose:** Specifies how the Inter-task SOA should be determined. The main `Inter-task SOA` column should contain the *mean* of this distribution.
     *   **Values:** `"uniform"`, `"choice"`. Defaults to `"fixed"`.
 
 *   **`SOA_range`** (array of 2 numbers)
@@ -103,35 +124,20 @@ These keys are propagated by `convert.py` into the `resolved_design_space.csv` a
 *   **`SOA_values`** (array of numbers)
     *   **Purpose:** Used with `"choice"` distribution for SOA.
 
-## 4. Worked Example: Coding a Mixed Block from [[De Jong (2002)]]
+## 7. A Note on RSI-Driven Dual Tasks
 
-This experiment used an AABB sequence with a random RSI chosen from three values. Let's code the "Switch Congruent" and "Repeat Incongruent" conditions from a short block.
+A small but theoretically important class of paradigms, notably [[Allport et al. (1994)]] Exp. 5, are structured as dual-tasks where the primary independent variable is the **Response-Stimulus Interval (RSI)** between R1 and S2. This is parametrically distinct from classic SOA-driven PRP, where the interval is between S1 and S2.
 
-**Condition 1: Switch Congruent**
-*   **CSV Row:** `Experiment`: `De Jong (2000) Exp2 Short Block Switch Congruent`, `Trial Transition Type`: `Switch`, `Stimulus-Stimulus Congruency`: `Congruent`, `RSI`: `750` (mean), `RSI is Predictable`: `No`...
-*   **JSON in Notes Column:**
-    ```json
-    {
-      "block_id": "dejong_2000_exp2_short",
-      "viewer_config": {
-        "sequence_type": "AABB",
-        "RSI_distribution": "choice",
-        "RSI_values":
-      }
-    }
-    ```
+The framework identifies these unique paradigms using a specific three-part rule. The `convert.py` script applies special timing logic if and only if a condition meets all of the following criteria:
 
-**Condition 2: Repeat Incongruent**
-*   **CSV Row:** `Experiment`: `De Jong (2000) Exp2 Short Block Repeat Incongruent`, `Trial Transition Type`: `Repeat`, `Stimulus-Stimulus Congruency`: `Incongruent`, `RSI`: `750`, `RSI is Predictable`: `No`...
-*   **JSON in Notes Column:**
-    ```json
-    {
-      "block_id": "dejong_2000_exp2_short",
-      "viewer_config": {
-        "sequence_type": "AABB",
-        "RSI_distribution": "choice",
-        "RSI_values":
-      }
-    }
-    ```
-By using the same `block_id`, `viewer.js` knows these two conditions (and the other two from that block) belong together in a single simulation.
+1.  `Task 2 Response Probability` is `1`.
+2.  `Inter-task SOA` is `N/A`.
+3.  `RSI` has a numerical value.
+
+**Implementation Logic in `convert.py`:**
+
+Because the start time of S2 in these paradigms depends on a dynamic event (R1), which `convert.py` cannot know, we must use a principled approximation. The script will calculate the start time of S2 as follows:
+
+`start_S2 = start_S1 + assumed_RT1 + RSI`
+
+An `assumed_RT1` of **600ms** will be used as a reasonable placeholder for a standard choice-reaction time. This is a documented abstraction within the framework. This logic ensures these unique designs are correctly operationalized based on their conceptual structure, without requiring a special JSON override.

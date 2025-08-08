@@ -49,8 +49,8 @@ def get_param(row, notes, param_name, default_value):
     """
     Gets a parameter for the current condition, prioritizing JSON overrides.
     """
-    if 'param_overrides' in notes and param_name in notes['param_overrides']:
-        override_value = notes['param_overrides'][param_name]
+    if 'convert_overrides' in notes and param_name in notes['convert_overrides']:
+        override_value = notes['convert_overrides'][param_name]
         logger.info(
             f"Experiment '{row.get('Experiment', 'N/A')}': Overriding '{param_name}'. "
             f"Default: {default_value}, New: {override_value}"
@@ -125,7 +125,19 @@ def process_condition(row):
             # Abstracting pure S-R conflict as Bivalent-Neutral for the viewer
             derived_stimulus_valency = 'Bivalent-Neutral'
 
-    # --- 3. Pre-process conceptual info to be passed to the client ---
+    # --- 3. Extract metadata from JSON notes ---
+    viewer_config = notes.get('viewer_config', {})
+    
+    # Extract metadata with defaults
+    block_id = notes.get('block_id', '')
+    description = notes.get('description', '')
+    sequence_type = viewer_config.get('sequence_type', 'Random')
+    iti_distribution_type = viewer_config.get('ITI_distribution', 'fixed')
+    iti_distribution_params = str(viewer_config.get('ITI_range', viewer_config.get('ITI_values', [])))
+    soa_distribution_type = viewer_config.get('SOA_distribution', 'fixed')
+    soa_distribution_params = str(viewer_config.get('SOA_range', viewer_config.get('SOA_values', [])))
+    
+    # --- 4. Pre-process conceptual info to be passed to the client ---
     task_2_prob = float(row['Task 2 Response Probability'])
     n_tasks = 2 if task_2_prob == 1.0 else 1
     
@@ -139,10 +151,14 @@ def process_condition(row):
         'SRM_1': row['Task 1 Stimulus-Response Mapping'],
         'SRM_2': row['Task 2 Stimulus-Response Mapping'],
         'Switch_Rate_Percent': row['Switch Rate'].replace('%', '') if isinstance(row['Switch Rate'], str) else row['Switch Rate'],
-        'Sequence_Type': notes.get('sequence_type', 'Random'),
+        'Block_ID': block_id,
+        'Description': description,
+        'Sequence_Type': sequence_type,
+        'RSI_Distribution_Type': iti_distribution_type,
+        'RSI_Distribution_Params': iti_distribution_params,
+        'SOA_Distribution_Type': soa_distribution_type,
+        'SOA_Distribution_Params': soa_distribution_params,
         'ITI_ms': row.get('RSI'),
-        'ITI_Distribution_Type': notes.get('RSI_distribution', 'fixed'),
-        'ITI_Distribution_Params': str(notes.get('RSI_range', notes.get('RSI_values', []))),
         'coh_1': difficulty_to_coherence(row['Task 1 Difficulty']),
         'coh_2': difficulty_to_coherence(row['Task 2 Difficulty']),
         'Trial_Transition_Type': row['Trial Transition Type'],
@@ -241,12 +257,39 @@ if __name__ == "__main__":
         # Create the final DataFrame
         resolved_df = pd.DataFrame(resolved_conditions)
         
+        # --- Collapse Conflict Dimensions ---
+        # Add the source columns from the original dataset for conflict collapsing
+        resolved_df['Stimulus-Stimulus Congruency'] = source_df['Stimulus-Stimulus Congruency']
+        resolved_df['Stimulus-Response Congruency'] = source_df['Stimulus-Response Congruency']
+        
+        # Apply the conflict collapsing logic
+        s_s_col = resolved_df['Stimulus-Stimulus Congruency']
+        s_r_col = resolved_df['Stimulus-Response Congruency']
+        
+        conditions = [
+            (s_s_col == 'Incongruent') | (s_r_col == 'Incongruent'),
+            (s_s_col == 'Congruent') | (s_r_col == 'Congruent'),
+            (s_s_col == 'Neutral') | (s_r_col == 'Neutral')
+        ]
+        
+        choices = [
+            'Incongruent',
+            'Congruent',
+            'Neutral'
+        ]
+        
+        resolved_df['Stimulus Bivalence & Congruency'] = np.select(conditions, choices, default='N/A')
+        
+        # Remove the temporary source columns
+        resolved_df = resolved_df.drop(columns=['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency'])
+        
         # Define the final column order for the output CSV
         final_column_order = [
             'Experiment', 'N_Tasks', 'Task_1_Type', 'Task_2_Type',
-            'Stimulus_Valency', 'Simplified_RSO', 'SRM_1', 'SRM_2',
-            'Switch_Rate_Percent', 'Sequence_Type', 'ITI_Distribution_Type',
-            'ITI_Distribution_Params', 'ITI_ms',
+            'Stimulus_Valency', 'Stimulus Bivalence & Congruency', 'Simplified_RSO', 'SRM_1', 'SRM_2',
+            'Switch_Rate_Percent', 'Block_ID', 'Description', 'Sequence_Type', 
+            'RSI_Distribution_Type', 'RSI_Distribution_Params', 
+            'SOA_Distribution_Type', 'SOA_Distribution_Params', 'ITI_ms',
             'coh_1', 'coh_2', 'Trial_Transition_Type',
             'effective_start_cue1', 'effective_end_cue1', 'effective_start_go1', 'effective_end_go1',
             'effective_start_stim1_mov', 'effective_end_stim1_mov', 'effective_start_stim2_mov', 'effective_end_stim2_mov',
