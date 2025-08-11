@@ -225,9 +225,9 @@ function generateTrialDirections(condition, trialAssignment) {
     return { dir_mov_1, dir_or_1, dir_mov_2, dir_or_2 };
 }
 
-// Generate ITI for a trial based on distribution parameters
+// Generate ITI for a trial based on distribution parameters (updated to use RSI column names)
 function generateITI(condition) {
-    const distributionType = condition.ITI_Distribution_Type || 'fixed';
+    const distributionType = condition.RSI_Distribution_Type || condition.ITI_Distribution_Type || 'fixed';
     const baseITI = parseFloat(condition.ITI_ms) || 1000;
     
     if (distributionType === 'fixed') {
@@ -237,11 +237,12 @@ function generateITI(condition) {
     // Parse distribution parameters
     let params = [];
     try {
-        if (condition.ITI_Distribution_Params && condition.ITI_Distribution_Params !== '[]') {
-            params = JSON.parse(condition.ITI_Distribution_Params);
+        const paramsString = condition.RSI_Distribution_Params || condition.ITI_Distribution_Params;
+        if (paramsString && paramsString !== '[]') {
+            params = JSON.parse(paramsString);
         }
     } catch (e) {
-        console.warn('Failed to parse ITI_Distribution_Params:', condition.ITI_Distribution_Params);
+        console.warn('Failed to parse RSI_Distribution_Params:', condition.RSI_Distribution_Params);
         return baseITI;
     }
     
@@ -256,6 +257,38 @@ function generateITI(condition) {
     
     // Default to base ITI if distribution can't be processed
     return baseITI;
+}
+
+// Generate SOA for a trial based on distribution parameters
+function generateSOA(condition, baseSoa = 0) {
+    const distributionType = condition.SOA_Distribution_Type || 'fixed';
+    
+    if (distributionType === 'fixed') {
+        return baseSoa;
+    }
+    
+    // Parse distribution parameters
+    let params = [];
+    try {
+        if (condition.SOA_Distribution_Params && condition.SOA_Distribution_Params !== '[]') {
+            params = JSON.parse(condition.SOA_Distribution_Params);
+        }
+    } catch (e) {
+        console.warn('Failed to parse SOA_Distribution_Params:', condition.SOA_Distribution_Params);
+        return baseSoa;
+    }
+    
+    if (distributionType === 'uniform' && params.length >= 2) {
+        // Uniform distribution between min and max
+        const [min, max] = params;
+        return min + Math.random() * (max - min);
+    } else if (distributionType === 'choice' && params.length > 0) {
+        // Random choice from array of values
+        return params[Math.floor(Math.random() * params.length)];
+    }
+    
+    // Default to base SOA if distribution can't be processed
+    return baseSoa;
 }
 
 // Generate task sequence for single-task paradigms
@@ -324,6 +357,22 @@ function generateTaskAssignmentSequence(task1Type, task2Type, numTrials, switchR
     }
     
     return sequence;
+}
+
+// Group conditions by Block_ID for block-aware trial generation
+function groupByBlock(data) {
+    const blocks = {};
+    
+    data.forEach(condition => {
+        const blockId = condition.Block_ID || condition.Experiment; // Fall back to Experiment name if no Block_ID
+        
+        if (!blocks[blockId]) {
+            blocks[blockId] = [];
+        }
+        blocks[blockId].push(condition);
+    });
+    
+    return blocks;
 }
 
 // Advanced trial sequence generation
@@ -688,9 +737,19 @@ function drawTimeline(trialData) {
 async function runSelectedExperiment() {
     const select = document.getElementById('experiment-select');
     select.blur() // remove focus from the dropdown
-    const selectedIndex = parseInt(select.value);
+    const selectedBlockId = select.value;
 
-    const condition = resolvedData[selectedIndex]
+    // Get the block data
+    const blocks = groupByBlock(resolvedData);
+    const blockConditions = blocks[selectedBlockId];
+    
+    if (!blockConditions || blockConditions.length === 0) {
+        console.error('No conditions found for block:', selectedBlockId);
+        return;
+    }
+
+    // Use the primary condition for trial generation (future enhancement: use full block)
+    const condition = blockConditions[0];
 
     // Generate trial sequence
     const trialSequence = createTrialSequence(condition, 10);
@@ -761,9 +820,9 @@ async function runSelectedExperiment() {
 // Main dropdown event handler
 function updateUIForSelection() {
     const select = document.getElementById('experiment-select');
-    const selectedIndex = parseInt(select.value);
+    const selectedBlockId = select.value;
     
-    if (isNaN(selectedIndex)) {
+    if (!selectedBlockId) {
         // Reset to initial state
         document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Select an experiment to begin</div>';
         document.getElementById('info-panel').innerHTML = '<div class="placeholder">Experiment details will appear here</div>';
@@ -771,20 +830,30 @@ function updateUIForSelection() {
         return;
     }
     
-    const condition = resolvedData[selectedIndex];
-    const conceptualRow = conceptualData.find(row => row.Experiment === condition.Experiment);
+    // Get the block data
+    const blocks = groupByBlock(resolvedData);
+    const blockConditions = blocks[selectedBlockId];
+    
+    if (!blockConditions || blockConditions.length === 0) {
+        console.error('No conditions found for block:', selectedBlockId);
+        return;
+    }
+    
+    // Use the first condition in the block for display purposes
+    const primaryCondition = blockConditions[0];
+    const conceptualRow = conceptualData.find(row => row.Experiment === primaryCondition.Experiment);
     
     // Update info panel
     if (conceptualRow) {
         updateInfoPanel(conceptualRow);
     } else {
         // Fallback info panel with condition data
-        updateInfoPanelFromCondition(condition);
+        updateInfoPanelFromCondition(primaryCondition);
     }
     
     // Generate a sample trial to visualize
     try {
-        const sampleTrials = createTrialSequence(condition, 1);
+        const sampleTrials = createTrialSequence(primaryCondition, 1);
         if (sampleTrials.length > 0) {
             // Draw timeline using actual trial data
             drawTimeline(sampleTrials[0].seParams);
@@ -794,7 +863,6 @@ function updateUIForSelection() {
         // Fall back to showing placeholder
         document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Error generating timeline</text>';
     }
-    
 }
 
 // Fallback info panel update when conceptual data is not available
@@ -842,12 +910,17 @@ async function initializeApp() {
         
         console.log(`Using ${resolvedData.length} total experiments`);
         
-        // Populate dropdown
+        // Group data by Block_ID for block-aware functionality
+        const blocks = groupByBlock(resolvedData);
+        
+        console.log(`Grouped into ${Object.keys(blocks).length} blocks`);
+        
+        // Populate dropdown with blocks
         const select = document.getElementById('experiment-select');
-        resolvedData.forEach((row, index) => {
+        Object.keys(blocks).forEach(blockId => {
             const option = document.createElement('option');
-            option.value = index;
-            option.textContent = row.Experiment;
+            option.value = blockId;
+            option.textContent = blockId;
             select.appendChild(option);
         });
         
@@ -872,6 +945,8 @@ module.exports = {
     convertAbsoluteToSEParams,
     generateTrialDirections,
     generateITI,
+    generateSOA,
+    groupByBlock,
     generateTaskSequence,
     generateTaskAssignmentSequence,
     createTrialSequence,
