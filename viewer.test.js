@@ -170,22 +170,35 @@ describe('convertAbsoluteToSEParams', () => {
         // Based on trial.js, Task 2 timings are relative to Task 1 end times
         const result = convertAbsoluteToSEParams(dualTaskConditionForRelativeTiming);
 
-        // Movement Channel 1: starts at 100ms, ends at 600ms
-        // Orientation Channel 2: starts at 200ms, ends at 700ms
+        // From dualTaskConditionForRelativeTiming:
+        // Task 1 Movement (Channel 1): starts at 100ms, ends at 600ms
+        // Task 2 Orientation (Channel 2): starts at 200ms, ends at 700ms
         
-        // start_mov_2 should be calculated as: start_stim2_mov - end_stim1_mov
-        // But since stim2_mov is not active (0), this should be 0
+        // Basic dual-task structure
+        expect(result.task_1).toBe('mov');
+        expect(result.task_2).toBe('or');
+        
+        // Task 1 timings should remain absolute
+        expect(result.start_mov_1).toBe(100);
+        expect(result.dur_mov_1).toBe(500); // 600 - 100
+        
+        // Task 2 timings should be RELATIVE to Task 1 end times
+        // start_mov_2 should be: start_stim2_mov - end_stim1_mov
+        // Since stim2_mov is not active (start=0, end=0), this should be 0
         expect(result.start_mov_2).toBe(0);
-
-        // start_or_2 should be calculated as: start_stim2_or - end_stim1_or 
-        // But we need to look at the actual pathway assignment
-        // For dual-task: Task 1 = mov (Channel 1), Task 2 = or (Channel 2)
-        // So start_or_2 should be: start_stim2_or - end_stim1_mov (200 - 600 = -400)
-        // This means Task 2 starts 400ms BEFORE Task 1 ends (overlapping)
-        expect(result.start_or_2).toBe(200); // This is the absolute start time currently
+        expect(result.dur_mov_2).toBe(0);
         
-        // TODO: This test exposes that we need to implement relative timing in convertAbsoluteToSEParams
-        // The SE package expects relative timings, not absolute timings for Task 2
+        // start_or_2 should be: start_stim2_or - end_stim1_or 
+        // According to trial.js: or2Interval.addTime(or1Interval.end)
+        // From test data: stim1_or is inactive (0,0), stim2_or is (200,700)
+        // So start_or_2 should be: 200 - 0 = 200
+        // This means Channel 2 orientation starts 200ms after Channel 1 orientation ends
+        expect(result.start_or_2).toBe(200); // Relative to Channel 1 orientation end (which is 0)
+        expect(result.dur_or_2).toBe(500); // 700 - 200
+        
+        // Channel 1 orientation pathway should be inactive for univalent dual-task
+        expect(result.start_or_1).toBe(0);
+        expect(result.dur_or_1).toBe(0);
     });
 });
 
@@ -701,31 +714,50 @@ describe('Block Grouping Logic', () => {
 });
 
 describe('Block-Aware Trial Generation', () => {
-    test('should prioritize Sequence_Type over Switch_Rate_Percent', () => {
-        // Note: Current implementation treats first condition as single condition,
-        // but should eventually handle block arrays with AABB sequence type
-        const firstCondition = multiConditionBlock[0]; // Use first condition for now
+    test('should prioritize Sequence_Type from viewer_config over Switch_Rate_Percent', () => {
+        // Test using the full multi-condition block with AABB sequence type in viewer_config
+        const result = createTrialSequence(multiConditionBlock, 4);
         
-        const result = createTrialSequence(firstCondition, 4);
-        
-        // For now, just verify it generates trials
+        // Should generate 4 trials following AABB pattern
         expect(result).toHaveLength(4);
-        expect(result[0].seParams).toBeDefined();
+        expect(result[0].taskType).toBe('mov');  // First A
+        expect(result[1].taskType).toBe('mov');  // Second A
+        expect(result[2].taskType).toBe('or');   // First B
+        expect(result[3].taskType).toBe('or');   // Second B
         
-        // TODO: Eventually this should follow AABB pattern from viewer_config
+        // Verify trials have the correct transition types
+        expect(result[0].transitionType).toBe('Pure');   // First trial is always pure
+        expect(result[1].transitionType).toBe('Repeat'); // Second A is repeat
+        expect(result[2].transitionType).toBe('Switch'); // First B is switch
+        expect(result[3].transitionType).toBe('Repeat'); // Second B is repeat
     });
 
     test('should map trials to correct condition rows based on Trial_Transition_Type', () => {
-        const firstCondition = multiConditionBlock[0]; // Use first condition for now
+        const result = createTrialSequence(multiConditionBlock, 4);
         
-        const result = createTrialSequence(firstCondition, 4);
-        
-        // First trial should be 'mov' and get parameters from the condition
+        // First trial (Pure) should find the matching Pure condition
         const firstTrial = result[0];
-        expect(firstTrial.seParams.coh_1).toBeDefined();
-        expect(firstTrial.seParams.coh_1).toBe(0.8); // From Switch condition
+        expect(firstTrial.transitionType).toBe('Pure');
+        expect(firstTrial.selectedCondition).toBe('TestBlock_A_Pure'); // Finds matching Pure condition
+        expect(firstTrial.seParams.coh_1).toBe(0.9); // From Pure condition
         
-        // TODO: Eventually this should select parameters based on Trial_Transition_Type
+        // Second trial (Repeat) should use the Repeat condition
+        const secondTrial = result[1];
+        expect(secondTrial.transitionType).toBe('Repeat');
+        expect(secondTrial.selectedCondition).toBe('TestBlock_A_Repeat');
+        expect(secondTrial.seParams.coh_1).toBe(0.6); // From Repeat condition, not Switch
+        
+        // Third trial (Switch) should use the Switch condition
+        const thirdTrial = result[2];
+        expect(thirdTrial.transitionType).toBe('Switch');
+        expect(thirdTrial.selectedCondition).toBe('TestBlock_A_Switch');
+        expect(thirdTrial.seParams.coh_1).toBe(0.8); // From Switch condition
+        
+        // Fourth trial (Repeat) should use the Repeat condition again
+        const fourthTrial = result[3];
+        expect(fourthTrial.transitionType).toBe('Repeat');
+        expect(fourthTrial.selectedCondition).toBe('TestBlock_A_Repeat');
+        expect(fourthTrial.seParams.coh_1).toBe(0.6); // From Repeat condition
     });
 
     test('should handle dynamic SOA generation per trial', () => {
@@ -733,12 +765,12 @@ describe('Block-Aware Trial Generation', () => {
         
         const result = createTrialSequence(condition, 2);
         
-        // Each trial should be generated successfully
+        // Each trial should include dynamic SOA values
         expect(result).toHaveLength(2);
-        expect(result[0].seParams).toBeDefined();
-        expect(result[1].seParams).toBeDefined();
-        
-        // TODO: Eventually should include dynamic SOA values per trial
+        expect(result[0].dynamicSOA).toBeGreaterThanOrEqual(50);
+        expect(result[0].dynamicSOA).toBeLessThanOrEqual(200);
+        expect(result[1].dynamicSOA).toBeGreaterThanOrEqual(50);
+        expect(result[1].dynamicSOA).toBeLessThanOrEqual(200);
     });
 
     test('should handle dynamic RSI generation per trial', () => {
@@ -751,6 +783,16 @@ describe('Block-Aware Trial Generation', () => {
         rsiValues.forEach(rsi => {
             expect([500, 1000, 1500, 2000]).toContain(rsi);
         });
+    });
+
+    test('should work with single conditions (backward compatibility)', () => {
+        // Test that the function still works with single conditions
+        const singleCondition = multiConditionBlock[0];
+        const result = createTrialSequence(singleCondition, 3);
+        
+        expect(result).toHaveLength(3);
+        expect(result[0].seParams.coh_1).toBe(0.8); // Uses single condition parameters
+        expect(result[0].selectedCondition).toBe('TestBlock_A_Switch');
     });
 });
 

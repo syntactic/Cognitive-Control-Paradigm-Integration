@@ -65,12 +65,16 @@ function convertAbsoluteToSEParams(absoluteRow) {
         // DUAL-TASK: Task 1 (mov) goes to Channel 1, Task 2 (or) goes to Channel 2
         // Each channel gets its primary stimulus, and potentially distractors based on valency
         
-        // Channel 1 (movement task): Primary movement stimulus
+        // Channel 1 (movement task): Primary movement stimulus (absolute timing)
         seParams.start_mov_1 = mov_start;
         seParams.dur_mov_1 = mov_duration;
         
-        // Channel 2 (orientation task): Primary orientation stimulus  
-        seParams.start_or_2 = or_start;
+        // Channel 2 (orientation task): Primary orientation stimulus (RELATIVE timing)
+        // According to trial.js: or2Interval.addTime(or1Interval.end)
+        // So start_or_2 should be: effective_start_stim2_or - effective_end_stim1_or
+        const or1_start = parseInt(absoluteRow.effective_start_stim1_or);
+        const or1_end = parseInt(absoluteRow.effective_end_stim1_or);
+        seParams.start_or_2 = or_start - or1_end; // Relative to Channel 1 orientation end
         seParams.dur_or_2 = or_duration;
         
         // For dual-task, check if we need distractors (bivalent stimuli)
@@ -78,8 +82,18 @@ function convertAbsoluteToSEParams(absoluteRow) {
         // For now, assume univalent stimuli in dual-task (no cross-channel distractors)
         seParams.start_or_1 = 0;
         seParams.dur_or_1 = 0;
-        seParams.start_mov_2 = 0;
-        seParams.dur_mov_2 = 0;
+        
+        // Movement pathway on Channel 2 (if needed, also relative)
+        // According to trial.js: mov2Interval.addTime(mov1Interval.end)
+        const mov2_start = parseInt(absoluteRow.effective_start_stim2_mov);
+        const mov2_end = parseInt(absoluteRow.effective_end_stim2_mov);
+        if (mov2_end > mov2_start) {
+            seParams.start_mov_2 = mov2_start - mov_end; // Relative to Channel 1 movement end
+            seParams.dur_mov_2 = mov2_end - mov2_start;
+        } else {
+            seParams.start_mov_2 = 0;
+            seParams.dur_mov_2 = 0;
+        }
         
     } else {
         // SINGLE-TASK: Only Channel 1 is used, Channel 2 is completely inactive
@@ -375,45 +389,113 @@ function groupByBlock(data) {
     return blocks;
 }
 
-// Advanced trial sequence generation
-function createTrialSequence(condition, numTrials = 10) {
+// Helper function to extract viewer config from condition
+function extractViewerConfig(condition) {
+    let config = {};
+    try {
+        if (condition.viewer_config && condition.viewer_config !== '{}') {
+            config = JSON.parse(condition.viewer_config);
+        }
+    } catch (e) {
+        console.warn('Failed to parse viewer_config:', condition.viewer_config);
+    }
+    return config;
+}
+
+// Helper function to determine trial transition type based on sequence position
+function getTrialTransitionType(trialIndex, taskSequence) {
+    if (trialIndex === 0) {
+        return 'Pure'; // First trial is always pure
+    }
+    
+    const currentTask = taskSequence[trialIndex];
+    const previousTask = taskSequence[trialIndex - 1];
+    
+    if (currentTask === previousTask) {
+        return 'Repeat';
+    } else {
+        return 'Switch';
+    }
+}
+
+// Advanced trial sequence generation - now supports both single conditions and blocks
+function createTrialSequence(conditionOrBlock, numTrials = 10) {
     const trialSequence = [];
     
-    // Parse sequence parameters
-    const sequenceType = condition.Sequence_Type || 'Random';
-    const switchRate = parseFloat(condition.Switch_Rate_Percent) || 0;
+    // Determine if we're dealing with a single condition or a block (array of conditions)
+    const isBlock = Array.isArray(conditionOrBlock);
+    const conditions = isBlock ? conditionOrBlock : [conditionOrBlock];
+    const primaryCondition = conditions[0]; // Use first condition for primary parameters
     
-    // Determine paradigm type from N_Tasks (new approach)
-    const nTasks = condition.N_Tasks || 1;
+    // A. Determine Sequence Order
+    let sequenceType = primaryCondition.Sequence_Type || 'Random';
+    let switchRate = parseFloat(primaryCondition.Switch_Rate_Percent) || 0;
+    
+    // Check for sequence type override in viewer_config
+    const viewerConfig = extractViewerConfig(primaryCondition);
+    if (viewerConfig.sequence_type) {
+        sequenceType = viewerConfig.sequence_type;
+    }
+    
+    // Determine paradigm type from N_Tasks
+    const nTasks = primaryCondition.N_Tasks || 1;
     const isDualTask = (nTasks == 2);
     
-    // Generate assignment sequence based on paradigm type
-    let assignmentSequence;
+    // Generate task sequence based on paradigm type and sequence rules
+    let taskSequence;
     
     if (isDualTask) {
         // DUAL-TASK: Generate task-to-channel assignments using switch rate
-        // Default mapping: Task 1 -> 'mov', Task 2 -> 'or'
-        assignmentSequence = generateTaskAssignmentSequence(
+        // For now, keep existing dual-task logic (can be enhanced later for blocks)
+        const assignmentSequence = generateTaskAssignmentSequence(
             'mov',  // Always map Task 1 to movement
             'or',   // Always map Task 2 to orientation 
             numTrials, 
             switchRate
         );
+        taskSequence = assignmentSequence.map(assignment => `${assignment.channel1_task}+${assignment.channel2_task}`);
     } else {
-        // SINGLE-TASK: Generate task sequence using switch rate
-        const taskSequence = generateTaskSequence(sequenceType, numTrials, switchRate);
-        // Convert to assignment format for consistency
-        assignmentSequence = taskSequence.map(task => ({ currentTask: task }));
+        // SINGLE-TASK: Generate task sequence using sequence type
+        const rawTaskSequence = generateTaskSequence(sequenceType, numTrials, switchRate);
+        taskSequence = rawTaskSequence;
     }
     
     // Generate trials
     for (let i = 0; i < numTrials; i++) {
-        const assignment = assignmentSequence[i];
-        const directions = generateTrialDirections(condition, assignment);
-        const iti = generateITI(condition);
+        // B. Map Trial to Condition: Determine transition type for this trial
+        const transitionType = getTrialTransitionType(i, taskSequence);
         
-        // Get base parameters from CSV data
-        const baseParams = convertAbsoluteToSEParams(condition);
+        // C. Find the specific condition row that matches this trial's transition type
+        let selectedCondition = primaryCondition; // Default fallback
+        
+        if (isBlock) {
+            // Look for a condition with matching Trial_Transition_Type
+            const matchingCondition = conditions.find(cond => 
+                cond.Trial_Transition_Type === transitionType
+            );
+            if (matchingCondition) {
+                selectedCondition = matchingCondition;
+            }
+        }
+        
+        // D. Generate Dynamic Values: SOA and ITI for this specific trial
+        const dynamicSOA = generateSOA(selectedCondition, 0);
+        const dynamicITI = generateITI(selectedCondition);
+        
+        // Generate trial assignment and directions
+        let assignment;
+        if (isDualTask) {
+            // Parse the combined task assignment (e.g., "mov+or")
+            const [task1, task2] = taskSequence[i].split('+');
+            assignment = { channel1_task: task1, channel2_task: task2 };
+        } else {
+            assignment = { currentTask: taskSequence[i] };
+        }
+        
+        const directions = generateTrialDirections(selectedCondition, assignment);
+        
+        // Get base parameters from the selected condition
+        const baseParams = convertAbsoluteToSEParams(selectedCondition);
         
         let trialParams;
         
@@ -421,8 +503,8 @@ function createTrialSequence(condition, numTrials = 10) {
             // DUAL-TASK: Both channels active, task assignment may vary per trial
             trialParams = {
                 ...baseParams,
-                task_1: assignment.channel1_task,  // Dynamic assignment based on switch rate
-                task_2: assignment.channel2_task,  // Dynamic assignment based on switch rate
+                task_1: assignment.channel1_task,
+                task_2: assignment.channel2_task,
                 
                 // Apply generated directions to all four pathways
                 dir_mov_1: directions.dir_mov_1 || 0,
@@ -435,14 +517,14 @@ function createTrialSequence(condition, numTrials = 10) {
             // SINGLE-TASK: Only Channel 1 active, task_1 varies
             trialParams = {
                 ...baseParams,
-                task_1: assignment.currentTask,  // Dynamic task assignment for task-switching
-                task_2: null,                    // Channel 2 always inactive for single-task
+                task_1: assignment.currentTask,  
+                task_2: null,                    
                 
-                // Apply generated directions (only Channel 1 pathways will have non-null values)
+                // Apply generated directions
                 dir_mov_1: directions.dir_mov_1 || 0,
                 dir_or_1: directions.dir_or_1 || 0,
-                dir_mov_2: 0,  // Channel 2 always inactive
-                dir_or_2: 0,   // Channel 2 always inactive
+                dir_mov_2: 0,  
+                dir_or_2: 0,   
                 
                 // Ensure Channel 2 is completely inactive
                 start_2: 0,
@@ -460,9 +542,12 @@ function createTrialSequence(condition, numTrials = 10) {
         
         trialSequence.push({
             seParams: trialParams,
-            regenTime: iti,
+            regenTime: dynamicITI,
             trialNumber: i + 1,
-            taskType: isDualTask ? `${assignment.channel1_task}+${assignment.channel2_task}` : assignment.currentTask
+            taskType: isDualTask ? `${assignment.channel1_task}+${assignment.channel2_task}` : assignment.currentTask,
+            transitionType: transitionType, // Add transition type for testing
+            selectedCondition: selectedCondition.Experiment, // Add selected condition for testing
+            dynamicSOA: dynamicSOA // Add dynamic SOA for testing
         });
     }
     
@@ -947,6 +1032,8 @@ module.exports = {
     generateITI,
     generateSOA,
     groupByBlock,
+    extractViewerConfig,
+    getTrialTransitionType,
     generateTaskSequence,
     generateTaskAssignmentSequence,
     createTrialSequence,
