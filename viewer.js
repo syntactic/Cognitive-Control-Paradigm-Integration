@@ -427,14 +427,15 @@ function createTrialSequence(conditionOrBlock, numTrials = 10) {
     const conditions = isBlock ? conditionOrBlock : [conditionOrBlock];
     const primaryCondition = conditions[0]; // Use first condition for primary parameters
     
-    // A. Determine Sequence Order
+    // A. Determine Sequence Order - ALWAYS use primary condition's configuration
     let sequenceType = primaryCondition.Sequence_Type || 'Random';
     let switchRate = parseFloat(primaryCondition.Switch_Rate_Percent) || 0;
     
-    // Check for sequence type override in viewer_config
-    const viewerConfig = extractViewerConfig(primaryCondition);
-    if (viewerConfig.sequence_type) {
-        sequenceType = viewerConfig.sequence_type;
+    // Check for sequence type override in viewer_config from PRIMARY CONDITION ONLY
+    // This enforces the "Primary Condition" rule - ignore viewer_config from other conditions
+    const primaryViewerConfig = extractViewerConfig(primaryCondition);
+    if (primaryViewerConfig.sequence_type) {
+        sequenceType = primaryViewerConfig.sequence_type;
     }
     
     // Determine paradigm type from N_Tasks

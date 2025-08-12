@@ -3,6 +3,7 @@ import json
 import numpy as np
 import argparse
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -89,6 +90,76 @@ def simplify_response_set_overlap(rso_string):
         return 'Disjoint'
     else:
         return 'N/A'
+
+def validate_block_configurations(df):
+    """
+    Validates that conditions within the same Block_ID have consistent viewer_config.
+    Logs detailed warnings for any inconsistencies found.
+    
+    Args:
+        df: pandas DataFrame with condition data
+        
+    Returns:
+        bool: True if validation passes (no critical errors), False if processing should halt
+    """
+    if df.empty:
+        return True
+        
+    # Group by Block_ID, extracting it from the JSON notes
+    blocks = {}
+    
+    for index, row in df.iterrows():
+        notes = parse_notes(row.get('Super_Experiment_Mapping_Notes', ''))
+        block_id = notes.get('block_id', '')
+        
+        # Skip empty block IDs or use experiment name as fallback
+        if not block_id:
+            block_id = row['Experiment']
+            
+        if block_id not in blocks:
+            blocks[block_id] = []
+            
+        blocks[block_id].append({
+            'index': index,
+            'experiment': row['Experiment'],
+            'viewer_config': notes.get('viewer_config', {}),
+            'viewer_config_str': str(notes.get('viewer_config', {}))
+        })
+    
+    # Validate each block with multiple conditions
+    validation_passed = True
+    warnings_found = False
+    
+    for block_id, conditions in blocks.items():
+        if len(conditions) <= 1:
+            continue  # Single-condition blocks don't need validation
+            
+        primary_condition = conditions[0]
+        primary_config_str = primary_condition['viewer_config_str']
+        
+        # Check each subsequent condition for inconsistencies
+        for i, condition in enumerate(conditions[1:], start=1):
+            current_config_str = condition['viewer_config_str']
+            
+            # Only warn if current condition has a config AND it's different from primary
+            if (current_config_str != '{}' and 
+                current_config_str != primary_config_str):
+                
+                logger.warning(
+                    f"Row {condition['index'] + 2}: Inconsistent viewer_config found for Block_ID '{block_id}'. "
+                    f"Primary condition '{primary_condition['experiment']}' (row {primary_condition['index'] + 2}) "
+                    f"has config: {primary_config_str}, but condition '{condition['experiment']}' "
+                    f"has different config: {current_config_str}. "
+                    f"Using configuration from primary condition."
+                )
+                warnings_found = True
+    
+    if warnings_found:
+        logger.info("Block validation completed with warnings. Primary condition rule will be enforced in viewer.")
+    else:
+        logger.info("Block validation passed - no configuration inconsistencies found.")
+        
+    return validation_passed
 
 def process_condition(row):
     """
@@ -238,13 +309,23 @@ if __name__ == "__main__":
         help="Enable verbose logging to see parameter overrides."
     )
     args = parser.parse_args()
+    
+    # Always set up logger for validation, use INFO level for validation messages
+    logger = setup_logger(logging.INFO)
     if args.verbose:
-        logger = setup_logger()
+        logger.setLevel(logging.DEBUG)
         logger.info("Verbose logging enabled.")
+    
     try:
         # Load the source CSV file
         source_df = pd.read_csv('data/super_experiment_design_space.csv')
         print(f"Loaded {len(source_df)} conditions from the source CSV.")
+        
+        # Validate block configurations before processing
+        logger.info("Validating block configurations...")
+        if not validate_block_configurations(source_df):
+            logger.error("Block validation failed. Aborting processing.")
+            sys.exit(1)
         
         # List to hold all the processed condition dictionaries
         resolved_conditions = []

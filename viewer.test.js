@@ -14,7 +14,8 @@ const {
     multiConditionBlock,
     singleConditionBlock,
     dynamicDistributionBlock,
-    dualTaskConditionForRelativeTiming
+    dualTaskConditionForRelativeTiming,
+    inconsistentConfigBlock
 } = require('./viewer.test.data.js');
 
 describe('generateITI', () => {
@@ -793,6 +794,24 @@ describe('Block-Aware Trial Generation', () => {
         expect(result).toHaveLength(3);
         expect(result[0].seParams.coh_1).toBe(0.8); // Uses single condition parameters
         expect(result[0].selectedCondition).toBe('TestBlock_A_Switch');
+    });
+
+    test('should handle inconsistent viewer_config gracefully (primary condition rule)', () => {
+        // Test that viewer gracefully uses primary condition config when inconsistencies exist
+        const result = createTrialSequence(inconsistentConfigBlock, 4);
+        
+        // Should complete successfully without throwing errors
+        expect(result).toHaveLength(4);
+        
+        // Should use AABB pattern from primary condition, not ABAB from secondary
+        expect(result[0].taskType).toBe('mov');  // First A
+        expect(result[1].taskType).toBe('mov');  // Second A  
+        expect(result[2].taskType).toBe('or');   // First B
+        expect(result[3].taskType).toBe('or');   // Second B
+        
+        // Should use parameters from appropriate conditions based on transition type
+        expect(result[0].seParams.coh_1).toBe(0.8); // From primary (Switch) condition
+        expect(result[1].seParams.coh_1).toBe(0.6); // From Repeat condition
     });
 });
 

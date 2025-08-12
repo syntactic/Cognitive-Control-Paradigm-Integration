@@ -1,12 +1,14 @@
 
 import pytest
 import pandas as pd
+import logging
 from convert import (
     parse_notes,
     get_param,
     difficulty_to_coherence,
     simplify_response_set_overlap,
-    process_condition
+    process_condition,
+    validate_block_configurations
 )
 
 # Tests for parse_notes
@@ -365,3 +367,131 @@ def test_conflict_dimensions_collapsing_all_na():
     
     # Both rows should result in N/A
     assert all(test_df['Stimulus Bivalence & Congruency'] == 'N/A')
+
+# Tests for validate_block_configurations
+def test_validate_block_configurations_no_blocks():
+    """Test validation with empty dataframe."""
+    df = pd.DataFrame()
+    result = validate_block_configurations(df)
+    assert result is True
+
+def test_validate_block_configurations_single_conditions():
+    """Test validation with only single-condition blocks (should pass)."""
+    df = pd.DataFrame({
+        'Experiment': ['Test1', 'Test2', 'Test3'],
+        'Super_Experiment_Mapping_Notes': ['', '', '']
+    })
+    result = validate_block_configurations(df)
+    assert result is True
+
+def test_validate_block_configurations_consistent_blocks():
+    """Test validation with consistent viewer_config within blocks."""
+    df = pd.DataFrame({
+        'Experiment': ['Block_A_Condition1', 'Block_A_Condition2', 'Block_B_Single'],
+        'Super_Experiment_Mapping_Notes': [
+            '{"block_id": "test_block_a", "viewer_config": {"sequence_type": "AABB"}}',
+            '{"block_id": "test_block_a", "viewer_config": {"sequence_type": "AABB"}}',
+            '{"block_id": "test_block_b", "viewer_config": {"sequence_type": "Random"}}'
+        ]
+    })
+    
+    # This should pass without any warnings or errors
+    result = validate_block_configurations(df)
+    assert result is True
+
+def test_validate_block_configurations_inconsistent_blocks(caplog):
+    """Test validation with inconsistent viewer_config within blocks."""
+    df = pd.DataFrame({
+        'Experiment': ['Block_A_Primary', 'Block_A_Secondary', 'Block_A_Tertiary'],
+        'Super_Experiment_Mapping_Notes': [
+            '{"block_id": "inconsistent_block", "viewer_config": {"sequence_type": "AABB"}}',
+            '{"block_id": "inconsistent_block", "viewer_config": {"sequence_type": "ABAB"}}',
+            '{"block_id": "inconsistent_block"}'  # No viewer_config - should not trigger warning
+        ]
+    })
+    
+    with caplog.at_level(logging.WARNING):
+        result = validate_block_configurations(df)
+    
+    # Should still return True (warnings, not errors)
+    assert result is True
+    
+    # Should have logged exactly one warning (for the ABAB config difference)
+    warning_messages = [record.message for record in caplog.records if record.levelname == 'WARNING']
+    assert len(warning_messages) == 1
+    assert 'Row 3' in warning_messages[0]  # Row index 1 + 2 = 3 (1-indexed for user)
+    assert 'inconsistent_block' in warning_messages[0]
+    assert 'AABB' in warning_messages[0]
+    assert 'ABAB' in warning_messages[0]
+
+def test_validate_block_configurations_mixed_scenarios(caplog):
+    """Test validation with a mix of consistent and inconsistent blocks."""
+    df = pd.DataFrame({
+        'Experiment': ['Good_Block_1', 'Good_Block_2', 'Bad_Block_1', 'Bad_Block_2', 'Single_Block'],
+        'Super_Experiment_Mapping_Notes': [
+            '{"block_id": "good_block", "viewer_config": {"sequence_type": "AABB", "ITI_distribution": "fixed"}}',
+            '{"block_id": "good_block", "viewer_config": {"sequence_type": "AABB", "ITI_distribution": "fixed"}}',
+            '{"block_id": "bad_block", "viewer_config": {"sequence_type": "AABB"}}',
+            '{"block_id": "bad_block", "viewer_config": {"sequence_type": "ABAB"}}',  # Different!
+            '{"block_id": "single_block", "viewer_config": {"sequence_type": "Random"}}'
+        ]
+    })
+    
+    with caplog.at_level(logging.WARNING):
+        result = validate_block_configurations(df)
+    
+    assert result is True
+    
+    # Should have exactly one warning for the bad_block inconsistency
+    warning_messages = [record.message for record in caplog.records if record.levelname == 'WARNING']
+    assert len(warning_messages) == 1
+    assert 'bad_block' in warning_messages[0]
+    assert 'Row 5' in warning_messages[0]  # Row index 3 + 2 = 5
+
+def test_validate_block_configurations_fallback_to_experiment_name(caplog):
+    """Test that conditions without block_id fall back to using experiment name as block ID."""
+    df = pd.DataFrame({
+        'Experiment': ['Same_Experiment_Name', 'Same_Experiment_Name'],
+        'Super_Experiment_Mapping_Notes': [
+            '{"viewer_config": {"sequence_type": "AABB"}}',  # No block_id
+            '{"viewer_config": {"sequence_type": "ABAB"}}'   # No block_id, different config
+        ]
+    })
+    
+    with caplog.at_level(logging.WARNING):
+        result = validate_block_configurations(df)
+    
+    assert result is True
+    
+    # Should warn about inconsistency using experiment name as block ID
+    warning_messages = [record.message for record in caplog.records if record.levelname == 'WARNING']
+    assert len(warning_messages) == 1
+    assert 'Same_Experiment_Name' in warning_messages[0]  # Block ID should be experiment name
+
+def test_validate_block_configurations_empty_vs_populated_config():
+    """Test that empty configs don't trigger warnings against populated configs."""
+    df = pd.DataFrame({
+        'Experiment': ['Primary_With_Config', 'Secondary_Empty_Config'],
+        'Super_Experiment_Mapping_Notes': [
+            '{"block_id": "test_block", "viewer_config": {"sequence_type": "AABB"}}',
+            '{"block_id": "test_block"}'  # Empty viewer_config
+        ]
+    })
+    
+    # This should NOT generate warnings since empty config is ignored
+    result = validate_block_configurations(df)
+    assert result is True
+
+def test_validate_block_configurations_malformed_json():
+    """Test validation handles malformed JSON gracefully."""
+    df = pd.DataFrame({
+        'Experiment': ['Good_JSON', 'Bad_JSON'],
+        'Super_Experiment_Mapping_Notes': [
+            '{"block_id": "test_block", "viewer_config": {"sequence_type": "AABB"}}',
+            'this is not valid json'  # Malformed JSON
+        ]
+    })
+    
+    # Should not crash, malformed JSON should be parsed as empty dict
+    result = validate_block_configurations(df)
+    assert result is True

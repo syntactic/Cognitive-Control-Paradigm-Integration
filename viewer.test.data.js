@@ -292,9 +292,66 @@ const dualTaskConditionForRelativeTiming = {
     effective_end_stim2_or: 700     // Task 2 Orientation ends at 700ms
 };
 
+// Fixture 4: Block with inconsistent viewer_config for robustness testing
+const inconsistentConfigBlock = [
+    {
+        Experiment: 'InconsistentBlock_Primary',
+        Block_ID: 'InconsistentTest',
+        N_Tasks: 1,
+        Trial_Transition_Type: 'Switch',
+        ITI_ms: 1000,
+        coh_1: 0.8,
+        coh_2: 0.0,
+        effective_start_cue1: 0,
+        effective_end_cue1: 50,
+        effective_start_go1: 200,
+        effective_end_go1: 250,
+        effective_start_stim1_mov: 200,
+        effective_end_stim1_mov: 700,
+        effective_start_stim2_mov: 0,
+        effective_end_stim2_mov: 0,
+        effective_start_cue2: 0,
+        effective_end_cue2: 0,
+        effective_start_go2: 0,
+        effective_end_go2: 0,
+        effective_start_stim1_or: 200,
+        effective_end_stim1_or: 700,
+        effective_start_stim2_or: 0,
+        effective_end_stim2_or: 0,
+        viewer_config: '{"sequence_type": "AABB"}'
+    },
+    {
+        Experiment: 'InconsistentBlock_Secondary',
+        Block_ID: 'InconsistentTest',
+        N_Tasks: 1,
+        Trial_Transition_Type: 'Repeat',
+        ITI_ms: 800,
+        coh_1: 0.6,
+        coh_2: 0.0,
+        effective_start_cue1: 0,
+        effective_end_cue1: 50,
+        effective_start_go1: 200,
+        effective_end_go1: 250,
+        effective_start_stim1_mov: 200,
+        effective_end_stim1_mov: 700,
+        effective_start_stim2_mov: 0,
+        effective_end_stim2_mov: 0,
+        effective_start_cue2: 0,
+        effective_end_cue2: 0,
+        effective_start_go2: 0,
+        effective_end_go2: 0,
+        effective_start_stim1_or: 200,
+        effective_end_stim1_or: 700,
+        effective_start_stim2_or: 0,
+        effective_end_stim2_or: 0,
+        viewer_config: '{"sequence_type": "ABAB"}' // Different config
+    }
+];
+
 module.exports = {
     multiConditionBlock,
     singleConditionBlock,
     dynamicDistributionBlock,
-    dualTaskConditionForRelativeTiming
+    dualTaskConditionForRelativeTiming,
+    inconsistentConfigBlock
 };
