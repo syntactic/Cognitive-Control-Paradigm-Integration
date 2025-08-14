@@ -2,6 +2,7 @@
 import pytest
 import pandas as pd
 import logging
+import json
 from convert import (
     parse_notes,
     get_param,
@@ -96,9 +97,12 @@ def test_process_condition_single_task(sample_test_row):
     result = process_condition(row)
     assert result['N_Tasks'] == 1
     assert result['coh_1'] == 0.5
-    assert result['effective_start_stim1_mov'] == 0
-    assert result['effective_end_stim1_mov'] == 2000 # default duration
-    assert result['effective_start_cue1'] == -50 # csi is 50
+    assert result['effective_start_stim1_mov'] == 50 # timeline offset by CSI
+    assert result['effective_end_stim1_mov'] == 2050 # default duration + offset
+    assert result['effective_start_cue1'] == 0 # cue starts at timeline beginning
+    # Verify CSI relationship is preserved
+    actual_csi = result['effective_start_stim1_mov'] - result['effective_start_cue1']
+    assert actual_csi == 50, f"CSI should be preserved: expected 50, got {actual_csi}"
     assert result['effective_start_stim1_or'] == 0 # No distractor for univalent
     assert result['effective_start_stim2_mov'] == 0 # No T2
     assert result['Stimulus_Valency'] == 'Univalent'
@@ -179,9 +183,12 @@ def test_process_condition_with_overrides():
         'Super_Experiment_Mapping_Notes': '{"convert_overrides": {"t1_stim_duration": 800, "t2_stim_duration": 800}}'
     })
     result = process_condition(row)
-    assert result['effective_end_stim1_mov'] == 800 # Overridden duration
-    assert result['effective_end_stim1_or'] == 800 # Distractor duration also overridden
-    assert result['effective_start_cue1'] == -100
+    assert result['effective_end_stim1_mov'] == 900 # Overridden duration (800) + offset (100)
+    assert result['effective_end_stim1_or'] == 900 # Distractor duration also overridden + offset
+    assert result['effective_start_cue1'] == 0 # timeline offset prevents negative
+    # Verify CSI relationship is preserved
+    actual_csi = result['effective_start_stim1_mov'] - result['effective_start_cue1']
+    assert actual_csi == 100, f"CSI should be preserved: expected 100, got {actual_csi}"
     assert result['effective_end_stim1_or'] > result['effective_start_stim1_or'] # Distractor should be active
     assert result['Stimulus_Valency'] == 'Bivalent-Incongruent'
 
@@ -495,3 +502,210 @@ def test_validate_block_configurations_malformed_json():
     # Should not crash, malformed JSON should be parsed as empty dict
     result = validate_block_configurations(df)
     assert result is True
+
+
+# Tests for CSI handling and timeline offset
+class TestCSIHandling:
+    """Test suite for CSI handling to ensure positive CSI values produce non-negative timestamps."""
+
+    def create_test_row(self, csi1=0, csi2=0, n_tasks=1, soa=0, notes_dict=None):
+        """Helper method to create a test row with specified CSI values."""
+        base_row = {
+            'Experiment': 'Test Experiment',
+            'Task 1 Type': 'Movement Task',
+            'Task 2 Type': 'Orientation Task',
+            'Task 1 CSI': str(csi1) if csi1 != 'N/A' else 'N/A',
+            'Task 2 CSI': str(csi2) if csi2 != 'N/A' else 'N/A',
+            'Task 2 Response Probability': 1.0 if n_tasks == 2 else 0.0,
+            'Inter-task SOA': str(soa) if n_tasks == 2 and soa != 'N/A' else 'N/A',
+            'Distractor SOA': str(soa) if n_tasks == 1 and soa != 'N/A' else 'N/A',
+            'Stimulus-Stimulus Congruency': 'N/A',
+            'Stimulus-Response Congruency': 'N/A',
+            'Response Set Overlap': 'Identical',
+            'Task 1 Stimulus-Response Mapping': 'Compatible',
+            'Task 2 Stimulus-Response Mapping': 'Compatible',
+            'Switch Rate': '0%',
+            'Task 1 Difficulty': 3,
+            'Task 2 Difficulty': 3,
+            'Trial Transition Type': 'Pure',
+            'RSI': 1000,
+            'Super_Experiment_Mapping_Notes': json.dumps(notes_dict) if notes_dict else ''
+        }
+        return pd.Series(base_row)
+
+    def test_zero_csi_baseline(self):
+        """Test that zero CSI produces expected baseline timestamps."""
+        row = self.create_test_row(csi1=0, csi2=0, n_tasks=1)
+        result = process_condition(row)
+        
+        # With CSI=0, cue and stimulus should start at the same time
+        assert result['effective_start_cue1'] == 0
+        assert result['effective_start_stim1_mov'] == 0
+        assert result['effective_start_cue1'] >= 0, "Cue start time should be non-negative"
+        assert result['effective_start_stim1_mov'] >= 0, "Stimulus start time should be non-negative"
+
+    def test_positive_csi_single_task(self):
+        """Test that positive CSI in single-task paradigm produces non-negative timestamps."""
+        csi_value = 500
+        row = self.create_test_row(csi1=csi_value, csi2=0, n_tasks=1)
+        result = process_condition(row)
+        
+        # All timestamps should be non-negative
+        assert result['effective_start_cue1'] >= 0, f"Cue start time {result['effective_start_cue1']} should be non-negative"
+        assert result['effective_start_stim1_mov'] >= 0, f"Stimulus start time {result['effective_start_stim1_mov']} should be non-negative"
+        
+        # Cue should start before stimulus (CSI relationship preserved)
+        cue_start = result['effective_start_cue1']
+        stim_start = result['effective_start_stim1_mov']
+        actual_csi = stim_start - cue_start
+        assert actual_csi == csi_value, f"CSI should be preserved: expected {csi_value}, got {actual_csi}"
+
+    def test_positive_csi_dual_task(self):
+        """Test that positive CSI in dual-task paradigm produces non-negative timestamps."""
+        csi1_value = 300
+        csi2_value = 400
+        soa_value = 200
+        row = self.create_test_row(csi1=csi1_value, csi2=csi2_value, n_tasks=2, soa=soa_value)
+        result = process_condition(row)
+        
+        # All timestamps should be non-negative
+        timing_keys = [
+            'effective_start_cue1', 'effective_start_cue2',
+            'effective_start_stim1_mov', 'effective_start_stim2_or'
+        ]
+        for key in timing_keys:
+            assert result[key] >= 0, f"{key} = {result[key]} should be non-negative"
+        
+        # Verify CSI relationships are preserved
+        t1_cue_start = result['effective_start_cue1']
+        t1_stim_start = result['effective_start_stim1_mov']
+        actual_csi1 = t1_stim_start - t1_cue_start
+        assert actual_csi1 == csi1_value, f"Task 1 CSI should be preserved: expected {csi1_value}, got {actual_csi1}"
+        
+        t2_cue_start = result['effective_start_cue2']
+        t2_stim_start = result['effective_start_stim2_or']
+        actual_csi2 = t2_stim_start - t2_cue_start
+        assert actual_csi2 == csi2_value, f"Task 2 CSI should be preserved: expected {csi2_value}, got {actual_csi2}"
+        
+        # Verify SOA relationship is preserved
+        actual_soa = t2_stim_start - t1_stim_start
+        assert actual_soa == soa_value, f"SOA should be preserved: expected {soa_value}, got {actual_soa}"
+
+    def test_large_positive_csi(self):
+        """Test that large positive CSI values are handled correctly."""
+        large_csi = 2000
+        row = self.create_test_row(csi1=large_csi, csi2=0, n_tasks=1)
+        result = process_condition(row)
+        
+        # Timeline should be shifted forward by the CSI amount
+        assert result['effective_start_cue1'] >= 0, "Cue start should be non-negative even with large CSI"
+        assert result['effective_start_stim1_mov'] >= large_csi, f"Stimulus should start at least {large_csi}ms after timeline start"
+        
+        # CSI relationship should be preserved
+        actual_csi = result['effective_start_stim1_mov'] - result['effective_start_cue1']
+        assert actual_csi == large_csi, f"Large CSI should be preserved: expected {large_csi}, got {actual_csi}"
+
+    def test_mixed_csi_values_dual_task(self):
+        """Test dual-task with different CSI values for each task."""
+        csi1 = 200
+        csi2 = 800  # Larger CSI for task 2
+        soa = 300
+        row = self.create_test_row(csi1=csi1, csi2=csi2, n_tasks=2, soa=soa)
+        result = process_condition(row)
+        
+        # Timeline should be shifted by the maximum CSI (csi2 = 800)
+        expected_offset = max(csi1, csi2)  # 800
+        
+        # All timestamps should be non-negative
+        timing_keys = [
+            'effective_start_cue1', 'effective_start_cue2',
+            'effective_start_stim1_mov', 'effective_start_stim2_or'
+        ]
+        for key in timing_keys:
+            assert result[key] >= 0, f"{key} should be non-negative"
+        
+        # Task 1 stimulus should start at the offset
+        assert result['effective_start_stim1_mov'] == expected_offset, \
+            f"Task 1 stimulus should start at offset {expected_offset}"
+        
+        # Verify both CSI relationships
+        actual_csi1 = result['effective_start_stim1_mov'] - result['effective_start_cue1']
+        actual_csi2 = result['effective_start_stim2_or'] - result['effective_start_cue2']
+        assert actual_csi1 == csi1, f"Task 1 CSI: expected {csi1}, got {actual_csi1}"
+        assert actual_csi2 == csi2, f"Task 2 CSI: expected {csi2}, got {actual_csi2}"
+
+    def test_csi_with_bivalent_stimulus(self):
+        """Test positive CSI with bivalent stimulus (distractor present)."""
+        csi_value = 400
+        distractor_soa = 100
+        row = self.create_test_row(csi1=csi_value, n_tasks=1, soa=distractor_soa)
+        # Add bivalent stimulus
+        row['Stimulus-Stimulus Congruency'] = 'Congruent'
+        
+        result = process_condition(row)
+        
+        # All timestamps should be non-negative
+        assert result['effective_start_cue1'] >= 0, "Cue start should be non-negative"
+        assert result['effective_start_stim1_mov'] >= 0, "Target stimulus start should be non-negative"
+        assert result['effective_start_stim1_or'] >= 0, "Distractor stimulus start should be non-negative"
+        
+        # CSI relationship should be preserved
+        actual_csi = result['effective_start_stim1_mov'] - result['effective_start_cue1']
+        assert actual_csi == csi_value, f"CSI should be preserved: expected {csi_value}, got {actual_csi}"
+        
+        # Distractor SOA relationship should be preserved
+        actual_distractor_soa = result['effective_start_stim1_or'] - result['effective_start_stim1_mov']
+        assert actual_distractor_soa == distractor_soa, \
+            f"Distractor SOA should be preserved: expected {distractor_soa}, got {actual_distractor_soa}"
+
+    def test_csi_with_duration_overrides(self):
+        """Test positive CSI with custom duration overrides from JSON notes."""
+        import json
+        csi_value = 600
+        custom_stim_duration = 1500
+        custom_cue_duration = 3000
+        
+        notes = {
+            "convert_overrides": {
+                "t1_stim_duration": custom_stim_duration,
+                "t1_cue_go_duration": custom_cue_duration
+            }
+        }
+        
+        row = self.create_test_row(csi1=csi_value, n_tasks=1, notes_dict=notes)
+        result = process_condition(row)
+        
+        # All timestamps should be non-negative
+        assert result['effective_start_cue1'] >= 0, "Cue start should be non-negative"
+        assert result['effective_start_stim1_mov'] >= 0, "Stimulus start should be non-negative"
+        
+        # CSI relationship should be preserved
+        actual_csi = result['effective_start_stim1_mov'] - result['effective_start_cue1']
+        assert actual_csi == csi_value, f"CSI should be preserved: expected {csi_value}, got {actual_csi}"
+        
+        # Duration overrides should be applied
+        actual_cue_duration = result['effective_end_cue1'] - result['effective_start_cue1']
+        actual_stim_duration = result['effective_end_stim1_mov'] - result['effective_start_stim1_mov']
+        assert actual_cue_duration == custom_cue_duration, \
+            f"Cue duration override: expected {custom_cue_duration}, got {actual_cue_duration}"
+        assert actual_stim_duration == custom_stim_duration, \
+            f"Stimulus duration override: expected {custom_stim_duration}, got {actual_stim_duration}"
+
+    def test_na_csi_values(self):
+        """Test that 'N/A' CSI values are handled correctly (should default to 0)."""
+        row = self.create_test_row(csi1='N/A', csi2='N/A', n_tasks=2)
+        result = process_condition(row)
+        
+        # With CSI = N/A (treated as 0), cue and stimulus should start at same time
+        assert result['effective_start_cue1'] == result['effective_start_stim1_mov'], \
+            "With N/A CSI, cue and stimulus should start simultaneously"
+        assert result['effective_start_cue2'] == result['effective_start_stim2_or'], \
+            "With N/A CSI, cue and stimulus should start simultaneously"
+        
+        # All timestamps should still be non-negative
+        timing_keys = [
+            'effective_start_cue1', 'effective_start_cue2',
+            'effective_start_stim1_mov', 'effective_start_stim2_or'
+        ]
+        for key in timing_keys:
+            assert result[key] >= 0, f"{key} should be non-negative"

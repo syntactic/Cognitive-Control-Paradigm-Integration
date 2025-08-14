@@ -253,13 +253,17 @@ def process_condition(row):
     csi2_str = row['Task 2 CSI']
     csi1 = 0 if pd.isna(csi1_str) or csi1_str == 'N/A' else int(csi1_str)
     csi2 = 0 if pd.isna(csi2_str) or csi2_str == 'N/A' else int(csi2_str)
+    
+    # Calculate timeline offset to ensure all timestamps are non-negative
+    # When CSI is positive, cue start becomes negative, so we need to shift everything forward
+    timeline_offset = max(0, csi1, csi2)  # Ensure offset handles both tasks
 
     if n_tasks == 2:
         # Standard Dual-Task / PRP paradigm
         # T1 -> Channel 1 mov pathway, T2 -> Channel 2 or pathway
         
-        # T1 Events (Channel 1)
-        t1_stim_start = TRIAL_START_OFFSET
+        # T1 Events (Channel 1) - Apply timeline offset
+        t1_stim_start = TRIAL_START_OFFSET + timeline_offset
         resolved_params['effective_start_stim1_mov'] = t1_stim_start
         resolved_params['effective_end_stim1_mov'] = t1_stim_start + t1_stim_duration
         
@@ -282,8 +286,8 @@ def process_condition(row):
         # Single-Task / Task-Switching / Interference paradigm
         # Target -> mov pathway, Distractor -> or pathway
         
-        # Target Events
-        target_stim_start = TRIAL_START_OFFSET
+        # Target Events - Apply timeline offset
+        target_stim_start = TRIAL_START_OFFSET + timeline_offset
         resolved_params['effective_start_stim1_mov'] = target_stim_start
         resolved_params['effective_end_stim1_mov'] = target_stim_start + t1_stim_duration
         

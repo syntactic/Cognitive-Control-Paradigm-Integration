@@ -48,7 +48,7 @@ def real_raw_data():
     # Select a few representative rows by their 'Experiment' name
     experiments_to_test = [
         "Stroop 1935 Color Naming", # Classic Interference
-        "Telford 1931 Auditory RT (500ms SOA)", # Classic PRP
+        "Telford 1931 Auditory RT", # Classic PRP
         "Meiran 1996 Exp 1 (Short CSI) Switch Trials Incongruent" # Complex Task Switching
     ]
     
