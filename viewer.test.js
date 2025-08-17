@@ -6,7 +6,14 @@ const {
     generateTrialDirections, 
     generateTaskSequence, 
     generateTaskAssignmentSequence,
-    createTrialSequence 
+    createTrialSequence,
+    updateInfoPanel,
+    updateInfoPanelFromCondition,
+    parseCSV,
+    groupByBlock,
+    generateDynamicSOA,
+    recalculateTimingsWithDynamicSOA,
+    extractMappingNotes
 } = require('./viewer.js');
 
 // Import test fixtures
@@ -996,5 +1003,235 @@ describe('FAILING TESTS - N_Tasks Based Paradigm Differentiation', () => {
         } else {
             expect(trial.seParams.dir_or_1).toBe(0);
         }
+    });
+});
+
+// NEW TESTS FOR BUG FIXES AND ENHANCEMENTS
+describe('updateInfoPanel', () => {
+    beforeEach(() => {
+        // Set up DOM
+        document.body.innerHTML = '<div id="info-panel"></div>';
+    });
+    
+    test('should handle missing conceptual row gracefully', () => {
+        updateInfoPanel(null);
+        const infoPanel = document.getElementById('info-panel');
+        expect(infoPanel.innerHTML).toContain('Experiment data not found');
+    });
+    
+    test('should correctly map column names with fallbacks', () => {
+        const conceptualRow = {
+            'Experiment': 'Test Experiment',
+            'Number of Tasks': '2',
+            'Inter-task SOA': '100',
+            'Task 1 Type': 'Color Discrimination',
+            'Task 2 Type': 'Shape Discrimination',
+            'Task 1 Stimulus-Response Mapping': 'Compatible',
+            'Task 2 Stimulus-Response Mapping': 'Arbitrary',
+            'Stimulus Valency': 'Bivalent-Congruent',
+            'Response Set Overlap': 'Identical',
+            'Switch Rate': '50',
+            'Notes': 'Test notes'
+        };
+        
+        updateInfoPanel(conceptualRow);
+        const infoPanel = document.getElementById('info-panel');
+        const content = infoPanel.innerHTML;
+        
+        expect(content).toContain('Test Experiment');
+        expect(content).toContain('Number of Tasks:</strong> 2');
+        expect(content).toContain('SOA:</strong> 100ms');
+        expect(content).toContain('Task 1 SRM:</strong> Compatible');
+        expect(content).toContain('Task 2 SRM:</strong> Arbitrary');
+        expect(content).toContain('Switch Rate:</strong> 50%');
+    });
+    
+    test('should handle single task experiments correctly', () => {
+        const conceptualRow = {
+            'Experiment': 'Single Task Test',
+            'Number of Tasks': '1',
+            'Task 1 Type': 'Arrow Identification',
+            'Task 1 Stimulus-Response Mapping': 'Compatible',
+            'Stimulus Valency': 'Univalent'
+        };
+        
+        updateInfoPanel(conceptualRow);
+        const infoPanel = document.getElementById('info-panel');
+        const content = infoPanel.innerHTML;
+        
+        expect(content).toContain('Number of Tasks:</strong> 1');
+        expect(content).toContain('Stimulus Response Mapping:</strong> Compatible');
+        expect(content).not.toContain('Task 2 Type');
+        expect(content).not.toContain('Task 2 SRM');
+    });
+});
+
+describe('updateInfoPanelFromCondition', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '<div id="info-panel"></div>';
+    });
+    
+    test('should handle missing condition gracefully', () => {
+        updateInfoPanelFromCondition(null);
+        const infoPanel = document.getElementById('info-panel');
+        expect(infoPanel.innerHTML).toContain('Condition data not found');
+    });
+    
+    test('should correctly display dual-task condition data', () => {
+        const condition = {
+            'Experiment': 'Dual Task Test',
+            'N_Tasks': 2,
+            'Task_1_Type': 'Movement',
+            'Task_2_Type': 'Orientation',
+            'SRM_1': 'Compatible',
+            'SRM_2': 'Arbitrary',
+            'Stimulus_Valency': 'Univalent',
+            'Simplified_RSO': 'Disjoint',
+            'Sequence_Type': 'Random',
+            'Switch_Rate_Percent': '25',
+            'ITI_ms': '1500',
+            'RSI_Distribution_Type': 'uniform'
+        };
+        
+        updateInfoPanelFromCondition(condition);
+        const infoPanel = document.getElementById('info-panel');
+        const content = infoPanel.innerHTML;
+        
+        expect(content).toContain('Dual Task Test');
+        expect(content).toContain('Number of Tasks:</strong> 2');
+        expect(content).toContain('Task 1 SRM:</strong> Compatible');
+        expect(content).toContain('Task 2 SRM:</strong> Arbitrary');
+        expect(content).toContain('Switch Rate:</strong> 25%');
+        expect(content).toContain('ITI:</strong> 1500ms (uniform)');
+    });
+});
+
+// REGRESSION TESTS for previously identified issues
+describe('Regression Tests', () => {
+    test('should not display undefined in SOA field', () => {
+        document.body.innerHTML = '<div id="info-panel"></div>';
+        
+        const conceptualRow = {
+            'Experiment': 'Test',
+            'Number of Tasks': '1',
+            'SOA': undefined, // This was causing "undefined" to appear
+            'Inter-task SOA': null
+        };
+        
+        updateInfoPanel(conceptualRow);
+        const content = document.getElementById('info-panel').innerHTML;
+        
+        expect(content).not.toContain('undefinedms');
+        expect(content).toContain('SOA:</strong> N/A');
+    });
+    
+    test('should not display undefined in Stimulus Response Mapping field', () => {
+        document.body.innerHTML = '<div id="info-panel"></div>';
+        
+        const conceptualRow = {
+            'Experiment': 'Test',
+            'Number of Tasks': '1',
+            'Stimulus Response Mapping': undefined, // This was causing issues
+            'Task 1 Stimulus-Response Mapping': 'Compatible'
+        };
+        
+        updateInfoPanel(conceptualRow);
+        const content = document.getElementById('info-panel').innerHTML;
+        
+        expect(content).not.toContain('Stimulus Response Mapping:</strong> undefined');
+        expect(content).toContain('Stimulus Response Mapping:</strong> Compatible');
+    });
+});
+
+// NEW TESTS FOR DYNAMIC SOA FUNCTIONALITY
+describe('Dynamic SOA Generation', () => {
+    test('should extract SOA distribution from mapping notes', () => {
+        const condition = {
+            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "choice", "SOA_values": [1000, 2000, 4000, 8000, 16000]}}'
+        };
+        
+        const notes = extractMappingNotes(condition);
+        expect(notes.viewer_config.SOA_distribution).toBe('choice');
+        expect(notes.viewer_config.SOA_values).toEqual([1000, 2000, 4000, 8000, 16000]);
+    });
+    
+    test('should generate SOA from discrete choice distribution', () => {
+        const condition = {
+            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "choice", "SOA_values": [1000, 2000, 4000, 8000, 16000]}}'
+        };
+        
+        // Test multiple samples to ensure they're all from the valid set
+        for (let i = 0; i < 10; i++) {
+            const soa = generateDynamicSOA(condition);
+            expect([1000, 2000, 4000, 8000, 16000]).toContain(soa);
+        }
+    });
+    
+    test('should generate SOA from uniform distribution', () => {
+        const condition = {
+            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "uniform", "SOA_range": [500, 1500]}}'
+        };
+        
+        const soa = generateDynamicSOA(condition);
+        expect(soa).toBeGreaterThanOrEqual(500);
+        expect(soa).toBeLessThanOrEqual(1500);
+    });
+    
+    test('should fallback to generateSOA when no viewer config', () => {
+        const condition = {
+            'SOA_Distribution_Type': 'fixed'
+        };
+        
+        const soa = generateDynamicSOA(condition);
+        expect(soa).toBe(0); // Default from generateSOA
+    });
+});
+
+describe('Timing Recalculation', () => {
+    test('should recalculate T2 timings based on dynamic SOA', () => {
+        const condition = {
+            'N_Tasks': '2',
+            'Inter-task SOA': '6200', // Original static SOA
+            'effective_start_stim1_mov': '100',
+            'effective_start_stim2_or': '6300', // Original T2 timing
+            'effective_end_stim2_or': '8300',
+            'effective_start_cue2': '4300',
+            'effective_end_cue2': '6300',
+            'Task 2 CSI': '2000'
+        };
+        
+        const dynamicSOA = 4000; // New SOA
+        const result = recalculateTimingsWithDynamicSOA(condition, dynamicSOA);
+        
+        // T2 stimulus should start at T1_start + dynamic_SOA = 100 + 4000 = 4100
+        expect(parseInt(result.effective_start_stim2_or)).toBe(4100);
+        expect(parseInt(result.effective_end_stim2_or)).toBe(6100); // 4100 + 2000 duration
+        
+        // T2 cue should start CSI ms before T2 stimulus = 4100 - 2000 = 2100
+        expect(parseInt(result.effective_start_cue2)).toBe(2100);
+    });
+    
+    test('should handle single-task experiments without modification', () => {
+        const condition = {
+            'N_Tasks': '1',
+            'effective_start_stim1_mov': '100',
+            'effective_end_stim1_mov': '600'
+        };
+        
+        const dynamicSOA = 2000;
+        const result = recalculateTimingsWithDynamicSOA(condition, dynamicSOA);
+        
+        // Should return unchanged condition for single-task
+        expect(result.effective_start_stim1_mov).toBe('100');
+        expect(result.effective_end_stim1_mov).toBe('600');
+    });
+    
+    test('should handle invalid JSON in mapping notes gracefully', () => {
+        const condition = {
+            'Super_Experiment_Mapping_Notes': 'invalid json'
+        };
+        
+        expect(() => extractMappingNotes(condition)).not.toThrow();
+        expect(() => generateDynamicSOA(condition)).not.toThrow();
     });
 });

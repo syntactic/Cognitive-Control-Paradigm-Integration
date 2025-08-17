@@ -1,6 +1,7 @@
 // Global variables to store experiment data
 let resolvedData = [];
 let conceptualData = [];
+let currentTrialSequence = []; // Pre-generated trial sequence for selected experiment
 
 // CSV parser using Papa Parse library
 function parseCSV(csvText) {
@@ -402,6 +403,92 @@ function extractViewerConfig(condition) {
     return config;
 }
 
+// Helper function to extract Super_Experiment_Mapping_Notes
+function extractMappingNotes(condition) {
+    let notes = {};
+    try {
+        if (condition.Super_Experiment_Mapping_Notes && condition.Super_Experiment_Mapping_Notes !== '{}') {
+            notes = JSON.parse(condition.Super_Experiment_Mapping_Notes);
+        }
+    } catch (e) {
+        console.warn('Failed to parse Super_Experiment_Mapping_Notes:', condition.Super_Experiment_Mapping_Notes);
+    }
+    return notes;
+}
+
+// Generate dynamic SOA from viewer config in mapping notes
+function generateDynamicSOA(condition) {
+    const mappingNotes = extractMappingNotes(condition);
+    const viewerConfig = mappingNotes.viewer_config || {};
+    
+    if (viewerConfig.SOA_distribution === 'choice' && viewerConfig.SOA_values) {
+        // Sample from discrete distribution
+        const values = viewerConfig.SOA_values;
+        return values[Math.floor(Math.random() * values.length)];
+    } else if (viewerConfig.SOA_distribution === 'uniform' && viewerConfig.SOA_range) {
+        // Sample from uniform distribution
+        const [min, max] = viewerConfig.SOA_range;
+        return min + Math.random() * (max - min);
+    }
+    
+    // Fallback to existing SOA generation logic
+    return generateSOA(condition, 0);
+}
+
+// Recalculate absolute timings based on dynamic SOA
+function recalculateTimingsWithDynamicSOA(condition, dynamicSOA) {
+    const modifiedCondition = { ...condition };
+    
+    // For dual-task experiments, we need to recalculate T2 timings based on dynamic SOA
+    const nTasks = parseInt(condition.N_Tasks) || 1;
+    
+    if (nTasks === 2 && dynamicSOA !== undefined) {
+        // Get T1 stimulus timing (baseline)
+        const t1_stim_start = parseInt(condition.effective_start_stim1_mov) || 0;
+        
+        // Calculate new T2 stimulus timing: T1_start + dynamic_SOA
+        const t2_stim_start = t1_stim_start + dynamicSOA;
+        const t2_stim_duration = (parseInt(condition.effective_end_stim2_or) || 0) - (parseInt(condition.effective_start_stim2_or) || 0);
+        const t2_stim_end = t2_stim_start + t2_stim_duration;
+        
+        // Update T2 stimulus timings
+        modifiedCondition.effective_start_stim2_or = t2_stim_start.toString();
+        modifiedCondition.effective_end_stim2_or = t2_stim_end.toString();
+        
+        // Calculate T2 cue timing based on CSI
+        const t2_csi = parseInt(condition['Task 2 CSI']) || 0;
+        
+        if (t2_csi > 0) {
+            // When CSI > 0, calculate cue duration from original data
+            const t2_cue_duration = (parseInt(condition.effective_end_cue2) || 0) - (parseInt(condition.effective_start_cue2) || 0);
+            
+            // T2 cue starts CSI ms before T2 stimulus
+            const t2_cue_start = t2_stim_start - t2_csi;
+            const t2_cue_end = t2_cue_start + t2_cue_duration;
+            
+            modifiedCondition.effective_start_cue2 = t2_cue_start.toString();
+            modifiedCondition.effective_end_cue2 = t2_cue_end.toString();
+        } else {
+            // When CSI is 0, cue and stimulus start simultaneously with stimulus duration
+            modifiedCondition.effective_start_cue2 = t2_stim_start.toString();
+            modifiedCondition.effective_end_cue2 = t2_stim_end.toString();
+        }
+        
+        // Update go signal timing to match stimulus
+        modifiedCondition.effective_start_go2 = t2_stim_start.toString();
+        modifiedCondition.effective_end_go2 = t2_stim_end.toString();
+        
+        console.log(`Recalculated timings for dynamic SOA ${dynamicSOA}ms:`, {
+            t1_stim_start,
+            t2_stim_start,
+            original_soa: parseInt(condition['Inter-task SOA']) || 0,
+            dynamic_soa: dynamicSOA
+        });
+    }
+    
+    return modifiedCondition;
+}
+
 // Helper function to determine trial transition type based on sequence position
 function getTrialTransitionType(trialIndex, taskSequence) {
     if (trialIndex === 0) {
@@ -480,8 +567,11 @@ function createTrialSequence(conditionOrBlock, numTrials = 10) {
         }
         
         // D. Generate Dynamic Values: SOA and ITI for this specific trial
-        const dynamicSOA = generateSOA(selectedCondition, 0);
+        const dynamicSOA = generateDynamicSOA(selectedCondition);
         const dynamicITI = generateITI(selectedCondition);
+        
+        // Recalculate absolute timings with dynamic SOA
+        const recalculatedCondition = recalculateTimingsWithDynamicSOA(selectedCondition, dynamicSOA);
         
         // Generate trial assignment and directions
         let assignment;
@@ -495,8 +585,8 @@ function createTrialSequence(conditionOrBlock, numTrials = 10) {
         
         const directions = generateTrialDirections(selectedCondition, assignment);
         
-        // Get base parameters from the selected condition
-        const baseParams = convertAbsoluteToSEParams(selectedCondition);
+        // Get base parameters from the recalculated condition with dynamic SOA
+        const baseParams = convertAbsoluteToSEParams(recalculatedCondition);
         
         let trialParams;
         
@@ -559,17 +649,67 @@ function createTrialSequence(conditionOrBlock, numTrials = 10) {
 function updateInfoPanel(conceptualRow) {
     const infoPanel = document.getElementById('info-panel');
     
+    if (!conceptualRow) {
+        infoPanel.innerHTML = '<div class="error">Experiment data not found</div>';
+        return;
+    }
+    
+    // Helper function to safely get column values with fallbacks
+    const getValue = (primary, fallback) => {
+        const value = conceptualRow[primary] || conceptualRow[fallback];
+        return (value && value !== 'undefined' && value.trim() !== '') ? value : 'N/A';
+    };
+    
+    // Get SOA value - check for distribution first, then fallback to static value
+    let soaValue = 'N/A';
+    
+    // Check if there's a dynamic SOA distribution in the mapping notes
+    try {
+        const mappingNotes = extractMappingNotes(conceptualRow);
+        const viewerConfig = mappingNotes.viewer_config || {};
+        
+        if (viewerConfig.SOA_distribution === 'choice' && viewerConfig.SOA_values) {
+            soaValue = `Choice from [${viewerConfig.SOA_values.join(', ')}]ms`;
+        } else if (viewerConfig.SOA_distribution === 'uniform' && viewerConfig.SOA_range) {
+            soaValue = `Uniform(${viewerConfig.SOA_range[0]}, ${viewerConfig.SOA_range[1]})ms`;
+        } else {
+            // Fallback to static SOA value (only SOA-related columns)
+            const staticSOA = getValue('Inter-task SOA', 'SOA');
+            soaValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
+        }
+    } catch (e) {
+        // If extractMappingNotes fails, fallback to static SOA value
+        const staticSOA = getValue('Inter-task SOA', 'SOA');
+        soaValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
+    }
+    
+    // Build stimulus response mapping info
+    let srmInfo = '';
+    const task1SRM = getValue('Task 1 Stimulus-Response Mapping', 'SRM_1');
+    const task2SRM = getValue('Task 2 Stimulus-Response Mapping', 'SRM_2');
+    const numTasks = parseInt(getValue('Number of Tasks', 'N_Tasks')) || 1;
+    
+    if (numTasks === 1) {
+        srmInfo = `<p><strong>Stimulus Response Mapping:</strong> ${task1SRM}</p>`;
+    } else {
+        srmInfo = `
+            <p><strong>Task 1 SRM:</strong> ${task1SRM}</p>
+            <p><strong>Task 2 SRM:</strong> ${task2SRM}</p>
+        `;
+    }
+    
     const info = `
         <h3>Experiment Details</h3>
-        <p><strong>Experiment:</strong> ${conceptualRow.Experiment}</p>
-        <p><strong>Number of Tasks:</strong> ${conceptualRow['Number of Tasks']}</p>
-        <p><strong>SOA:</strong> ${conceptualRow.SOA}ms</p>
-        <p><strong>Task 1 Type:</strong> ${conceptualRow['Task 1 Type']}</p>
-        <p><strong>Task 2 Type:</strong> ${conceptualRow['Task 2 Type']}</p>
-        <p><strong>Stimulus Valency:</strong> ${conceptualRow['Stimulus Valency']}</p>
-        <p><strong>Response Set Overlap:</strong> ${conceptualRow['Response Set Overlap']}</p>
-        <p><strong>Stimulus Response Mapping:</strong> ${conceptualRow['Stimulus Response Mapping']}</p>
-        <p><strong>Notes:</strong> ${conceptualRow.Notes || 'N/A'}</p>
+        <p><strong>Experiment:</strong> ${getValue('Experiment', '')}</p>
+        <p><strong>Number of Tasks:</strong> ${numTasks}</p>
+        <p><strong>SOA:</strong> ${soaValue}${soaValue !== 'N/A' ? 'ms' : ''}</p>
+        <p><strong>Task 1 Type:</strong> ${getValue('Task 1 Type', '')}</p>
+        ${numTasks > 1 ? `<p><strong>Task 2 Type:</strong> ${getValue('Task 2 Type', '')}</p>` : ''}
+        <p><strong>Stimulus Valency:</strong> ${getValue('Stimulus Valency', '')}</p>
+        <p><strong>Response Set Overlap:</strong> ${getValue('Response Set Overlap', 'Simplified_RSO')}</p>
+        ${srmInfo}
+        <p><strong>Switch Rate:</strong> ${getValue('Switch Rate', 'Switch_Rate_Percent')}${getValue('Switch Rate', 'Switch_Rate_Percent') !== 'N/A' ? '%' : ''}</p>
+        <p><strong>Notes:</strong> ${getValue('Notes', '') || 'N/A'}</p>
     `;
     
     infoPanel.innerHTML = info;
@@ -579,29 +719,27 @@ function updateInfoPanel(conceptualRow) {
 function drawTimeline(trialData) {
     const svg = document.getElementById('timeline-svg');
     
-    // Optimization: Check if we need to redraw (compare with previous trial data)
-    const trialKey = JSON.stringify({
-        task_1: trialData.task_1,
-        task_2: trialData.task_2,
-        start_1: trialData.start_1,
-        dur_1: trialData.dur_1,
-        start_2: trialData.start_2,
-        dur_2: trialData.dur_2,
-        start_mov_1: trialData.start_mov_1,
-        dur_mov_1: trialData.dur_mov_1,
-        start_or_1: trialData.start_or_1,
-        dur_or_1: trialData.dur_or_1,
-        start_mov_2: trialData.start_mov_2,
-        dur_mov_2: trialData.dur_mov_2,
-        start_or_2: trialData.start_or_2,
-        dur_or_2: trialData.dur_or_2,
-        regenTime: trialData.regenTime || 0
-    });
-    
-    // Skip redraw if timeline structure is identical
-    if (svg.getAttribute('data-trial-key') === trialKey) {
+    if (!trialData) {
+        svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">No trial data available</text>';
         return;
     }
+    
+    // Note: Timeline needs to redraw for each trial as parameters can vary
+    // Only skip if we have the exact same data structure (rare case)
+    const essentialProps = [
+        'task_1', 'task_2', 'start_1', 'dur_1', 'start_2', 'dur_2',
+        'start_mov_1', 'dur_mov_1', 'start_or_1', 'dur_or_1',
+        'start_mov_2', 'dur_mov_2', 'start_or_2', 'dur_or_2'
+    ];
+    
+    const trialKey = essentialProps.map(prop => `${prop}:${trialData[prop] || 0}`).join('|');
+    
+    // Minor optimization: skip redraw only if timeline structure is identical
+    const currentKey = svg.getAttribute('data-trial-key');
+    if (currentKey === trialKey) {
+        return;
+    }
+    
     svg.setAttribute('data-trial-key', trialKey);
     
     // Clear previous timeline
@@ -719,6 +857,11 @@ function drawTimeline(trialData) {
             text.textContent = `${startTime}-${endTime}ms`;
             g.appendChild(text);
         }
+        
+        // Add hover tooltip for detailed information
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        title.textContent = `${label}: ${startTime}ms - ${endTime}ms (Duration: ${endTime - startTime}ms)`;
+        rect.appendChild(title);
     }
     
     // Determine what to draw based on actual trial structure
@@ -822,8 +965,24 @@ function drawTimeline(trialData) {
 
 async function runSelectedExperiment() {
     const select = document.getElementById('experiment-select');
-    select.blur() // remove focus from the dropdown
+    const startButton = document.getElementById('start-experiment');
+    
+    // Disable button to prevent multiple clicks
+    if (startButton) {
+        startButton.disabled = true;
+        startButton.textContent = 'Running...';
+    }
+    
+    select.blur(); // remove focus from the dropdown
     const selectedBlockId = select.value;
+    
+    if (!selectedBlockId) {
+        if (startButton) {
+            startButton.disabled = false;
+            startButton.textContent = 'Start Experiment';
+        }
+        return;
+    }
 
     // Get the block data
     const blocks = groupByBlock(resolvedData);
@@ -831,14 +990,20 @@ async function runSelectedExperiment() {
     
     if (!blockConditions || blockConditions.length === 0) {
         console.error('No conditions found for block:', selectedBlockId);
+        const canvasContainer = document.getElementById('canvas-container');
+        canvasContainer.innerHTML = '<div class="error">No conditions found for selected experiment</div>';
+        if (startButton) {
+            startButton.disabled = false;
+            startButton.textContent = 'Start Experiment';
+        }
         return;
     }
 
     // Use the primary condition for trial generation (future enhancement: use full block)
     const condition = blockConditions[0];
 
-    // Generate trial sequence
-    const trialSequence = createTrialSequence(condition, 10);
+    // Use the pre-generated trial sequence that was created when experiment was selected
+    const trialSequence = currentTrialSequence.length > 0 ? currentTrialSequence : createTrialSequence(condition, 10);
     
     console.log('Running experiment with trial sequence:', trialSequence);
     
@@ -875,6 +1040,9 @@ async function runSelectedExperiment() {
             // Update display for current trial
             canvasContainer.innerHTML = `<div>Running trial ${trial.trialNumber}/${trialSequence.length} (${trial.taskType})</div>`;
             
+            // Update timeline to show current trial's timing
+            drawTimeline(trial.seParams);
+            
             // Clean up previous trial
             await superExperiment.endBlock();
             
@@ -900,6 +1068,12 @@ async function runSelectedExperiment() {
         } catch (cleanupError) {
             console.error('Error during cleanup:', cleanupError);
         }
+    } finally {
+        // Re-enable the start button
+        if (startButton) {
+            startButton.disabled = false;
+            startButton.textContent = 'Start Experiment';
+        }
     }
 }
  
@@ -907,47 +1081,78 @@ async function runSelectedExperiment() {
 function updateUIForSelection() {
     const select = document.getElementById('experiment-select');
     const selectedBlockId = select.value;
+    const startButton = document.getElementById('start-experiment');
     
     if (!selectedBlockId) {
         // Reset to initial state
+        currentTrialSequence = []; // Clear pre-generated sequence
         document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Select an experiment to begin</div>';
         document.getElementById('info-panel').innerHTML = '<div class="placeholder">Experiment details will appear here</div>';
         document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Timeline will appear here</text>';
+        if (startButton) startButton.disabled = true;
         return;
     }
     
-    // Get the block data
-    const blocks = groupByBlock(resolvedData);
-    const blockConditions = blocks[selectedBlockId];
+    // Enable start button when experiment is selected
+    if (startButton) startButton.disabled = false;
     
-    if (!blockConditions || blockConditions.length === 0) {
-        console.error('No conditions found for block:', selectedBlockId);
-        return;
-    }
-    
-    // Use the first condition in the block for display purposes
-    const primaryCondition = blockConditions[0];
-    const conceptualRow = conceptualData.find(row => row.Experiment === primaryCondition.Experiment);
-    
-    // Update info panel
-    if (conceptualRow) {
-        updateInfoPanel(conceptualRow);
-    } else {
-        // Fallback info panel with condition data
-        updateInfoPanelFromCondition(primaryCondition);
-    }
-    
-    // Generate a sample trial to visualize
     try {
-        const sampleTrials = createTrialSequence(primaryCondition, 1);
-        if (sampleTrials.length > 0) {
-            // Draw timeline using actual trial data
-            drawTimeline(sampleTrials[0].seParams);
+        // Get the block data
+        const blocks = groupByBlock(resolvedData);
+        const blockConditions = blocks[selectedBlockId];
+        
+        if (!blockConditions || blockConditions.length === 0) {
+            console.error('No conditions found for block:', selectedBlockId);
+            document.getElementById('canvas-container').innerHTML = '<div class="error">No conditions found for selected experiment</div>';
+            document.getElementById('info-panel').innerHTML = '<div class="error">Experiment data not found</div>';
+            document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error: No data found</text>';
+            return;
         }
+        
+        // Use the first condition in the block for display purposes
+        const primaryCondition = blockConditions[0];
+        const conceptualRow = conceptualData.find(row => row.Experiment === primaryCondition.Experiment);
+        
+        // Update info panel
+        if (conceptualRow) {
+            updateInfoPanel(conceptualRow);
+        } else {
+            // Fallback info panel with condition data
+            updateInfoPanelFromCondition(primaryCondition);
+        }
+        
+        // Generate full trial sequence - this will be used for both preview and actual experiment
+        try {
+            // Generate the actual trial sequence that will be used when experiment runs
+            currentTrialSequence = createTrialSequence(primaryCondition, 10); // Generate 10 trials
+            
+            if (currentTrialSequence.length > 0) {
+                // Draw timeline using the FIRST trial that will actually run
+                drawTimeline(currentTrialSequence[0].seParams);
+                
+                // Update info panel to show the distribution info (not specific sampled values)
+                if (conceptualRow) {
+                    updateInfoPanel(conceptualRow);
+                } else {
+                    updateInfoPanelFromCondition(primaryCondition);
+                }
+            } else {
+                throw new Error('No trials generated');
+            }
+        } catch (timelineError) {
+            console.error('Error generating sample trial for timeline:', timelineError);
+            // Fall back to showing error
+            document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error generating timeline</text>';
+        }
+        
+        // Update canvas container to show experiment is ready
+        document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Click "Start Experiment" to begin</div>';
+        
     } catch (error) {
-        console.error('Error generating sample trial for timeline:', error);
-        // Fall back to showing placeholder
-        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Error generating timeline</text>';
+        console.error('Error in updateUIForSelection:', error);
+        document.getElementById('canvas-container').innerHTML = '<div class="error">Error loading experiment data</div>';
+        document.getElementById('info-panel').innerHTML = '<div class="error">Error loading experiment information</div>';
+        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error loading timeline</text>';
     }
 }
 
@@ -955,76 +1160,180 @@ function updateUIForSelection() {
 function updateInfoPanelFromCondition(condition) {
     const infoPanel = document.getElementById('info-panel');
     
+    if (!condition) {
+        infoPanel.innerHTML = '<div class="error">Condition data not found</div>';
+        return;
+    }
+    
+    // Helper function to safely get values
+    const getValue = (value) => (value && value !== 'undefined' && value.trim() !== '') ? value : 'N/A';
+    
+    const numTasks = parseInt(condition.N_Tasks) || 1;
+    
+    // Build SRM info based on number of tasks
+    let srmInfo = '';
+    if (numTasks === 1) {
+        srmInfo = `<p><strong>Stimulus Response Mapping:</strong> ${getValue(condition.SRM_1)}</p>`;
+    } else {
+        srmInfo = `
+            <p><strong>Task 1 SRM:</strong> ${getValue(condition.SRM_1)}</p>
+            <p><strong>Task 2 SRM:</strong> ${getValue(condition.SRM_2)}</p>
+        `;
+    }
+    
+    // Check for SOA distribution in condition's mapping notes  
+    let soaDisplayValue = 'N/A';
+    try {
+        const mappingNotes = extractMappingNotes(condition);
+        const viewerConfig = mappingNotes.viewer_config || {};
+        
+        if (viewerConfig.SOA_distribution === 'choice' && viewerConfig.SOA_values) {
+            soaDisplayValue = `Choice from [${viewerConfig.SOA_values.join(', ')}]ms`;
+        } else if (viewerConfig.SOA_distribution === 'uniform' && viewerConfig.SOA_range) {
+            soaDisplayValue = `Uniform(${viewerConfig.SOA_range[0]}, ${viewerConfig.SOA_range[1]})ms`;
+        } else {
+            // Fallback to static SOA value (only SOA-related columns)
+            const staticSOA = getValue(condition['Inter-task SOA']) || getValue(condition.SOA);
+            soaDisplayValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
+        }
+    } catch (e) {
+        // If extractMappingNotes fails, fallback to static SOA value
+        const staticSOA = getValue(condition['Inter-task SOA']) || getValue(condition.SOA);
+        soaDisplayValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
+    }
+    
     const info = `
         <h3>Experiment Details</h3>
-        <p><strong>Experiment:</strong> ${condition.Experiment}</p>
-        <p><strong>Task 1 Type:</strong> ${condition.Task_1_Type || 'N/A'}</p>
-        <p><strong>Task 2 Type:</strong> ${condition.Task_2_Type || 'N/A'}</p>
-        <p><strong>Stimulus Valency:</strong> ${condition.Stimulus_Valency || 'N/A'}</p>
-        <p><strong>Response Set Overlap:</strong> ${condition.Simplified_RSO || 'N/A'}</p>
-        <p><strong>Sequence Type:</strong> ${condition.Sequence_Type || 'N/A'}</p>
-        <p><strong>Switch Rate:</strong> ${condition.Switch_Rate_Percent || 0}%</p>
-        <p><strong>ITI:</strong> ${condition.ITI_ms || 'N/A'}ms (${condition.ITI_Distribution_Type || 'fixed'})</p>
+        <p><strong>Experiment:</strong> ${getValue(condition.Experiment)}</p>
+        <p><strong>Number of Tasks:</strong> ${numTasks}</p>
+        <p><strong>SOA:</strong> ${soaDisplayValue}</p>
+        <p><strong>Task 1 Type:</strong> ${getValue(condition.Task_1_Type)}</p>
+        ${numTasks > 1 ? `<p><strong>Task 2 Type:</strong> ${getValue(condition.Task_2_Type)}</p>` : ''}
+        <p><strong>Stimulus Valency:</strong> ${getValue(condition.Stimulus_Valency)}</p>
+        <p><strong>Response Set Overlap:</strong> ${getValue(condition.Simplified_RSO)}</p>
+        ${srmInfo}
+        <p><strong>Sequence Type:</strong> ${getValue(condition.Sequence_Type)}</p>
+        <p><strong>Switch Rate:</strong> ${getValue(condition.Switch_Rate_Percent)}${condition.Switch_Rate_Percent ? '%' : ''}</p>
+        <p><strong>ITI:</strong> ${getValue(condition.ITI_ms)}${condition.ITI_ms ? 'ms' : ''} (${getValue(condition.RSI_Distribution_Type || condition.ITI_Distribution_Type)})</p>
     `;
     
     infoPanel.innerHTML = info;
 }
 
+// Show loading state
+function showLoadingState() {
+    const canvasContainer = document.getElementById('canvas-container');
+    const infoPanel = document.getElementById('info-panel');
+    const timelineSvg = document.getElementById('timeline-svg');
+    
+    canvasContainer.innerHTML = '<div class="loading">Loading experiment data...</div>';
+    infoPanel.innerHTML = '<div class="loading">Loading...</div>';
+    timelineSvg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Loading...</text>';
+}
+
+// Show error state
+function showErrorState(message) {
+    const canvasContainer = document.getElementById('canvas-container');
+    const infoPanel = document.getElementById('info-panel');
+    const timelineSvg = document.getElementById('timeline-svg');
+    
+    canvasContainer.innerHTML = `<div class="error">${message}</div>`;
+    infoPanel.innerHTML = '<div class="error">Error loading experiment data</div>';
+    timelineSvg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error loading data</text>';
+}
+
 // Initialize the application
 async function initializeApp() {
     try {
-        // Load both CSV files
+        showLoadingState();
+        
+        // Load both CSV files with better error handling
         console.log('Loading CSV files...');
         
         const [resolvedResponse, conceptualResponse] = await Promise.all([
-            fetch('data/resolved_design_space.csv'),
-            fetch('data/super_experiment_design_space.csv')
+            fetch('data/resolved_design_space.csv').catch(e => { throw new Error(`Failed to load resolved data: ${e.message}`); }),
+            fetch('data/super_experiment_design_space.csv').catch(e => { throw new Error(`Failed to load conceptual data: ${e.message}`); })
         ]);
+        
+        if (!resolvedResponse.ok) {
+            throw new Error(`Failed to load resolved data: ${resolvedResponse.status} ${resolvedResponse.statusText}`);
+        }
+        if (!conceptualResponse.ok) {
+            throw new Error(`Failed to load conceptual data: ${conceptualResponse.status} ${conceptualResponse.statusText}`);
+        }
         
         const resolvedText = await resolvedResponse.text();
         const conceptualText = await conceptualResponse.text();
         
-        // Parse CSV data
-        resolvedData = parseCSV(resolvedText);
-        conceptualData = parseCSV(conceptualText);
+        // Parse CSV data with error handling
+        try {
+            resolvedData = parseCSV(resolvedText);
+            conceptualData = parseCSV(conceptualText);
+        } catch (parseError) {
+            throw new Error(`Failed to parse CSV data: ${parseError.message}`);
+        }
         
         console.log(`Loaded ${resolvedData.length} resolved experiments`);
         console.log(`Loaded ${conceptualData.length} conceptual experiments`);
         
-        // Use all data from the CSV without filtering
+        // Validate and filter data
+        const initialResolvedCount = resolvedData.length;
         resolvedData = resolvedData.filter(row => row.Experiment && row.Experiment.trim() !== '');
         
-        console.log(`Using ${resolvedData.length} total experiments`);
+        if (resolvedData.length === 0) {
+            throw new Error('No valid experiments found in the data files');
+        }
+        
+        console.log(`Using ${resolvedData.length} total experiments (filtered from ${initialResolvedCount})`);
         
         // Group data by Block_ID for block-aware functionality
         const blocks = groupByBlock(resolvedData);
+        const blockKeys = Object.keys(blocks);
         
-        console.log(`Grouped into ${Object.keys(blocks).length} blocks`);
+        if (blockKeys.length === 0) {
+            throw new Error('No experiment blocks found');
+        }
+        
+        console.log(`Grouped into ${blockKeys.length} blocks`);
         
         // Populate dropdown with blocks
         const select = document.getElementById('experiment-select');
-        Object.keys(blocks).forEach(blockId => {
+        
+        // Clear existing options except the placeholder
+        const placeholder = select.querySelector('option[value=""]');
+        select.innerHTML = '';
+        if (placeholder) select.appendChild(placeholder);
+        
+        // Sort blocks alphabetically for better UX
+        blockKeys.sort().forEach(blockId => {
             const option = document.createElement('option');
             option.value = blockId;
             option.textContent = blockId;
             select.appendChild(option);
         });
         
-        // Add event listener
+        // Add event listeners
         select.addEventListener('change', updateUIForSelection);
-	const startButton = document.getElementById('start-experiment');
-	startButton.addEventListener('click', runSelectedExperiment)
+        const startButton = document.getElementById('start-experiment');
+        if (startButton) {
+            startButton.addEventListener('click', runSelectedExperiment);
+        }
+        
+        // Reset to initial state
+        updateUIForSelection();
         
         console.log('App initialized successfully');
         
     } catch (error) {
         console.error('Error initializing app:', error);
-        document.getElementById('canvas-container').innerHTML = '<div style="color: red; padding: 20px;">Error loading experiment data. Check console for details.</div>';
+        showErrorState(`Error loading experiment data: ${error.message}`);
     }
 }
 
-// Start the app when page loads
-document.addEventListener('DOMContentLoaded', initializeApp);
+// Start the app when page loads (only in browser environment)
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+}
 
 module.exports = {
     parseCSV,
@@ -1032,6 +1341,9 @@ module.exports = {
     generateTrialDirections,
     generateITI,
     generateSOA,
+    generateDynamicSOA,
+    recalculateTimingsWithDynamicSOA,
+    extractMappingNotes,
     groupByBlock,
     extractViewerConfig,
     getTrialTransitionType,
@@ -1039,6 +1351,8 @@ module.exports = {
     generateTaskAssignmentSequence,
     createTrialSequence,
     updateInfoPanel,
-    drawTimeline
-    // Add any other functions you want to test
+    updateInfoPanelFromCondition,
+    drawTimeline,
+    showLoadingState,
+    showErrorState
 };
