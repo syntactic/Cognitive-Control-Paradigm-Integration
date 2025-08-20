@@ -10,27 +10,27 @@ aliases:
 # Conflict Coding Guide
 
 ### Purpose
-This document provides the canonical guidelines for coding conflict-related dimensions in the `super_experiment_design_space.csv` dataset. It formalizes the use of two precise, orthogonal dimensions to capture conflict: **`Stimulus-Stimulus (S-S) Congruency`** and **`Stimulus-Response (S-R) Congruency`**. Adherence to this guide is mandatory to ensure the logical consistency of the parametric design space.
+Canonical guidelines for coding conflict dimensions in `super_experiment_design_space.csv`. Defines two orthogonal dimensions: **`Stimulus-Stimulus (S-S) Congruency`** and **`Stimulus-Response (S-R) Congruency`**.
 
-### The Core Principle: Semantic vs. Structural Priming
+### Core Principle: Semantic vs. Structural Priming
 
-The distinction between S-S and S-R conflict is determined by whether an irrelevant stimulus feature primes a response via a **learned, semantic association** or via a **direct, structural correspondence**. To determine the conflict type, we analyze the relationship between the irrelevant stimulus feature (`S_irrelevant`) and the response.
+S-S and S-R conflict are distinguished by whether an irrelevant stimulus feature primes a response via **learned, semantic association** or **direct, structural correspondence**.
 
-#### **1. Stimulus-Stimulus (S-S) Congruency: Conflict via Semantic Association**
+#### **1. Stimulus-Stimulus (S-S) Congruency: Semantic Association**
 
-This conflict occurs when `S_irrelevant` has a learned, semantic relationship with an item in the abstract **Response Set** (the set of possible answers, e.g., the words {"blue", "red"}).
+Occurs when `S_irrelevant` has a learned, semantic relationship with the abstract **Response Set**.
 
-*   **Mechanism:** `S_irrelevant` -> (primes) -> **Conceptual Response Category**
-*   **Rule of Thumb:** Does the irrelevant part of the stimulus *mean* the same thing as one of the possible answers?
-*   **Applies To:** Stroop/Flanker tasks (perceptual conflict) and task-switching with bivalent stimuli (operational conflict).
+*   **Mechanism:** `S_irrelevant` -> **Conceptual Response Category**
+*   **Rule:** Does the irrelevant feature *mean* the same as a possible answer?
+*   **Applies To:** Stroop/Flanker (perceptual conflict), task-switching with bivalent stimuli (operational conflict).
 
-#### **2. Stimulus-Response (S-R) Congruency: Conflict via Structural Correspondence**
+#### **2. Stimulus-Response (S-R) Congruency: Structural Correspondence**
 
-This conflict occurs when `S_irrelevant` has a direct, structural (e.g., spatial, directional) correspondence with the physical **Response Effector** or action.
+Occurs when `S_irrelevant` has direct, structural correspondence with the physical **Response Effector**.
 
-*   **Mechanism:** `S_irrelevant` -> (primes) -> **Physical Motor Action**
-*   **Rule of Thumb:** Does the irrelevant part of the stimulus directly map onto the physical action, bypassing its meaning?
-*   **Applies To:** Simon and Simon-like tasks (e.g., pitch-height, affective congruency).
+*   **Mechanism:** `S_irrelevant` -> **Physical Motor Action**
+*   **Rule:** Does the irrelevant feature directly map to physical action, bypassing meaning?
+*   **Applies To:** Simon tasks (spatial, pitch-height, affective congruency).
 
 ### The N/A vs. Neutral Litmus Test
 

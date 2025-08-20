@@ -11,10 +11,10 @@ tags:
 **Journal:** Journal of Experimental Psychology
 
 **Core Goal:**
-To investigate whether a "refractory phase"—a period of decreased excitability or readiness for response immediately following a voluntary action or associative process—exists in complex human behaviors, analogous to that found in simpler physiological systems (like nerve/muscle tissue or reflexes). Telford explored this by examining how the time interval between successive stimuli affects:
-1.  Simple reaction time.
-2.  Accuracy of judgments.
-3.  Tendencies to repeat associative responses.
+Investigate whether a "refractory phase" exists in complex human behaviors, analogous to physiological systems. Examined how inter-stimulus intervals affect:
+1. Simple reaction time
+2. Judgment accuracy  
+3. Associative response tendencies
 
 **Paradigm(s) Used & Key Manipulations:**
 Telford conducted three main sets of experiments, all ofwhich can be conceptualized as [[Dual-Task Performance & PRP|PRP-like paradigms]] where [[Number of Tasks|Number of Tasks=2]] (two sequential S-R episodes). The primary manipulation was the [[Inter-task SOA (Stimulus Onset Asynchrony)|Stimulus Onset Asynchrony (SOA)]] between the first stimulus (S1) and the second stimulus (S2).

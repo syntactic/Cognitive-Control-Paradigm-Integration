@@ -8,8 +8,7 @@ tags:
 **Journal:** PLoS Biology
 **DOI:** 10.1371/journal.pbio.0040220
 
-## Core Goal:
-To reconcile the "passive structural bottleneck" view from [[Dual-Task Performance & PRP|PRP]] research with the "active executive control" view from [[Task Switching]] research. The study investigates how task uncertainty and task simultaneity interact by explicitly mixing ingredients from both paradigms.
+**Core Goal:** Reconcile "passive structural bottleneck" ([[Dual-Task Performance & PRP|PRP]]) with "active executive control" ([[Task Switching]]) views by investigating task uncertainty and simultaneity interactions.
 
 ## Paradigm Used:
 A [[Dual-Task Performance & PRP|dual-task]] paradigm where participants responded to two tasks:

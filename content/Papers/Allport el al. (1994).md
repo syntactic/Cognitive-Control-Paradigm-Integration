@@ -8,18 +8,14 @@ tags:
 aliases:
   - Allport et al. 1994
 ---
-### Core Goal
-To investigate the behavioral costs of switching tasks and to challenge the prevailing view that these costs reflect the duration of a discrete, executive "shift-of-set" operation. The authors' central argument is that **switch costs do not represent an active reconfiguration process but rather a form of proactive interference from the previously active task set**. They introduce the influential concept of **Task-Set Inertia (TSI)** to explain these findings.
+**Core Goal:** Investigate task switching costs and challenge the "shift-of-set" view. Argues switch costs reflect proactive interference from previous task set rather than active reconfiguration. Introduces **[[Theoretical Concepts/Task-Set Inertia|Task-Set Inertia (TSI)]]**.
 
-### Paradigm(s) Used
-The paper describes a series of experiments using variations of a [[Task Switching]] paradigm with predictable task alternation (ABAB...). This builds on the early work of [[Jersild (1927)]].
+**Paradigms:** [[Task Switching]] with predictable ABAB alternation (building on [[Jersild (1927)]]):
+- **Number Judgments:** Value vs. group size; Odd/Even vs. More/Less than five
+- **Stroop-like:** Word naming (dominant) vs. color naming (non-dominant)  
+- **RSVP Semantic:** Monitoring word streams for shifting categories
 
-*   **Tasks:** A variety of tasks were used across experiments, including:
-    *   **Number Judgments (Exp 1, 2):** Responding to the **value** vs. **group size** of numerals, and judging them as **Odd/Even** vs. **More/Less** than five.
-    *   **Stroop-like Tasks (Exp 3, 5):** Switching between **word naming** (dominant) and **color naming** (non-dominant).
-    *   **RSVP Semantic Monitoring (Exp 6, 7):** Monitoring a rapid stream of words for a shifting semantic category (e.g., from 'Animal' to 'Small Object').
-
-*   **General Procedure:** Participants typically alternated between two tasks in a predictable sequence. Performance on these "alternating" lists/trials was compared to "uniform" (single-task) baseline conditions.
+**Procedure:** Alternating vs. uniform (single-task) baseline comparison.
 
 ### Key Manipulations
 1.  **Task Feature Switched (Exp 1):** Compared the cost of switching the relevant **stimulus dimension** (e.g., Value vs. Group Size) versus switching the **cognitive operation/judgment** (e.g., Odd/Even vs. More/Less).

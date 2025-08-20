@@ -1,18 +1,33 @@
 ---
 tags:
   - dimension
+  - deprecated
+aliases:
+  - N_Tasks
 ---
 
-Definition: The number of distinct stimulus-response (S-R) episodes that the participant is instructed to complete **within a single trial presentation** or very close temporal proximity, typically triggered by temporally distinct stimuli (S1, S2).
+## ⚠️ DEPRECATED DIMENSION
 
-**Values:** Typically **Categorical {1, 2}**.
+**This dimension has been superseded by [[Dimensions/Task 2 Response Probability]] for analytical purposes.**
 
-**Relevance to Design Space:**
+### Legacy Definition
+The number of distinct stimulus-response (S-R) episodes that the participant is instructed to complete **within a single trial presentation** or very close temporal proximity, typically triggered by temporally distinct stimuli (S1, S2).
 
-- A fundamental dimension differentiating paradigm classes:
-    
-    - **Number of Tasks = 1:** Encompasses [[Single Task]] paradigms (with or without distractors) and [[Task Switching]] paradigms (where each trial involves one S-R episode, but the task rule switches between trials).
-    - **Number of Tasks = 2:** Encompasses [[Dual-Task Performance & PRP|Dual Task]] and [[Dual-Task Performance & PRP|PRP]] paradigms, where two distinct S-R episodes are required within the trial.
-- The value of Number of Tasks determines the applicability of other dimensions like [[Inter-task SOA (Stimulus Onset Asynchrony)]].
+**Values:** Categorical {1, 2}
 
-Super Exp. Mapping: Setting Super Experiment parameters for only Task 1 vs. parameters for both Task 1 and Task 2 to define required S-R episodes within a trial.
+### Why This Dimension Was Deprecated
+As detailed in GEMINI.md, the discrete Number of Tasks dimension creates interpretability problems for parametric analysis. When using Principal Component Analysis (PCA), interpolating between single-task (N_Tasks=1) and dual-task (N_Tasks=2) paradigms yields mathematically incoherent results like N_Tasks=1.5.
+
+### Replacement Dimension
+**[[Dimensions/Task 2 Response Probability]]** provides a continuous (0.0 to 1.0) representation of the same conceptual space:
+- **Value = 0.0:** Corresponds to all single-task paradigms (interference, task-switching)
+- **Value = 1.0:** Corresponds to all dual-task paradigms (PRP, dual-task)
+- **Interpolated values:** Represent coherent "bridge" paradigms where Task 2 response is probabilistic
+
+### Legacy Usage
+This dimension may still appear in:
+- Historical paper summaries for descriptive purposes
+- The CSV column headers for backward compatibility
+- Conceptual discussions where the discrete categorization is more intuitive
+
+For all analytical and operational purposes, use [[Dimensions/Task 2 Response Probability]].

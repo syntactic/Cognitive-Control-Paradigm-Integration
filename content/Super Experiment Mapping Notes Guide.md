@@ -8,12 +8,12 @@ tags:
 
 ## 1. Purpose and Rationale
 
-This document provides the canonical guidelines for using the `Super_Experiment_Mapping_Notes` column in the `super_experiment_design_space.csv` dataset. This column contains a JSON object that serves two critical, distinct functions:
+Guidelines for the `Super_Experiment_Mapping_Notes` JSON column serving two functions:
 
-1.  **It allows `convert.py` to apply precise overrides** to its default within-trial timing calculations, ensuring maximum fidelity to the source literature for analysis.
-2.  **It provides `viewer.js` with essential metadata** about between-trial sequencing and randomization, enabling high-fidelity interactive simulations.
+1. **`convert.py` overrides:** Trial-level timing calculation adjustments for literature fidelity
+2. **`viewer.js` metadata:** Between-trial sequencing and randomization for simulations
 
-The principle is to keep the main CSV columns clean and optimized for quantitative analysis while using this JSON object to capture the necessary nuances for accurate operationalization.
+Keeps main CSV clean for analysis while capturing operationalization nuances in JSON.
 
 ## 2. The RSI vs. ITI Abstraction: A Methodological Note
 

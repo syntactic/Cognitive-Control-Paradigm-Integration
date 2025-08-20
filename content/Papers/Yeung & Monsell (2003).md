@@ -37,21 +37,19 @@ To investigate the "paradoxical" asymmetry in [[Effects/Switch Cost|Switch Costs
 
 **Key Findings:**
 
-1.  **Replication of Allport's Asymmetry (High Interference):**
-    *   When interference was high (simultaneous attribute presentation in Exp 1; shared responses in Exp 2b and Full Overlap in Exp 3), switch costs were larger for switching *to the stronger task* (e.g., word naming, digit naming).
-2.  **Reversal of Asymmetry (Reduced Interference):**
-    *   **Exp 1 (Delayed Attribute):** Delaying word onset (reducing interference for color naming) reversed the asymmetry. Switch costs became larger for switching *to the weaker color-naming task*.
-    *   **Exp 2a (Disjoint Response Categories):** Switching between digit naming and odd/even (different vocal responses) resulted in a larger switch cost for the *weaker odd/even task*.
-    *   **Exp 3 (Separated Response Sets):** When response sets were separated by modality or category (Modality Overlap, Category Overlap, No Overlap conditions), the switch cost asymmetry reversed: costs were larger for switching *to the weaker color-naming task*.
-3.  **Interference Reduction:** The manipulations (delayed attribute, separated responses) generally reduced overall interference (e.g., Stroop effect size), but the key finding was the *reversal* of switch cost asymmetry, not necessarily its elimination.
-4.  **Modelling:** The authors propose a model where task activation is a function of task strength (baseline), control input (top-down bias), and task priming (carry-over). Asymmetrical priming (larger priming after a weak task because it required more control) combined with minimization of control effort can explain both patterns of asymmetry. When interference is high, overcoming it for the weak task leads to strong carry-over priming that then interferes more when switching back to the strong task. When interference is low, less control is needed for the weak task, leading to less carry-over, and the inherent difficulty of activating the weaker task set becomes more dominant.
+1. **High Interference Conditions:** Switch costs larger for switching to stronger task (replicating Allport's asymmetry)
+2. **Reduced Interference Conditions:** Asymmetry reverses - larger costs to weaker task
+   - **Exp 1:** Delayed word onset reversed asymmetry  
+   - **Exp 2a:** Disjoint response categories favored stronger task
+   - **Exp 3:** Separated response sets reversed asymmetry
+3. **Interference Reduction:** Manipulations reduced overall interference but key finding was asymmetry reversal
+4. **Model:** Task activation = task strength + control input + task priming. Asymmetrical priming after weak tasks (requiring more control) explains both patterns depending on interference level.
 
-**Authors' Main Conclusions/Interpretations:**
-
--   The paradoxical asymmetry in switch costs (larger cost to switch to a stronger task) is not a universal feature of task switching but is characteristic of situations with **high between-task interference** (stemming from stimulus attribute overlap and/or response set overlap).
--   When interference between tasks is reduced, the asymmetry reverses, and it becomes harder to switch to the **weaker, less practiced, or less dominant task**. This aligns more with intuitive notions of task-set inertia or reconfiguration difficulty.
--   The results support models where switch costs arise from an interaction between **task priming (carry-over activation/inhibition) and endogenous control processes** that are adjusted based on task demands and interference levels.
--   Separating response sets is an effective way to "gate out" interference from an irrelevant task, thereby changing the dynamics of switch costs.
+**Main Conclusions:**
+- Asymmetrical switch costs (larger to stronger task) occur with high between-task interference
+- Reduced interference reverses asymmetry (larger costs to weaker task)  
+- Switch costs arise from interaction between task priming and endogenous control
+- Separating response sets effectively reduces interference and changes switch cost dynamics
 
 **Relevance to Thesis:**
 

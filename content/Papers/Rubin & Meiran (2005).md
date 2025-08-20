@@ -9,9 +9,9 @@ tags:
 **Journal:** Journal of Experimental Psychology: Learning, Memory, and Cognition
 
 **Core Goal:**  
-To investigate the origins of the [[Effects/Mixing Cost|Mixing Cost (MC)]] in cued [[Task Switching]] paradigms. Specifically, the paper tests two hypotheses:
-1.  **Task Ambiguity Hypothesis:** MC arises from the need to resolve task ambiguity when stimuli are [[Dimensions/Stimulus-Stimulus Congruency]] (i.e., afford responses for multiple tasks) in mixed-task blocks.
-2.  **Working Memory (WM) Load Hypothesis:** MC arises from the increased load of holding multiple task sets in working memory in mixed-task blocks.
+Investigate [[Effects/Mixing Cost|Mixing Cost]] origins in cued [[Task Switching]], testing two hypotheses:
+1. **Task Ambiguity:** MC from resolving ambiguity when stimuli are [[Dimensions/Stimulus-Stimulus Congruency]]
+2. **WM Load:** MC from holding multiple task sets in working memory
 
 **Paradigm(s) Used:**
 Cued [[Task Switching]] paradigm.

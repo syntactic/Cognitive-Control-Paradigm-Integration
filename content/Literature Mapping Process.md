@@ -3,16 +3,16 @@ tags:
   - methodology
   - thesis_concept
 ---
-The process of mapping the existing literature onto the [[Parametric Design Space]] is a core methodological component of this thesis. It involves a systematic procedure for translating published experimental designs into a consistent, analyzable format. This structured approach is similar to the strategy to overcome the "task impurity problem," a challenge identified and tackled with a statistical methodology by [[Miyake et al. (2000)]].
+Systematic procedure for translating published experimental designs into the [[Parametric Design Space]] for analysis, similar to [[Miyake et al. (2000)]]'s approach to the "task impurity problem."
 
 ## 1. High-Level Process
 
-1. **Identify Key Studies:** Select foundational and representative studies from the literature using database searches, seminal reviews (e.g., [[Kiesel et al., 2010]], [[Koch et al., 2018]], [[Pashler, 1994]]), and citation tracking.
-2. **Define Derived Dimensions:** Establish a set of core conceptual dimensions that capture the primary functional manipulations in cognitive control research (e.g., [[Inter-task SOA (Stimulus Onset Asynchrony)]], [[CSI (Cue-Stimulus Interval)]], [[Task 2 Response Probability]]).
-3. **Code Studies at the Condition Level:** For each study, identify its distinct experimental conditions and code each one as a separate entry (a row) in a structured CSV dataset. This involves assigning a value for each derived dimension.
-4. **Translate to SE Parameters:** For each coded condition, translate its high-level dimensional representation into the concrete, low-level parameters required by the [[Super Experiment Framework]]. This translation is automated via a script (convert.py) and creates the final dataset (resolved_design_space.csv) for quantitative analysis.
-5. **Analyze and Visualize:** Use the resulting dataset to perform a Principal Component Analysis ([[PCA]]) and visualize the structure of the experimental design space.
-6. **Identify Gaps and Limitations:** Use the conceptual map and the PCA results to locate under-explored regions in the design space and to identify experimental manipulations from the literature that the SE framework cannot fully capture (see [[Study Limitations]]).
+1. **Select Studies:** Foundational studies via database searches, seminal reviews ([[Kiesel et al., 2010]], [[Koch et al., 2018]], [[Pashler, 1994]]), citation tracking
+2. **Define Dimensions:** Core conceptual dimensions capturing cognitive control manipulations
+3. **Code Conditions:** Each experimental condition as separate CSV entry with dimensional values
+4. **Translate Parameters:** Automated conversion (convert.py) to [[Super Experiment Framework]] parameters
+5. **Analyze:** [[PCA]] and visualization of design space structure
+6. **Identify Gaps:** Locate under-explored regions and framework limitations ([[Study Limitations]])
 
 ## 2. The Unit of Analysis: Granularity in Coding
 
@@ -23,16 +23,16 @@ This means that if a study manipulates a key variable within a block of trials (
 - **Analytical Fidelity for PCA:** The primary goal of the PCA is to discover the structure of variance in the design space. By coding individual conditions, we expose the variance introduced by key experimental manipulations (like congruency or predictability) to the analysis. Collapsing a mixed block into a single entry would erase this crucial variance, blinding the PCA to the study's core logic.
 - **Representing Experimental Comparisons:** Cognitive science advances by comparing performance across closely matched conditions. This coding scheme honors that logic, representing each distinct point of comparison that researchers have explored. A study that systematically explores 10 conditions rightfully occupies more volume in the conceptual space than a study with only two, and the PCA should reflect this.
 
-To manage the reconstruction of mixed-blocks in the viewer.js client, each condition is assigned a unique Condition_ID, and a block_composition_ids key in the Super_Experiment_Mapping_Notes JSON object lists all IDs belonging to a single experimental block.
+To manage the reconstruction of mixed-blocks in the viewer.js client, conditions sharing the same block_id in the Super_Experiment_Mapping_Notes JSON object are combined into a single experimental block.
 
 ## 3. Principles for Simplification and Granularity
 
-A central challenge in creating a unified space is deciding the appropriate level of granularity for each dimension. The goal is to maximize fidelity to the source literature while creating a feature set that is meaningful, analyzable, and operationally relevant to the [[Super Experiment Framework]]. This is achieved through a **two-level simplification process**:
+**Granularity Challenge:** Balance literature fidelity with meaningful, analyzable features via two-level simplification:
 
-1. **Level 1 (Conceptual Coding):** Capture high-fidelity details from the paper into the super_experiment_design_space.csv.
-2. **Level 2 (Analytical Processing):** Programmatically apply principled simplifications to create the final feature set for the PCA.
+1. **Level 1:** High-fidelity capture in super_experiment_design_space.csv
+2. **Level 2:** Programmatic simplification for PCA feature set
 
-The decision to simplify a dimension at Level 2, or to add a new granular dimension at Level 1, is guided by three principles applied in order:
+**Decision principles (applied in order):**
 
 ---
 ### Principle 1: Theoretical Centrality

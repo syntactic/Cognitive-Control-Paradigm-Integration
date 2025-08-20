@@ -16,11 +16,11 @@
     * **Task Difficulty**: The _source_ of difficulty is critical. A task that is difficult due to high perceptual demands may tax the control system differently than a task that is difficult due to a high working memory load. Read Vandierendonck, Liefooghe, and Verbruggen (2010). 
 ### Exclusion of Sequential and Contextual Effects
 
-The parametric design space is primarily concerned with the static, structural parameters that define an individual experimental condition. It deliberately abstracts away from dynamic, trial-to-trial modulations of performance that arise from sequential context or trial history. This limitation means that key phenomena related to cognitive control adaptation are not directly modeled. Two foundational studies illustrate this exclusion:
+Framework focuses on static, structural parameters per condition, abstracting away dynamic trial-to-trial modulations:
 
-1.  **Block-Level Contextual Probability:** In **[[Gratton, Coles, and Donchin (1992)]]**, the global probability of congruent vs. incongruent flanker trials was manipulated across blocks. They found that the magnitude of the Flanker effect on a given trial was modulated by this block-level statistical context. The framework lacks a dimension for "Contextual Expectancy" or "Trial-Type Probability," and therefore cannot distinguish between two physically identical trials that produce different results due to the block they are in.
+1. **Block-Level Context:** [[Gratton, Coles, and Donchin (1992)]] manipulated global congruent/incongruent probability across blocks. Framework lacks "Contextual Expectancy" dimension to distinguish identical trials with different block contexts.
 
-2.  **Trial-to-Trial Sequential Effects:** In **[[Egner et al. (2007)]]**, the core finding was that **conflict adaptation** is domain-specific: the Stroop effect was reduced following a Stroop-incongruent trial, but not a Simon-incongruent trial. Capturing this requires modeling the specific sequence of congruency across trials (e.g., Incongruent-Congruent vs. Congruent-Congruent). The `Trial Transition Type` dimension is designed to capture task-rule switches, not these finer-grained congruency-based transitions.
+2. **Sequential Effects:** [[Egner et al. (2007)]] showed domain-specific conflict adaptation (Stroop effect reduced after Stroop-incongruent, not Simon-incongruent). Requires modeling congruency sequences beyond current `Trial Transition Type` dimension.
 
 #### Abstraction of Stimulus Ambiguity Source
  
@@ -29,13 +29,11 @@ In task-switching and dual-task paradigms, stimulus ambiguity can arise from two
 - **Attribute-Based Bivalence:** A stimulus has multiple, separable perceptual features, each relevant to a different task (e.g., a "blue circle" in a color-shape switching task). Resolving this conflict may rely on attentional selection.
 - **Operation-Based Bivalence:** A single, non-decomposable stimulus affords multiple, competing transformations or rules (e.g., the number "64" in a task switching between "add the digits" and "multiply the digits," as in [[Jersild (1927)]]). Resolving this conflict may rely more on rule maintenance and inhibition.
 
-For the sake of a parsimonious design space, this framework does not currently have a dedicated dimension to distinguish between these two sources of ambiguity. Both are coded with S-S Congruency: N/A and S-R Congruency: N/A, with the core conflict being captured by the Trial Transition Type (Switch vs. Repeat). This is a deliberate abstraction that should be considered when interpreting the results.
-
-In both cases, physically identical trials yield different behavioral outcomes based on the context in which they are embedded. To maintain a tractable and comparable feature set across dozens of studies for the primary PCA, we have made the methodological decision to focus on the properties of the trial types themselves, acknowledging that this excludes the rich and important domain of sequential trial dynamics from the main analysis.
+**Current Abstraction:** Both sources coded identically (S-S/S-R Congruency: N/A), with conflict captured by Trial Transition Type. Deliberate simplification for PCA tractability excludes sequential trial dynamics.
 
 #### Abstraction of Stimulus Type
 
-Both the Super Experiment and the coding scheme abstract the nature of the stimulus, which sees variation across experimental designs. Differences between specific stimulus content or modality (e.g., color, shape, character, auditory tones, semantic content like emotional valence) are **abstracted away** by the current coding schema's dimensions. For example, [[Papers/Fischer & Schubert (2008)]] used a modified Flanker task as task 2 in a PRP experiment. Notably, the modification was around the stimulus types used in the Flanker task - instead of using arrows which would be typical of a Flanker task, they used words which elicited semantic valence, probing the impact of higher-level semantic processing, which the authors specifically investigated to see if it bypassed central capacity limitations in a way that simpler perceptual processing might not.
+Framework abstracts stimulus content/modality differences (color, shape, auditory, semantic valence). Example: [[Papers/Fischer & Schubert (2008)]] used semantic word flankers instead of arrows to probe whether higher-level processing bypasses central capacity limitations.
 #### Limited Granularity for Second Task (Task 2) Internal Features in Dual-Task Paradigms
 
 The Super Experiment Framework, and the associated coding scheme, is designed to capture the overarching temporal and structural relationships between tasks in dual-task settings, or the target-distractor relationship in single-task interference paradigms. However, this design leads to a limited ability to precisely model the internal stimulus characteristics of the **second task (Task 2)** when it is itself a complex stimulus.

@@ -11,14 +11,13 @@ tags:
 **Journal:** Archives of Psychology, No. 89
 
 **Core Goal:**
-To investigate the effects of "shift" (alternating between different mental operations or tasks) on performance efficiency compared to performing those tasks separately ("mental set"). Jersild explored:
-1.  Whether shift always involves a loss in efficiency and if this loss varies across different task combinations.
-2.  The effect of increasing task difficulty on shift loss.
-3.  The role of practice in determining the efficiency of a shift task.
-4.  The relationship between the ability to shift and general intelligence.
+Investigate "shift" (task alternation) vs. "mental set" (separate task performance) effects on efficiency:
+1. Whether shift always reduces efficiency and varies across task combinations
+2. Task difficulty effects on shift loss
+3. Practice effects on shift efficiency  
+4. Relationship between shifting ability and intelligence
 
-**Paradigm(s) Used & Key Manipulations:**
-Jersild employed a variety of tasks, typically comparing performance when tasks were done separately (establishing a baseline "mental set" for each) versus when they were interleaved in a "shift" condition. The primary measure was time taken (Amount Limit method).
+**Paradigms:** Compared separate task performance ("mental set" baseline) vs. interleaved "shift" conditions. Primary measure: completion time.
 
 **Key Task Combinations Explored (Chapter II):**
 

@@ -10,8 +10,7 @@ aliases:
 - Gratton et al. 1992
 ---
 
-### Core Goal
-To test the hypothesis that subjects can exert **strategic, top-down control** over how they process information in the face of conflict. The authors used a [[Canonical Tasks/Flanker Task|Flanker-like paradigm]] (which they term the "noise-compatibility paradigm") to investigate whether subjects can strategically choose to respond based on information from an early, fast, "parallel" processing phase (which is sensitive to flanker interference) or a later, slower, "focused" phase (which can filter out flankers). They argue this choice is not fixed but is modulated by expectancies about the upcoming stimulus.
+**Core Goal:** Test whether subjects exert strategic, top-down control over conflict processing. Used [[Canonical Tasks/Flanker Task|Flanker paradigm]] to investigate strategic choice between early "parallel" processing (flanker-sensitive) vs. later "focused" processing (flanker-filtered) based on stimulus expectancies.
 
 ### Paradigm & General Method
 *   **Paradigm:** A letter-based [[Canonical Tasks/Flanker Task|Flanker Task]].
