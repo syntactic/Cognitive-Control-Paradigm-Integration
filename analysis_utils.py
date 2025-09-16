@@ -15,7 +15,7 @@ from scipy.stats import skew
 VIEW_MAPPING_UNIFIED = {
     'Temporal': ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI'],
     'Context': ['Switch Rate', 'RSI is Predictable', 'Trial Transition Type'],
-    'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty'],
+    'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty', 'Intra-Trial Task Relationship'],
     'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency', 'Stimulus Bivalence & Congruency'],
     'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap'],
     'Structure': ['Task 2 Response Probability', 'Task 1 Cue Type', 'Task 2 Cue Type']
@@ -66,6 +66,19 @@ def validate_and_log_warnings(df, logger):
             sr_is_na = pd.isna(row.get('Stimulus-Response Congruency')) or row.get('Stimulus-Response Congruency') == 'N/A'
             if ss_is_na and sr_is_na:
                 logger.warning(f"Warning: Distractor SOA has a value but neither S-S nor S-R congruency is defined in experiment {exp_name}.")
+
+        # Heuristic 6: Check Intra-Trial Task Relationship consistency with Task 1 and Task 2 Types
+        ittr_value = row.get('Intra-Trial Task Relationship')
+        task1_type = row.get('Task 1 Type')
+        task2_type = row.get('Task 2 Type')
+        
+        if pd.notna(ittr_value) and ittr_value != 'N/A':
+            # Check if single-task condition should be N/A
+            # For dual-task conditions, validate the relationship
+            if pd.notna(task1_type) and pd.notna(task2_type) and task1_type != 'N/A' and task2_type != 'N/A':
+                expected_relationship = 'Same' if task1_type == task2_type else 'Different'
+                if ittr_value != expected_relationship:
+                    logger.warning(f"Warning: Intra-Trial Task Relationship is '{ittr_value}' but Task 1 Type ('{task1_type}') and Task 2 Type ('{task2_type}') suggest it should be '{expected_relationship}' in experiment {exp_name}.")
 
 
 def clean_rsi(value):
@@ -194,6 +207,13 @@ def map_ttt(val): # For Trial Transition Type
     if 'repeat' in val_str: return 'TTT_Repeat'
     return 'TTT_NA'
 
+def map_ittr(val): # For Intra-Trial Task Relationship
+    val_str = str(val).lower()
+    if val_str == 'same': return 'ITTR_Same'
+    if val_str == 'different': return 'ITTR_Different'
+    if val_str == 'n/a' or pd.isna(val): return 'ITTR_NA'
+    return 'ITTR_NA'
+
 def reverse_map_categories(df):
     """
     Takes the interpolated dataframe and adds original human-readable columns
@@ -253,6 +273,11 @@ def reverse_map_categories(df):
         'TCT2_Arbitrary': 'Arbitrary (Symbolic)',
         'TCT2_NA': 'N/A'
     }
+    ittr_reverse_map = {
+        'ITTR_Same': 'Same',
+        'ITTR_Different': 'Different',
+        'ITTR_NA': 'N/A'
+    }
 
     # Apply the reverse mappings
     if 'SBC_Mapped' in df_out.columns:
@@ -273,6 +298,8 @@ def reverse_map_categories(df):
         df_out['Task 1 Cue Type'] = df_out['Task 1 Cue Type Mapped'].map(tct_reverse_map)
     if 'Task 2 Cue Type Mapped' in df_out.columns:
         df_out['Task 2 Cue Type'] = df_out['Task 2 Cue Type Mapped'].map(tct2_reverse_map)
+    if 'Intra-Trial Task Relationship Mapped' in df_out.columns:
+        df_out['Intra-Trial Task Relationship'] = df_out['Intra-Trial Task Relationship Mapped'].map(ittr_reverse_map)
 
     # Handle the binary predictable RSI
     if 'RSI is Predictable' in df_out.columns:
@@ -422,6 +449,7 @@ def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
     df['Task 2 Stimulus-Response Mapping Mapped'] = df['Task 2 Stimulus-Response Mapping'].apply(map_srm2)
     df['Task 2 Cue Type Mapped'] = df['Task 2 Cue Type'].apply(map_tct2)
     df['Trial Transition Type Mapped'] = df['Trial Transition Type'].apply(map_ttt)
+    df['Intra-Trial Task Relationship Mapped'] = df['Intra-Trial Task Relationship'].apply(map_ittr)
 
     # --- Step 7: Select final columns for the pipeline ---
     numerical_cols = [
@@ -433,7 +461,7 @@ def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
         'Response Set Overlap Mapped', 'RSI is Predictable',
         'Task 1 Stimulus-Response Mapping Mapped', 'Task 1 Cue Type Mapped',
         'Task 2 Stimulus-Response Mapping Mapped', 'Task 2 Cue Type Mapped',
-        'Trial Transition Type Mapped'
+        'Trial Transition Type Mapped', 'Intra-Trial Task Relationship Mapped'
     ]
     
     if merge_conflict_dimensions:
@@ -673,6 +701,14 @@ def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse',
                         'TCT2_Implicit': 0.0, 'TCT2_Arbitrary': 1.0
                     }
                     df_sparse[col] = df_sparse[col].map(cue_mapping)
+                    
+                elif 'Intra-Trial Task Relationship' in col:
+                    # Map ITTR to ordinal scale: Same=1.0, Different=-1.0
+                    # ITTR_NA values stay as NaN and get dropped
+                    ittr_mapping = {
+                        'ITTR_Same': 1.0, 'ITTR_Different': -1.0
+                    }
+                    df_sparse[col] = df_sparse[col].map(ittr_mapping)
                     
                 elif col == 'RSI is Predictable':
                     # Already binary (0/1), keep as-is
@@ -1080,7 +1116,7 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
         
     Z = factor_scores.values
     W = model.get_weights(df=True)  # Get weights as DataFrame
-    
+
     # Reconstruct the scaled/encoded data space
     reconstructed_data_scaled = pd.DataFrame(
         Z @ W.T, 
@@ -1095,7 +1131,7 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
         
         # Get the exact feature order the preprocessor expects
         expected_feature_order = preprocessor_obj.get_feature_names_out()
-        
+
         # Re-index the weight matrix to match the preprocessor's order
         W_aligned = W.reindex(expected_feature_order)
         
@@ -1143,7 +1179,8 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
             'Trial Transition Type': {-0.5: -0.5, 0: 0.0, 0.5: 0.5},
             'Task 1 Cue Type': {0: 0.0, 1: 1.0},
             'Task 2 Cue Type': {0: 0.0, 1: 1.0},
-            'RSI is Predictable': {0: 0.0, 1: 1.0}
+            'RSI is Predictable': {0: 0.0, 1: 1.0},
+            'Intra-Trial Task Relationship': {-1: -1.0, 1: 1.0}
         }
         
         for col, mapping in ordinal_mappings.items():

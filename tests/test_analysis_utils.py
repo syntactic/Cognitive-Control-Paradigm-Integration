@@ -49,7 +49,8 @@ def test_data_validation_logging(caplog):
         'Task 1 Cue Type': ['None/Implicit'], 'Task 1 CSI': ['0'], 'RSI': ['1000'],
         'Task 1 Difficulty': ['1'], 'Task 2 Difficulty': ['N/A'], 'Task 2 CSI': ['N/A'],
         'Task 2 Stimulus-Response Mapping': ['N/A'], 'Task 2 Cue Type': ['N/A'],
-        'Trial Transition Type': ['Pure'], 'RSI is Predictable': ['Yes']
+        'Trial Transition Type': ['Pure'], 'RSI is Predictable': ['Yes'],
+        'Task 1 Type': ['Color Naming'], 'Task 2 Type': ['N/A'], 'Intra-Trial Task Relationship': ['N/A']
     })
     preprocess(invalid_data.copy())
     assert "Warning: Distractor SOA has a value but neither S-S nor S-R congruency is defined" in caplog.text

@@ -34,6 +34,9 @@ def raw_test_data_dict():
         'RSI': ['1000', '1500', 'Varied (choice: 600, 1600)', '800', '2000', '1200', '1000', '1800'],
         'Task 1 Difficulty': [3, 2, 3, 2, 4, 1, 3, 2],
         'Task 2 Difficulty': ['N/A', 2, 3, 'N/A', 3, 4, 'N/A', 1],
+        'Task 1 Type': ['Color Naming', 'Auditory RT', 'Add 6', 'Arrow Direction', 'Visual RT', 'Subtract 3', 'Spatial Location', 'Memory Task'],
+        'Task 2 Type': ['N/A', 'Auditory RT', 'Subtract 3', 'N/A', 'Auditory RT', 'Add 6', 'N/A', 'Memory Task'],
+        'Intra-Trial Task Relationship': ['N/A', 'Same', 'Different', 'N/A', 'Different', 'Different', 'N/A', 'Same'],
     }
 
 @pytest.fixture(scope="module")
