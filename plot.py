@@ -73,7 +73,18 @@ def create_latent_space_plot(
     ).encode(
         x=alt.X(f'{x_col}:Q', title=x_title),
         y=alt.Y(f'{y_col}:Q', title=y_title),
-        color=alt.Color('Paradigm:N', title='Paradigm Class', scale=PARADIGM_COLORS),
+        #color=alt.Color('Paradigm:N', title='Paradigm Class', scale=PARADIGM_COLORS),
+        color=alt.Color(
+            'Paradigm:N', 
+            title='Paradigm Class', 
+            scale=PARADIGM_COLORS,
+            legend=alt.Legend(
+                direction='horizontal',
+                orient='bottom',
+                titleOrient='left',
+                titleAnchor='middle',
+            )
+        ),
         tooltip=tooltip_cols
     ).transform_filter(
         alt.datum['Point Type'] == 'Empirical Data'
