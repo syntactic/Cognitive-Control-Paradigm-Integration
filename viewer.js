@@ -440,7 +440,7 @@ function recalculateTimingsWithDynamicSOA(condition, dynamicSOA) {
     const modifiedCondition = { ...condition };
     
     // For dual-task experiments, we need to recalculate T2 timings based on dynamic SOA
-    const nTasks = parseInt(condition.N_Tasks) || 1;
+    const nTasks = parseInt(condition.N_Tasks, 10) || 1;
     
     if (nTasks === 2 && dynamicSOA !== undefined) {
         // Get T1 stimulus timing (baseline)
@@ -645,6 +645,17 @@ function createTrialSequence(conditionOrBlock, numTrials = 10) {
     return trialSequence;
 }
 
+// Helper function to safely add info panel rows using DOM construction
+function addInfoRow(container, label, value) {
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    
+    const dd = document.createElement('dd');
+    dd.textContent = value ?? 'N/A';
+    
+    container.append(dt, dd);
+}
+
 // Update info panel with experiment details
 function updateInfoPanel(conceptualRow) {
     const infoPanel = document.getElementById('info-panel');
@@ -683,36 +694,95 @@ function updateInfoPanel(conceptualRow) {
         soaValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
     }
     
-    // Build stimulus response mapping info
-    let srmInfo = '';
+    // Clear and rebuild info panel using DOM construction
+    infoPanel.innerHTML = '';
+    
+    // Create header
+    const header = document.createElement('h3');
+    header.textContent = 'Experiment Details';
+    infoPanel.appendChild(header);
+    
+    // Create definition list for organized layout
+    const dl = document.createElement('dl');
+    
+    const numTasks = parseInt(getValue('Number of Tasks', 'N_Tasks')) || 1;
     const task1SRM = getValue('Task 1 Stimulus-Response Mapping', 'SRM_1');
     const task2SRM = getValue('Task 2 Stimulus-Response Mapping', 'SRM_2');
-    const numTasks = parseInt(getValue('Number of Tasks', 'N_Tasks')) || 1;
     
-    if (numTasks === 1) {
-        srmInfo = `<p><strong>Stimulus Response Mapping:</strong> ${task1SRM}</p>`;
-    } else {
-        srmInfo = `
-            <p><strong>Task 1 SRM:</strong> ${task1SRM}</p>
-            <p><strong>Task 2 SRM:</strong> ${task2SRM}</p>
-        `;
+    // Add experiment info rows
+    addInfoRow(dl, 'Experiment', getValue('Experiment', ''));
+    addInfoRow(dl, 'Number of Tasks', numTasks.toString());
+    addInfoRow(dl, 'SOA', soaValue !== 'N/A' ? `${soaValue}ms` : soaValue);
+    addInfoRow(dl, 'Task 1 Type', getValue('Task 1 Type', ''));
+    
+    if (numTasks > 1) {
+        addInfoRow(dl, 'Task 2 Type', getValue('Task 2 Type', ''));
     }
     
-    const info = `
-        <h3>Experiment Details</h3>
-        <p><strong>Experiment:</strong> ${getValue('Experiment', '')}</p>
-        <p><strong>Number of Tasks:</strong> ${numTasks}</p>
-        <p><strong>SOA:</strong> ${soaValue}${soaValue !== 'N/A' ? 'ms' : ''}</p>
-        <p><strong>Task 1 Type:</strong> ${getValue('Task 1 Type', '')}</p>
-        ${numTasks > 1 ? `<p><strong>Task 2 Type:</strong> ${getValue('Task 2 Type', '')}</p>` : ''}
-        <p><strong>Stimulus Valency:</strong> ${getValue('Stimulus Valency', '')}</p>
-        <p><strong>Response Set Overlap:</strong> ${getValue('Response Set Overlap', 'Simplified_RSO')}</p>
-        ${srmInfo}
-        <p><strong>Switch Rate:</strong> ${getValue('Switch Rate', 'Switch_Rate_Percent')}${getValue('Switch Rate', 'Switch_Rate_Percent') !== 'N/A' ? '%' : ''}</p>
-        <p><strong>Notes:</strong> ${getValue('Notes', '') || 'N/A'}</p>
-    `;
+    addInfoRow(dl, 'Stimulus Valency', getValue('Stimulus Valency', ''));
+    addInfoRow(dl, 'Response Set Overlap', getValue('Response Set Overlap', 'Simplified_RSO'));
     
-    infoPanel.innerHTML = info;
+    // Add SRM info based on number of tasks
+    if (numTasks === 1) {
+        addInfoRow(dl, 'Stimulus Response Mapping', task1SRM);
+    } else {
+        addInfoRow(dl, 'Task 1 SRM', task1SRM);
+        addInfoRow(dl, 'Task 2 SRM', task2SRM);
+    }
+    
+    const switchRate = getValue('Switch Rate', 'Switch_Rate_Percent');
+    addInfoRow(dl, 'Switch Rate', switchRate !== 'N/A' ? `${switchRate}%` : switchRate);
+    addInfoRow(dl, 'Notes', getValue('Notes', '') || 'N/A');
+    
+    infoPanel.appendChild(dl);
+}
+
+// Color token map for timeline elements
+const TIMELINE_COLORS = {
+    get cue() { return getComputedStyle(document.documentElement).getPropertyValue('--cue').trim(); },
+    get stimPrimary() { return getComputedStyle(document.documentElement).getPropertyValue('--stim-primary').trim(); },
+    get stimDistractor() { return getComputedStyle(document.documentElement).getPropertyValue('--stim-distractor').trim(); },
+    get go() { return getComputedStyle(document.documentElement).getPropertyValue('--go').trim(); }
+};
+
+// Create or update timeline legend
+function updateTimelineLegend(isDualTask) {
+    const legend = document.getElementById('timeline-legend');
+    if (!legend) return;
+    
+    // Clear existing legend
+    legend.innerHTML = '';
+    
+    // Define legend items based on timeline content
+    const legendItems = [
+        { color: TIMELINE_COLORS.cue, label: 'Cue' },
+        { color: TIMELINE_COLORS.stimPrimary, label: 'Stimulus (Primary)' },
+        { color: TIMELINE_COLORS.stimDistractor, label: 'Stimulus (Distractor)' }
+    ];
+    
+    if (isDualTask) {
+        legendItems.push({ color: TIMELINE_COLORS.go, label: 'T2 Cue' });
+    }
+    
+    // Create legend items
+    legendItems.forEach(({ color, label }) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        
+        const swatch = document.createElement('div');
+        swatch.className = 'legend-swatch';
+        swatch.style.backgroundColor = color;
+        
+        const text = document.createElement('span');
+        text.textContent = label;
+        
+        item.appendChild(swatch);
+        item.appendChild(text);
+        legend.appendChild(item);
+    });
+    
+    // Show legend
+    legend.style.display = 'flex';
 }
 
 // Draw timeline visualization from trial-specific data
@@ -720,7 +790,10 @@ function drawTimeline(trialData) {
     const svg = document.getElementById('timeline-svg');
     
     if (!trialData) {
-        svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">No trial data available</text>';
+        setSvgMessage(svg, 'No trial data available', 'error');
+        // Hide legend when no data
+        const legend = document.getElementById('timeline-legend');
+        if (legend) legend.style.display = 'none';
         return;
     }
     
@@ -742,7 +815,7 @@ function drawTimeline(trialData) {
     
     svg.setAttribute('data-trial-key', trialKey);
     
-    // Clear previous timeline
+    // Clear any existing content first
     svg.innerHTML = '';
     
     // Calculate timeline end time from trial data
@@ -761,45 +834,130 @@ function drawTimeline(trialData) {
     const width = svg.clientWidth - margin.left - margin.right;
     const height = 260;
     
-    // Create main group
-    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g.setAttribute("transform", `translate(${margin.left},${margin.top})`);
-    svg.appendChild(g);
-    
-    // Draw time axis
-    const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    axis.setAttribute("x1", "0");
-    axis.setAttribute("y1", height);
-    axis.setAttribute("x2", width);
-    axis.setAttribute("y2", height);
-    axis.setAttribute("stroke", "#333");
-    axis.setAttribute("stroke-width", "2");
-    g.appendChild(axis);
-    
-    // Add time markers
-    const tickInterval = Math.ceil(timelineEnd / 8000) * 1000; // Dynamic tick interval
-    for(let t = 0; t <= timelineEnd; t += tickInterval) {
-        const x = (t * width / timelineEnd);
+    // Add shadow filter definition
+    let defs = svg.querySelector('defs');
+    if (!defs) {
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        filter.setAttribute("id", "softShadow");
+        filter.setAttribute("x", "-20%");
+        filter.setAttribute("y", "-20%");
+        filter.setAttribute("width", "140%");
+        filter.setAttribute("height", "140%");
         
-        // Tick mark
-        const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        tick.setAttribute("x1", x);
-        tick.setAttribute("y1", height - 5);
-        tick.setAttribute("x2", x);
-        tick.setAttribute("y2", height + 5);
-        tick.setAttribute("stroke", "#333");
-        tick.setAttribute("stroke-width", "1");
-        g.appendChild(tick);
+        const feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
+        feDropShadow.setAttribute("dx", "0");
+        feDropShadow.setAttribute("dy", "2");
+        feDropShadow.setAttribute("stdDeviation", "2");
+        feDropShadow.setAttribute("flood-opacity", "0.1");
         
-        // Label
-        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        label.setAttribute("x", x);
-        label.setAttribute("y", height + 20);
-        label.setAttribute("text-anchor", "middle");
-        label.setAttribute("fill", "#333");
-        label.setAttribute("font-size", "10px");
-        label.textContent = `${t}ms`;
-        g.appendChild(label);
+        filter.appendChild(feDropShadow);
+        defs.appendChild(filter);
+        svg.appendChild(defs);
+    }
+
+    // Create or get persistent static layer (ruler/grid/axis)
+    let ruler = svg.querySelector('#ruler');
+    if (!ruler) {
+        ruler = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        ruler.id = 'ruler';
+        ruler.setAttribute("transform", `translate(${margin.left},${margin.top})`);
+        svg.appendChild(ruler);
+    }
+    
+    // Create or clear dynamic layer (bars)
+    let bars = svg.querySelector('#bars');
+    if (bars) {
+        bars.replaceChildren();
+    } else {
+        bars = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        bars.id = 'bars';
+        bars.setAttribute("transform", `translate(${margin.left},${margin.top})`);
+        svg.appendChild(bars);
+    }
+    
+    // Use ruler group for static elements, bars group for dynamic elements
+    const g = ruler;  // Static elements
+    const barsGroup = bars;  // Dynamic elements
+    
+    // Only redraw static elements if ruler is empty (first time or timeline dimensions changed)
+    if (ruler.children.length === 0 || ruler.getAttribute('data-timeline-end') !== timelineEnd.toString()) {
+        ruler.replaceChildren(); // Clear if dimensions changed
+        ruler.setAttribute('data-timeline-end', timelineEnd.toString());
+        
+        // Draw vertical grid lines
+        for (let t = 0; t <= timelineEnd; t += 250) {
+            const x = (t * width / timelineEnd);
+            const grid = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            grid.setAttribute("x1", x);
+            grid.setAttribute("x2", x);
+            grid.setAttribute("y1", 0);
+            grid.setAttribute("y2", height);
+            grid.setAttribute("stroke", "currentColor");
+            grid.setAttribute("opacity", t % 1000 === 0 ? "0.18" : "0.08");
+            grid.setAttribute("class", t % 1000 === 0 ? "timeline-grid major" : "timeline-grid");
+            ruler.appendChild(grid);
+        }
+
+        // Draw time axis
+        const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        axis.setAttribute("x1", "0");
+        axis.setAttribute("y1", height);
+        axis.setAttribute("x2", width);
+        axis.setAttribute("y2", height);
+        axis.setAttribute("stroke", "currentColor");
+        axis.setAttribute("stroke-width", "2");
+        axis.setAttribute("opacity", "0.3");
+        ruler.appendChild(axis);
+        
+        // Add time markers
+        const tickInterval = Math.ceil(timelineEnd / 8000) * 1000; // Dynamic tick interval
+        for(let t = 0; t <= timelineEnd; t += tickInterval) {
+            const x = (t * width / timelineEnd);
+            
+            // Tick mark
+            const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            tick.setAttribute("x1", x);
+            tick.setAttribute("y1", height - 5);
+            tick.setAttribute("x2", x);
+            tick.setAttribute("y2", height + 5);
+            tick.setAttribute("stroke", "currentColor");
+            tick.setAttribute("stroke-width", "1");
+            tick.setAttribute("opacity", "0.5");
+            ruler.appendChild(tick);
+            
+            // Label
+            const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            label.setAttribute("x", x);
+            label.setAttribute("y", height + 20);
+            label.setAttribute("text-anchor", "middle");
+            label.setAttribute("fill", "currentColor");
+            label.setAttribute("font-size", "10px");
+            label.setAttribute("class", "timeline-label");
+            label.textContent = `${t}ms`;
+            ruler.appendChild(label);
+        }
+        
+        // Draw axis labels (static)
+        const axisLabels = [
+            { label: "T1 Cue", yPos: 30 },
+            { label: "T1 Stimulus", yPos: 60 },
+            { label: "T2 Cue", yPos: 120 },
+            { label: "T2 Stimulus", yPos: 150 }
+        ];
+        
+        axisLabels.forEach(({label, yPos}) => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", -10);
+            text.setAttribute("y", yPos + 15);
+            text.setAttribute("text-anchor", "end");
+            text.setAttribute("fill", "currentColor");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("font-weight", "bold");
+            text.setAttribute("class", "timeline-label");
+            text.textContent = label;
+            ruler.appendChild(text);
+        });
     }
     
     // Define y-positions for the timeline elements
@@ -810,24 +968,6 @@ function drawTimeline(trialData) {
         t2_stim: 150
     };
     
-    // Draw axis labels
-    function drawAxisLabel(label, yPos) {
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", -10);
-        text.setAttribute("y", yPos + 15);
-        text.setAttribute("text-anchor", "end");
-        text.setAttribute("fill", "#333");
-        text.setAttribute("font-size", "12px");
-        text.setAttribute("font-weight", "bold");
-        text.textContent = label;
-        g.appendChild(text);
-    }
-    
-    drawAxisLabel("T1 Cue", yPositions.t1_cue);
-    drawAxisLabel("T1 Stimulus", yPositions.t1_stim);
-    drawAxisLabel("T2 Cue", yPositions.t2_cue);
-    drawAxisLabel("T2 Stimulus", yPositions.t2_stim);
-    
     // Draw timeline components
     function drawComponent(startTime, endTime, yPos, color, label) {
         if (startTime >= endTime) return;
@@ -835,27 +975,32 @@ function drawTimeline(trialData) {
         const x = startTime * width / timelineEnd;
         const componentWidth = Math.max(2, (endTime - startTime) * width / timelineEnd);
         
-        // Draw rectangle
+        // Draw rectangle with rounded corners and shadow
         const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rect.setAttribute("x", x);
         rect.setAttribute("y", yPos);
         rect.setAttribute("width", componentWidth);
         rect.setAttribute("height", "25");
+        rect.setAttribute("rx", "6");
+        rect.setAttribute("ry", "6");
         rect.setAttribute("fill", color);
-        rect.setAttribute("opacity", "0.7");
-        g.appendChild(rect);
+        rect.setAttribute("opacity", "0.8");
+        rect.setAttribute("filter", "url(#softShadow)");
+        rect.setAttribute("class", "timeline-bar");
+        barsGroup.appendChild(rect);
         
-        // Add timing labels if component is wide enough
+        // Add timing labels directly on the bars for better readability
         if (componentWidth > 40) {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("x", x + componentWidth/2);
-            text.setAttribute("y", yPos + 17);
+            text.setAttribute("y", yPos + 17); // Centered vertically in the 25px high bar
             text.setAttribute("text-anchor", "middle");
             text.setAttribute("fill", "white");
             text.setAttribute("font-size", "9px");
             text.setAttribute("font-weight", "bold");
+            text.setAttribute("text-shadow", "0 1px 2px rgba(0,0,0,0.8)"); // Better contrast
             text.textContent = `${startTime}-${endTime}ms`;
-            g.appendChild(text);
+            barsGroup.appendChild(text);
         }
         
         // Add hover tooltip for detailed information
@@ -864,8 +1009,11 @@ function drawTimeline(trialData) {
         rect.appendChild(title);
     }
     
-    // Determine what to draw based on actual trial structure
-    const isDualTask = (trialData.task_2 !== null);
+    // Determine what to draw based on actual trial structure (guard against undefined/null)
+    const isDualTask = (trialData.task_2 !== null && trialData.task_2 !== undefined && trialData.task_2);
+    
+    // Update timeline legend
+    updateTimelineLegend(isDualTask);
     
     // Draw Channel 1 components (always active)
     if (trialData.dur_1 > 0) {
@@ -873,7 +1021,7 @@ function drawTimeline(trialData) {
             trialData.start_1,
             trialData.start_1 + trialData.dur_1,
             yPositions.t1_cue,
-            "#4CAF50",
+            TIMELINE_COLORS.cue,
             `${trialData.task_1.toUpperCase()} Cue`
         );
     }
@@ -884,7 +1032,7 @@ function drawTimeline(trialData) {
             trialData.start_mov_1,
             trialData.start_mov_1 + trialData.dur_mov_1,
             yPositions.t1_stim,
-            trialData.task_1 === 'mov' ? "#2196F3" : "#90CAF9", // Darker if primary, lighter if distractor
+            trialData.task_1 === 'mov' ? TIMELINE_COLORS.stimPrimary : TIMELINE_COLORS.stimDistractor,
             `${trialData.task_1 === 'mov' ? 'Primary' : 'Distractor'} Movement`
         );
     }
@@ -894,7 +1042,7 @@ function drawTimeline(trialData) {
             trialData.start_or_1,
             trialData.start_or_1 + trialData.dur_or_1,
             yPositions.t2_stim,
-            trialData.task_1 === 'or' ? "#2196F3" : "#90CAF9", // Darker if primary, lighter if distractor
+            trialData.task_1 === 'or' ? TIMELINE_COLORS.stimPrimary : TIMELINE_COLORS.stimDistractor,
             `${trialData.task_1 === 'or' ? 'Primary' : 'Distractor'} Orientation`
         );
     }
@@ -906,7 +1054,7 @@ function drawTimeline(trialData) {
                 trialData.start_2,
                 trialData.start_2 + trialData.dur_2,
                 yPositions.t2_cue,
-                "#FF9800",
+                TIMELINE_COLORS.go,
                 `${trialData.task_2.toUpperCase()} Cue`
             );
         }
@@ -917,7 +1065,7 @@ function drawTimeline(trialData) {
                 trialData.start_mov_2,
                 trialData.start_mov_2 + trialData.dur_mov_2,
                 yPositions.t1_stim, // Use different y-position if needed
-                "#F44336",
+                TIMELINE_COLORS.stimPrimary,
                 "T2 Movement"
             );
         }
@@ -927,7 +1075,7 @@ function drawTimeline(trialData) {
                 trialData.start_or_2,
                 trialData.start_or_2 + trialData.dur_or_2,
                 yPositions.t2_stim,
-                "#F44336",
+                TIMELINE_COLORS.stimPrimary,
                 "T2 Orientation"
             );
         }
@@ -946,7 +1094,7 @@ function drawTimeline(trialData) {
             soaLabel.setAttribute("font-size", "12px");
             soaLabel.setAttribute("font-weight", "bold");
             soaLabel.textContent = `SOA: ${soa}ms`;
-            g.appendChild(soaLabel);
+            barsGroup.appendChild(soaLabel);
         }
     } else if (trialData.dur_or_1 > 0 && trialData.dur_mov_1 > 0) {
         // Single-task with distractor - calculate SOA between target and distractor
@@ -1010,7 +1158,6 @@ async function runSelectedExperiment() {
     // Clear canvas container and run experiment sequence
     const canvasContainer = document.getElementById('canvas-container');
     canvasContainer.focus()
-    canvasContainer.innerHTML = '<div>Starting experiment sequence...</div>';
     
     // Run the super experiment sequence
     try {
@@ -1038,7 +1185,11 @@ async function runSelectedExperiment() {
             const trial = trialSequence[i];
             
             // Update display for current trial
-            canvasContainer.innerHTML = `<div>Running trial ${trial.trialNumber}/${trialSequence.length} (${trial.taskType})</div>`;
+            const trialStatus = document.getElementById('trial-status');
+            if (trialStatus) {
+                trialStatus.textContent = `Running trial ${trial.trialNumber}/${trialSequence.length} (${trial.taskType})`;
+                trialStatus.style.display = 'block';
+            }
             
             // Update timeline to show current trial's timing
             drawTimeline(trial.seParams);
@@ -1056,6 +1207,13 @@ async function runSelectedExperiment() {
         
         console.log('Full experiment sequence completed');
         canvasContainer.innerHTML = '<div style="color: green; padding: 20px;">Experiment sequence completed successfully!</div>';
+        
+        // Hide trial status and show completion message there instead
+        const trialStatus = document.getElementById('trial-status');
+        if (trialStatus) {
+            trialStatus.textContent = 'Experiment completed successfully!';
+            trialStatus.style.display = 'block';
+        }
         
     } catch (error) {
         console.error('Error running experiment sequence:', error);
@@ -1088,7 +1246,12 @@ function updateUIForSelection() {
         currentTrialSequence = []; // Clear pre-generated sequence
         document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Select an experiment to begin</div>';
         document.getElementById('info-panel').innerHTML = '<div class="placeholder">Experiment details will appear here</div>';
-        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Timeline will appear here</text>';
+        setSvgMessage(document.getElementById('timeline-svg'), 'Timeline will appear here');
+        
+        // Hide trial status
+        const trialStatus = document.getElementById('trial-status');
+        if (trialStatus) trialStatus.style.display = 'none';
+        
         if (startButton) startButton.disabled = true;
         return;
     }
@@ -1105,7 +1268,7 @@ function updateUIForSelection() {
             console.error('No conditions found for block:', selectedBlockId);
             document.getElementById('canvas-container').innerHTML = '<div class="error">No conditions found for selected experiment</div>';
             document.getElementById('info-panel').innerHTML = '<div class="error">Experiment data not found</div>';
-            document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error: No data found</text>';
+            setSvgMessage(document.getElementById('timeline-svg'), 'Error: No data found', 'error');
             return;
         }
         
@@ -1142,17 +1305,17 @@ function updateUIForSelection() {
         } catch (timelineError) {
             console.error('Error generating sample trial for timeline:', timelineError);
             // Fall back to showing error
-            document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error generating timeline</text>';
+            setSvgMessage(document.getElementById('timeline-svg'), 'Error generating timeline', 'error');
         }
         
-        // Update canvas container to show experiment is ready
-        document.getElementById('canvas-container').innerHTML = '<div class="placeholder">Click "Start Experiment" to begin</div>';
+        // Clear canvas container - experiment is ready
+        document.getElementById('canvas-container').innerHTML = '';
         
     } catch (error) {
         console.error('Error in updateUIForSelection:', error);
         document.getElementById('canvas-container').innerHTML = '<div class="error">Error loading experiment data</div>';
         document.getElementById('info-panel').innerHTML = '<div class="error">Error loading experiment information</div>';
-        document.getElementById('timeline-svg').innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error loading timeline</text>';
+        setSvgMessage(document.getElementById('timeline-svg'), 'Error loading timeline', 'error');
     }
 }
 
@@ -1168,18 +1331,8 @@ function updateInfoPanelFromCondition(condition) {
     // Helper function to safely get values
     const getValue = (value) => (value && value !== 'undefined' && value.trim() !== '') ? value : 'N/A';
     
-    const numTasks = parseInt(condition.N_Tasks) || 1;
+    const numTasks = parseInt(condition.N_Tasks, 10) || 1;
     
-    // Build SRM info based on number of tasks
-    let srmInfo = '';
-    if (numTasks === 1) {
-        srmInfo = `<p><strong>Stimulus Response Mapping:</strong> ${getValue(condition.SRM_1)}</p>`;
-    } else {
-        srmInfo = `
-            <p><strong>Task 1 SRM:</strong> ${getValue(condition.SRM_1)}</p>
-            <p><strong>Task 2 SRM:</strong> ${getValue(condition.SRM_2)}</p>
-        `;
-    }
     
     // Check for SOA distribution in condition's mapping notes  
     let soaDisplayValue = 'N/A';
@@ -1202,33 +1355,74 @@ function updateInfoPanelFromCondition(condition) {
         soaDisplayValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
     }
     
-    const info = `
-        <h3>Experiment Details</h3>
-        <p><strong>Experiment:</strong> ${getValue(condition.Experiment)}</p>
-        <p><strong>Number of Tasks:</strong> ${numTasks}</p>
-        <p><strong>SOA:</strong> ${soaDisplayValue}</p>
-        <p><strong>Task 1 Type:</strong> ${getValue(condition.Task_1_Type)}</p>
-        ${numTasks > 1 ? `<p><strong>Task 2 Type:</strong> ${getValue(condition.Task_2_Type)}</p>` : ''}
-        <p><strong>Stimulus Valency:</strong> ${getValue(condition.Stimulus_Valency)}</p>
-        <p><strong>Response Set Overlap:</strong> ${getValue(condition.Simplified_RSO)}</p>
-        ${srmInfo}
-        <p><strong>Sequence Type:</strong> ${getValue(condition.Sequence_Type)}</p>
-        <p><strong>Switch Rate:</strong> ${getValue(condition.Switch_Rate_Percent)}${condition.Switch_Rate_Percent ? '%' : ''}</p>
-        <p><strong>ITI:</strong> ${getValue(condition.ITI_ms)}${condition.ITI_ms ? 'ms' : ''} (${getValue(condition.RSI_Distribution_Type || condition.ITI_Distribution_Type)})</p>
-    `;
+    // Clear and rebuild info panel using DOM construction
+    infoPanel.innerHTML = '';
     
-    infoPanel.innerHTML = info;
+    // Create header
+    const header = document.createElement('h3');
+    header.textContent = 'Experiment Details';
+    infoPanel.appendChild(header);
+    
+    // Create definition list for organized layout
+    const dl = document.createElement('dl');
+    
+    // Add experiment info rows
+    addInfoRow(dl, 'Experiment', getValue(condition.Experiment));
+    addInfoRow(dl, 'Number of Tasks', numTasks.toString());
+    addInfoRow(dl, 'SOA', soaDisplayValue);
+    addInfoRow(dl, 'Task 1 Type', getValue(condition.Task_1_Type));
+    
+    if (numTasks > 1) {
+        addInfoRow(dl, 'Task 2 Type', getValue(condition.Task_2_Type));
+    }
+    
+    addInfoRow(dl, 'Stimulus Valency', getValue(condition.Stimulus_Valency));
+    addInfoRow(dl, 'Response Set Overlap', getValue(condition.Simplified_RSO));
+    
+    // Add SRM info based on number of tasks
+    if (numTasks === 1) {
+        addInfoRow(dl, 'Stimulus Response Mapping', getValue(condition.SRM_1));
+    } else {
+        addInfoRow(dl, 'Task 1 SRM', getValue(condition.SRM_1));
+        addInfoRow(dl, 'Task 2 SRM', getValue(condition.SRM_2));
+    }
+    
+    addInfoRow(dl, 'Sequence Type', getValue(condition.Sequence_Type));
+    const switchRate = getValue(condition.Switch_Rate_Percent);
+    addInfoRow(dl, 'Switch Rate', switchRate !== 'N/A' && condition.Switch_Rate_Percent ? `${switchRate}%` : switchRate);
+    
+    const itiValue = getValue(condition.ITI_ms);
+    const itiType = getValue(condition.RSI_Distribution_Type || condition.ITI_Distribution_Type);
+    const itiDisplay = itiValue !== 'N/A' && condition.ITI_ms ? `${itiValue}ms (${itiType})` : `${itiValue} (${itiType})`;
+    addInfoRow(dl, 'ITI', itiDisplay);
+    
+    infoPanel.appendChild(dl);
 }
 
-// Show loading state
+// Helper function to set SVG message
+function setSvgMessage(svg, text, className = 'placeholder') {
+    const color = className === 'error' ? 'var(--danger)' : 'var(--muted)';
+    svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="${color}" font-style="italic">${text}</text>`;
+}
+
+// Show loading state with skeletons
 function showLoadingState() {
     const canvasContainer = document.getElementById('canvas-container');
     const infoPanel = document.getElementById('info-panel');
     const timelineSvg = document.getElementById('timeline-svg');
+    const legend = document.getElementById('timeline-legend');
     
-    canvasContainer.innerHTML = '<div class="loading">Loading experiment data...</div>';
-    infoPanel.innerHTML = '<div class="loading">Loading...</div>';
-    timelineSvg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#666" font-style="italic">Loading...</text>';
+    // Canvas skeleton
+    canvasContainer.innerHTML = '<div class="skeleton skeleton-canvas"></div>';
+    
+    // Info panel skeleton
+    infoPanel.innerHTML = '<div class="skeleton skeleton-info"></div>';
+    
+    // Timeline skeleton
+    setSvgMessage(timelineSvg, 'Loading...', 'loading');
+    
+    // Hide legend
+    if (legend) legend.style.display = 'none';
 }
 
 // Show error state
@@ -1236,10 +1430,14 @@ function showErrorState(message) {
     const canvasContainer = document.getElementById('canvas-container');
     const infoPanel = document.getElementById('info-panel');
     const timelineSvg = document.getElementById('timeline-svg');
+    const legend = document.getElementById('timeline-legend');
     
     canvasContainer.innerHTML = `<div class="error">${message}</div>`;
     infoPanel.innerHTML = '<div class="error">Error loading experiment data</div>';
-    timelineSvg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#d32f2f" font-style="italic">Error loading data</text>';
+    setSvgMessage(timelineSvg, 'Error loading data', 'error');
+    
+    // Hide legend
+    if (legend) legend.style.display = 'none';
 }
 
 // Initialize the application
@@ -1335,24 +1533,27 @@ if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 }
 
-module.exports = {
-    parseCSV,
-    convertAbsoluteToSEParams,
-    generateTrialDirections,
-    generateITI,
-    generateSOA,
-    generateDynamicSOA,
-    recalculateTimingsWithDynamicSOA,
-    extractMappingNotes,
-    groupByBlock,
-    extractViewerConfig,
-    getTrialTransitionType,
-    generateTaskSequence,
-    generateTaskAssignmentSequence,
-    createTrialSequence,
-    updateInfoPanel,
-    updateInfoPanelFromCondition,
-    drawTimeline,
-    showLoadingState,
-    showErrorState
-};
+// Export for Node.js environment (for testing)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        parseCSV,
+        convertAbsoluteToSEParams,
+        generateTrialDirections,
+        generateITI,
+        generateSOA,
+        generateDynamicSOA,
+        recalculateTimingsWithDynamicSOA,
+        extractMappingNotes,
+        groupByBlock,
+        extractViewerConfig,
+        getTrialTransitionType,
+        generateTaskSequence,
+        generateTaskAssignmentSequence,
+        createTrialSequence,
+        updateInfoPanel,
+        updateInfoPanelFromCondition,
+        drawTimeline,
+        showLoadingState,
+        showErrorState
+    };
+}
