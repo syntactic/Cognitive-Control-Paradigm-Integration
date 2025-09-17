@@ -27,7 +27,7 @@ This concept captures the difference in how conflicting stimulus attributes are 
 
 ### Implications for the Parametric Design Space & Thesis Discussion
 
-This distinction offers a powerful lens through which to interpret the [[Results/PCA Results]]. The PCA, in its effort to find the largest axes of variance across the entire space, may place Stroop and Flanker paradigms in close proximity because they share the high-level feature of S-S conflict.
+This distinction offers a powerful lens through which to interpret the [[PCA Results (merged conflict dimensions)]]. The PCA, in its effort to find the largest axes of variance across the entire space, may place Stroop and Flanker paradigms in close proximity because they share the high-level feature of S-S conflict.
 
 In the **Discussion Chapter**, this note should be used to argue the following:
 

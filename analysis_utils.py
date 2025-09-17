@@ -9,6 +9,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from scipy.stats import skew
 
 
@@ -1388,3 +1391,102 @@ def longest_common_prefix(strs: list[str]) -> str:
                 return ""
 
     return prefix
+
+def validate_paradigm_separation(pca_df, pc_cols, target_col='Paradigm'):
+    """
+    Validates the separability of paradigms in a PCA latent space using a simple classifier.
+
+    This function serves as a quantitative probe to measure how well paradigm classes
+    are separated in the principal component space. By training a simple classifier
+    (k-Nearest Neighbors) on just the PC coordinates, we can objectively assess whether
+    the visual clustering translates to statistical separability. High accuracy with a
+    simple model indicates clear, fundamental separation that doesn't require complex
+    decision boundaries.
+
+    Args:
+        pca_df (pd.DataFrame): The DataFrame containing the principal component coordinates
+                               and the target labels for each experimental condition.
+        pc_cols (list of str): A list of the column names corresponding to the principal
+                               components to be used as features (e.g., ['PC1', 'PC2']).
+        target_col (str): The name of the column containing the paradigm labels to predict.
+                          Default is 'Paradigm'.
+
+    Returns:
+        dict: A dictionary containing key performance metrics:
+              - 'accuracy': The overall accuracy of the classifier on the test set.
+              - 'classification_report': A detailed report with precision, recall, and F1-scores.
+              - 'confusion_matrix': A numpy array showing prediction vs. actual labels.
+              - 'model_name': A string with the name of the classifier used.
+              - 'feature_names': List of PC columns used as features.
+              - 'class_names': List of unique paradigm classes found in the data.
+    """
+    # Prepare the data
+    X = pca_df[pc_cols].copy()
+    y = pca_df[target_col].copy()
+
+    # Handle any potential missing values in the target column
+    valid_indices = ~y.isna()
+    X = X[valid_indices]
+    y = y[valid_indices]
+
+    if len(X) == 0:
+        raise ValueError(f"No valid data found. Check that '{target_col}' column has non-null values.")
+
+    # Check if we have enough samples for each class
+    class_counts = y.value_counts()
+    min_samples_per_class = class_counts.min()
+
+    if min_samples_per_class < 2:
+        raise ValueError(f"At least one class has fewer than 2 samples. Cannot perform train/test split. "
+                        f"Class counts: {class_counts.to_dict()}")
+
+    # Split the data with stratification to maintain class proportions
+    test_size = min(0.2, 1.0 / min_samples_per_class)  # Ensure at least 1 sample per class in test
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=test_size,
+        random_state=42,
+        stratify=y
+    )
+
+    # Initialize and train a simple k-Nearest Neighbors classifier
+    # Using k=3 as a good default for most cases, but adjust if we have very few samples
+    k = min(3, len(X_train) // len(y.unique()))
+    k = max(1, k)  # Ensure k is at least 1
+
+    model = KNeighborsClassifier(n_neighbors=k)
+    model.fit(X_train, y_train)
+
+    # Make predictions on the test set
+    y_pred = model.predict(X_test)
+
+    # Calculate performance metrics
+    accuracy = accuracy_score(y_test, y_pred)
+
+    # Get unique class names for consistent reporting
+    class_names = sorted(y.unique())
+
+    # Generate classification report
+    clf_report = classification_report(
+        y_test, y_pred,
+        target_names=class_names,
+        output_dict=True,
+        zero_division=0
+    )
+
+    # Generate confusion matrix
+    conf_matrix = confusion_matrix(y_test, y_pred, labels=class_names)
+
+    # Package results
+    results = {
+        'accuracy': accuracy,
+        'classification_report': clf_report,
+        'confusion_matrix': conf_matrix,
+        'model_name': f'KNeighborsClassifier(n_neighbors={k})',
+        'feature_names': pc_cols,
+        'class_names': class_names,
+        'test_size': len(y_test),
+        'train_size': len(y_train)
+    }
+
+    return results
