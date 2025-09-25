@@ -17,7 +17,7 @@ from scipy.stats import skew
 
 VIEW_MAPPING_UNIFIED = {
     'Temporal': ['Inter-task SOA', 'Distractor SOA', 'Task 1 CSI', 'Task 2 CSI', 'RSI'],
-    'Context': ['Switch Rate', 'RSI is Predictable', 'Trial Transition Type'],
+    'Context': ['Switch Rate', 'RSI is Predictable', 'Inter-task SOA is Predictable', 'Trial Transition Type'],
     'Task_Properties': ['Task 1 Difficulty', 'Task 2 Difficulty', 'Intra-Trial Task Relationship'],
     'Conflict': ['Stimulus-Stimulus Congruency', 'Stimulus-Response Congruency', 'Stimulus Bivalence & Congruency'],
     'Rules': ['Task 1 Stimulus-Response Mapping', 'Task 2 Stimulus-Response Mapping', 'Response Set Overlap'],
@@ -110,6 +110,30 @@ def clean_switch_rate(value):
         return float(value_str)
     except (ValueError, TypeError):
         return 0.0
+
+
+def normalize_tristate_flag(value):
+    """Normalizes three-state categorical flags to 'Yes', 'No', or 'N/A'."""
+    if pd.isna(value):
+        return 'N/A'
+
+    if isinstance(value, (int, float, np.integer, np.floating)):
+        if np.isclose(value, 1.0):
+            return 'Yes'
+        if np.isclose(value, 0.0):
+            return 'No'
+        return 'N/A'
+
+    value_str = str(value).strip().lower()
+
+    if value_str in {'yes', 'y', 'true', '1'}:
+        return 'Yes'
+    if value_str in {'no', 'n', 'false', '0'}:
+        return 'No'
+    if value_str in {'n/a', 'na', 'not applicable', 'none', 'null', 'missing', 'not specified'}:
+        return 'N/A'
+
+    return 'N/A'
 
 def classify_paradigm(row):
     """
@@ -310,6 +334,9 @@ def reverse_map_categories(df):
         print(df_out['RSI is Predictable'].value_counts())
         df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 1 if round(x) == 1 else 'No')
 
+    if 'Inter-task SOA is Predictable' in df_out.columns:
+        df_out['Inter-task SOA is Predictable'] = df_out['Inter-task SOA is Predictable'].apply(normalize_tristate_flag)
+
     return df_out
 
 def apply_conceptual_constraints(df):
@@ -367,6 +394,11 @@ def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
     logger = logging.getLogger(__name__)
     df = df_raw.copy()
 
+    # Ensure the Inter-task SOA predictability flag exists so downstream column
+    # selection remains stable even if older datasets omit it.
+    if 'Inter-task SOA is Predictable' not in df.columns:
+        df['Inter-task SOA is Predictable'] = 'N/A'
+
     # --- Step 1: General Cleaning & Type Conversion ---
     # Convert all potentially numeric columns to numeric, coercing errors
     numeric_cols_to_clean = [
@@ -418,6 +450,10 @@ def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
     # Process new binary 'RSI is Predictable'
     df['RSI is Predictable'] = df['RSI is Predictable'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
 
+    # Normalize the tri-state Inter-task SOA predictability flag
+    if 'Inter-task SOA is Predictable' in df.columns:
+        df['Inter-task SOA is Predictable'] = df['Inter-task SOA is Predictable'].apply(normalize_tristate_flag)
+
     # --- Step 6: Map Categorical Features ---
     if merge_conflict_dimensions:
         s_s_col = df['Stimulus-Stimulus Congruency']
@@ -463,7 +499,7 @@ def preprocess(df_raw, merge_conflict_dimensions=False, target='pca'):
         'RSI', 'Switch Rate', 'Task 1 Difficulty Norm', 'Task 2 Difficulty Norm', 
     ]
     categorical_cols = [ 'Inter-task SOA is NA', 'Distractor SOA is NA', 'Task 2 CSI is NA', 'Task 2 Difficulty is NA',
-        'Response Set Overlap Mapped', 'RSI is Predictable',
+        'Response Set Overlap Mapped', 'RSI is Predictable', 'Inter-task SOA is Predictable',
         'Task 1 Stimulus-Response Mapping Mapped', 'Task 1 Cue Type Mapped',
         'Task 2 Stimulus-Response Mapping Mapped', 'Task 2 Cue Type Mapped',
         'Trial Transition Type Mapped', 'Intra-Trial Task Relationship Mapped'
@@ -714,7 +750,15 @@ def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse',
                         'ITTR_Same': 1.0, 'ITTR_Different': -1.0
                     }
                     df_sparse[col] = df_sparse[col].map(ittr_mapping)
-                    
+
+                elif col == 'Inter-task SOA is Predictable':
+                    # Map predictability to binary scale; N/A stays NaN
+                    predictability_mapping = {
+                        'Yes': 1.0,
+                        'No': 0.0
+                    }
+                    df_sparse[col] = df_sparse[col].map(predictability_mapping)
+
                 elif col == 'RSI is Predictable':
                     # Already binary (0/1), keep as-is
                     pass
@@ -1327,6 +1371,7 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
             'Task 1 Cue Type': {0: 0.0, 1: 1.0},
             'Task 2 Cue Type': {0: 0.0, 1: 1.0},
             'RSI is Predictable': {0: 0.0, 1: 1.0},
+            'Inter-task SOA is Predictable': {0: 0.0, 1: 1.0},
             'Intra-Trial Task Relationship': {-1: -1.0, 1: 1.0}
         }
         

@@ -89,6 +89,17 @@ def load_and_preprocess_data():
     # Apply paradigm classification
     df_processed['Paradigm'] = df_processed.apply(au.classify_paradigm, axis=1)
 
+    # Re-introduce NaNs for descriptive reporting where preprocess() used median fills.
+    na_flag_map = {
+        'Inter-task SOA': 'Inter-task SOA is NA',
+        'Distractor SOA': 'Distractor SOA is NA',
+        'Task 2 CSI': 'Task 2 CSI is NA',
+        'Task 2 Difficulty': 'Task 2 Difficulty is NA',
+    }
+    for value_col, flag_col in na_flag_map.items():
+        if value_col in df_processed.columns and flag_col in df_processed.columns:
+            df_processed.loc[df_processed[flag_col] == 1, value_col] = np.nan
+
     print(f"Preprocessing complete. Dataset shape: {df_processed.shape}")
     print(f"Paradigm distribution: {df_processed['Paradigm'].value_counts().to_dict()}")
 

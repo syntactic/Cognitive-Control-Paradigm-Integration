@@ -30,6 +30,7 @@ def raw_test_data_dict():
         'Task 2 Stimulus-Response Mapping': ['N/A', 'Compatible', 'Arbitrary', 'N/A', 'Compatible', 'Incompatible', 'N/A', 'Arbitrary'],
         'Task 1 Cue Type': ['None/Implicit', 'None/Implicit', 'Arbitrary', 'None/Implicit', 'Arbitrary', 'Arbitrary', 'None/Implicit', 'None/Implicit'],
         'Task 2 Cue Type': ['N/A', 'None/Implicit', 'Arbitrary', 'N/A', 'Arbitrary', 'Arbitrary', 'N/A', 'None/Implicit'],
+        'Inter-task SOA is Predictable': ['N/A', 'Yes', 'N/A', 'N/A', 'Yes', 'N/A', 'N/A', 'No'],
         'RSI is Predictable': ['Yes', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'No'],
         'RSI': ['1000', '1500', 'Varied (choice: 600, 1600)', '800', '2000', '1200', '1000', '1800'],
         'Task 1 Difficulty': [3, 2, 3, 2, 4, 1, 3, 2],
