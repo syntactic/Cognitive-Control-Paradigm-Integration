@@ -419,7 +419,7 @@ def plot_merged_conflict_by_paradigm(df_processed, output_dir):
     plot_colors = [conflict_colors.get(col, '#CCCCCC') for col in merged_crosstab_norm.columns]
 
     ax = merged_crosstab_norm.plot(kind='bar', stacked=False, figsize=(12, 6), color=plot_colors)
-    ax.set_title('Merged Conflict Distribution by Paradigm', fontsize=14, fontweight='bold')
+    ax.set_title('Conflict Distribution by Paradigm', fontsize=14, fontweight='bold')
     ax.set_xlabel('Paradigm')
     ax.set_ylabel('Proportion of Conditions')
     ax.set_xticklabels(paradigm_order, rotation=45, ha='center', rotation_mode='anchor')
@@ -432,9 +432,138 @@ def plot_merged_conflict_by_paradigm(df_processed, output_dir):
     ax.legend(title='Conflict Type', bbox_to_anchor=(1.05, 1), loc='upper left')
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(output_dir / 'merged_conflict_by_paradigm.svg', format='svg', dpi=300)
-    plt.savefig(output_dir / 'merged_conflict_by_paradigm.png', format='png', dpi=100)
+    plt.savefig(output_dir / 'conflict_distribution_by_paradigm.svg', format='svg', dpi=300)
+    plt.savefig(output_dir / 'conflict_distribution_by_paradigm.png', format='png', dpi=100)
     plt.close()
+
+
+def plot_response_set_overlap_by_paradigm(df_processed, output_dir):
+    """
+    Create stacked bar chart for response set overlap categories by paradigm.
+
+    Args:
+        df_processed (pd.DataFrame): The processed dataset
+        output_dir (Path): Directory to save plots
+    """
+    relevant_paradigms = ['Task Switching', 'Dual-Task_PRP']
+    df_main_raw = df_processed[df_processed['Paradigm'].isin(relevant_paradigms)].copy()
+
+    if df_main_raw.empty:
+        print("No paradigms found for response set overlap plot; skipping.")
+        return
+
+    df_main, _ = add_paradigm_display_column(df_main_raw)
+
+    display_order = ['Task-Switching', 'Dual-Task/PRP']
+    df_main = df_main[df_main['Paradigm Display'].isin(display_order)]
+
+    if df_main.empty:
+        print("No eligible paradigms remain for response set overlap plot; skipping.")
+        return
+
+    df_main['Paradigm Display'] = pd.Categorical(
+        df_main['Paradigm Display'], categories=display_order, ordered=True
+    )
+
+    collapsed_map = {
+        'RSO_Identical': 'Identical',
+        'RSO_Disjoint': 'Disjoint',
+        'RSO_NA': 'Not Specified'
+    }
+    overlap_collapsed = (
+        df_main['Response Set Overlap']
+        .apply(au.map_rso)
+        .map(collapsed_map)
+        .fillna('Not Specified')
+    )
+
+    df_main = df_main.assign(**{'Response Set Overlap Collapsed': overlap_collapsed})
+
+    paradigm_order = display_order
+
+    overlap_crosstab = pd.crosstab(
+        df_main['Paradigm Display'],
+        df_main['Response Set Overlap Collapsed']
+    ).reindex(paradigm_order).fillna(0)
+
+    if overlap_crosstab.values.sum() == 0:
+        print("Response Set Overlap counts are all zero; skipping plot.")
+        return
+
+    category_order = (
+        df_main['Response Set Overlap Collapsed']
+        .value_counts()
+        .reindex(overlap_crosstab.columns, fill_value=0)
+        .sort_values(ascending=False)
+        .index.tolist()
+    )
+    overlap_crosstab = overlap_crosstab.reindex(columns=category_order, fill_value=0)
+
+    row_totals = overlap_crosstab.sum(axis=1)
+    # Avoid division by zero while normalizing to proportions
+    safe_totals = row_totals.replace(0, np.nan)
+    overlap_crosstab_norm = overlap_crosstab.div(safe_totals, axis=0).fillna(0)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    indices = np.arange(len(paradigm_order))
+    widths = 0.6
+    bottom = np.zeros(len(paradigm_order))
+    base_palette = iter(sns.color_palette('Set2', len(category_order)))
+    category_color_map = {
+        'Identical': '#1B9E77',  # teal
+        'Disjoint': '#D95F02',   # orange
+        'Not Specified': '#B3B3B3'
+    }
+
+    colors = [category_color_map.get(category, next(base_palette)) for category in category_order]
+
+    for color, category in zip(colors, category_order):
+        proportions = overlap_crosstab_norm[category].to_numpy()
+        ax.bar(
+            indices,
+            proportions,
+            width=widths,
+            bottom=bottom,
+            color=color,
+            edgecolor='black',
+            label=category
+        )
+
+        for i, (prop, base) in enumerate(zip(proportions, bottom)):
+            if prop <= 0:
+                continue
+            text_y = base + prop / 2
+            va = 'center'
+            if prop < 0.06:
+                text_y = base + prop + 0.015
+                va = 'bottom'
+            ax.text(indices[i], text_y, f'{prop*100:.0f}%', ha='center', va=va, fontsize=9)
+
+        bottom += proportions
+
+    ax.set_title('Response Set Overlap by Paradigm', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Paradigm')
+    ax.set_ylabel('Proportion of Conditions')
+    ax.set_xticks(indices)
+    ax.set_xticklabels(paradigm_order, rotation=45, ha='center', rotation_mode='anchor')
+    ax.tick_params(axis='x', pad=10)
+    for label in ax.get_xticklabels():
+        label.set_ha('center')
+        label.set_va('top')
+        x, y = label.get_position()
+        label.set_position((x, y - 0.05))
+    ax.set_ylim(0, 1.15)
+    ax.grid(True, axis='y', alpha=0.3)
+    ax.legend(title='Response Set Overlap', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    for i, paradigm in enumerate(paradigm_order):
+        total = int(row_totals.get(paradigm, 0))
+        ax.text(indices[i], 1.05, f'n={total}', ha='center', va='bottom', fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig(output_dir / 'response_set_overlap_by_paradigm.svg', format='svg', dpi=300)
+    plt.savefig(output_dir / 'response_set_overlap_by_paradigm.png', format='png', dpi=100)
+    plt.close(fig)
 
 
 def plot_task_structure_parameters(df_processed, output_dir):
@@ -738,6 +867,10 @@ def main():
     # Merged Conflict Parameter
     plot_merged_conflict_by_paradigm(df_processed, output_dir)
     print("✓ Created merged conflict parameter plot")
+
+    # Response Set Overlap Parameter
+    plot_response_set_overlap_by_paradigm(df_processed, output_dir)
+    print("✓ Created response set overlap stacked bar chart")
 
     # Task Structure Parameters
     plot_task_structure_parameters(df_processed, output_dir)

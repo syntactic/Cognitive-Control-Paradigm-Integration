@@ -1,7 +1,10 @@
-import analysis_utils as au
 import pandas as pd
 import re
 import json
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
+import analysis_utils as au
 
 def find_paper(experiment_name):
     """

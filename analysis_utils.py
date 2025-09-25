@@ -117,7 +117,7 @@ def classify_paradigm(row):
     The order of checks is hierarchical to ensure correct classification.
     """
     # 1. Dual-Task/PRP paradigms are defined by requiring a response to a second task.
-    if row['Task 2 Response Probability'] == 1:
+    if row['Task 2 Response Probability'] > 0:
         return 'Dual-Task_PRP'
 
     # 2. For single-response paradigms, task-switching is the next major category.
@@ -223,6 +223,7 @@ def reverse_map_categories(df):
     based on the reconstructed mapped category columns from the PCA inversion.
     """
     df_out = df.copy()
+    print(df_out)
 
     # Define the reverse mappings (the inverse of your 'map_*' functions)
     sbc_reverse_map = {
@@ -306,7 +307,8 @@ def reverse_map_categories(df):
 
     # Handle the binary predictable RSI
     if 'RSI is Predictable' in df_out.columns:
-         df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 1 if round(x) == 1 else 'No')
+        print(df_out['RSI is Predictable'].value_counts())
+        df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 1 if round(x) == 1 else 'No')
 
     return df_out
 
@@ -1036,6 +1038,147 @@ def get_component_loadings(pipeline, numerical_cols, categorical_cols):
     )
     return loadings
 
+"""def export_component_loadings(loadings_df, component_name, feature_map, output_path, top_n=10):"""
+"""
+    Selects, sorts, renames, and formats the top N component loadings,
+    then writes them to a file as LaTeX table rows.
+    
+    Args:
+        loadings_df (pd.DataFrame): DataFrame containing all component loadings.
+        component_name (str): The column name of the component to process (e.g., 'PC1').
+        feature_map (dict): A dictionary mapping raw feature names to display names.
+        output_path (str): The file path for the output file (e.g., 'pc1_loadings.tex').
+        top_n (int): The number of top features to export.
+    """# 1. Select, sort, and round the data
+"""
+    component_series = loadings_df[component_name].sort_values(key=abs, ascending=False).head(top_n)
+    df_for_latex = component_series.round(3).reset_index()
+    df_for_latex.columns = ['Feature', 'Loading']
+
+    # 2. Prepare feature names for LaTeX
+    def clean_feature_name(name):
+        name = feature_map.get(name, name)
+        # Replace characters that would break LaTeX
+        name = name.replace('_', ' ').replace('=', ': ')
+        # Escape any remaining special LaTeX characters
+        name = name.replace('&', '\\&').replace('%', '\\%').replace('#', '\\#')
+        return name
+
+    df_for_latex['Feature'] = df_for_latex['Feature'].apply(clean_feature_name)
+
+    # 3. Build the string of LaTeX table rows
+    table_rows = []
+    for index, row in df_for_latex.iterrows():
+        # Format each row as "Feature & Loading \\" with proper indentation
+        table_rows.append(f"    {row['Feature']} & {row['Loading']} \\\\")
+    
+    output_string = "\n".join(table_rows)
+
+    # 4. Write the generated string directly to the output file
+    try:
+        with open(output_path, 'w') as f:
+            f.write(output_string)
+        print(f"Successfully wrote LaTeX content for {component_name} to {output_path}")
+    except IOError as e:
+        print(f"Error writing to file {output_path}: {e}")"""
+
+def _filter_redundant_binary_features(component_series):
+    """
+    Filters a series of loadings to remove redundant, anti-correlated binary features.
+    
+    For pairs like 'Feature_1' and 'Feature_0' that are perfectly anti-correlated,
+    this function keeps only the one with the higher absolute loading.
+    
+    Args:
+        component_series (pd.Series): A series of feature loadings, sorted by
+                                      absolute value in descending order.
+                                      
+    Returns:
+        pd.Series: A filtered series with redundant binary features removed.
+    """
+    features_to_keep = []
+    processed_bases = set() # Keep track of feature bases we've already handled
+
+    for feature, loading in component_series.items():
+        # Use regex to find binary features ending in _0 or _1
+        match = re.match(r'^(.*?)_([01])$', feature)
+        
+        if match:
+            base_name = match.group(1) # The part of the name before _0 or _1
+            
+            if base_name in processed_bases:
+                continue # Skip if we've already processed this pair
+            
+            # Find the opposite feature
+            current_suffix = match.group(2)
+            opposite_suffix = '1' if current_suffix == '0' else '0'
+            opposite_feature = f"{base_name}_{opposite_suffix}"
+            
+            # Check if the opposite feature exists in the original series
+            if opposite_feature in component_series:
+                # Compare absolute loadings and decide which to keep
+                opposite_loading = component_series[opposite_feature]
+                if abs(loading) >= abs(opposite_loading):
+                    features_to_keep.append(feature)
+                else:
+                    features_to_keep.append(opposite_feature)
+                processed_bases.add(base_name)
+            else:
+                # It's a binary feature without a pair in the top list, so keep it
+                features_to_keep.append(feature)
+        else:
+            # Not a binary feature of the form name_0/1, so keep it
+            features_to_keep.append(feature)
+            
+    # Return the filtered series, preserving the original order as much as possible
+    # We use .loc to select the features in our desired order and filter duplicates
+    return component_series.loc[features_to_keep].drop_duplicates()
+
+
+def export_component_loadings(loadings_df, component_name, feature_map, output_path, top_n=10):
+    """
+    Selects, sorts, renames, filters redundant binary features, and formats the
+    top N component loadings, then writes them to a file as LaTeX table rows.
+    """
+    # 1. Select and sort a larger pool of features to ensure we find pairs
+    # We fetch more than top_n initially to have a better chance of finding the anti-correlated pairs.
+    initial_fetch_count = top_n * 2
+    component_series = loadings_df[component_name].sort_values(key=abs, ascending=False).head(initial_fetch_count)
+
+    # 2. Filter out the redundant binary features
+    filtered_series = _filter_redundant_binary_features(component_series)
+    
+    # 3. Select the final top N from the filtered list and prepare for LaTeX
+    df_for_latex = filtered_series.head(top_n).round(3).reset_index()
+    df_for_latex.columns = ['Feature', 'Loading']
+
+    # 4. Prepare feature names for LaTeX (cleaning)
+    def clean_feature_name(name):
+        name = feature_map.get(name, name)
+        name = name.replace('_', ' ').replace('=', ': ')
+        # Special handling for the binary features to make them more readable
+        name = re.sub(r' (\d+)$', r' = \1', name) 
+        # Escape any remaining special LaTeX characters
+        name = name.replace('&', '\\&').replace('%', '\\%').replace('#', '\\#')
+        return name
+
+    df_for_latex['Feature'] = df_for_latex['Feature'].apply(clean_feature_name)
+
+    # 5. Build the string of LaTeX table rows
+    table_rows = []
+    for index, row in df_for_latex.iterrows():
+        table_rows.append(f"    {row['Feature']} & {row['Loading']} \\\\")
+    
+    output_string = "\n".join(table_rows)
+
+    # 6. Write the generated string directly to the output file
+    try:
+        with open(output_path, 'w') as f:
+            f.write(output_string)
+        print(f"Successfully wrote LaTeX content for {component_name} to {output_path}")
+    except IOError as e:
+        print(f"Error writing to file {output_path}: {e}")
+
 # =============================================================================
 # 4. Interpolation Functions (NEW)
 # =============================================================================
@@ -1147,6 +1290,7 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
         
         # Apply inverse transformation
         reconstructed_original_data = preprocessor_obj.inverse_transform(reconstructed_df)
+        print("RECON", reconstructed_original_data)
         
         # Return as DataFrame with proper column names
         return pd.DataFrame(
@@ -1392,101 +1536,195 @@ def longest_common_prefix(strs: list[str]) -> str:
 
     return prefix
 
-def validate_paradigm_separation(pca_df, pc_cols, target_col='Paradigm'):
+def validate_paradigm_separation(
+    pca_df,
+    pc_cols,
+    target_col='Paradigm',
+    repeats=1,
+    base_seed=42,
+    test_size=0.2,
+    n_neighbors=None
+):
     """
-    Validates the separability of paradigms in a PCA latent space using a simple classifier.
+    Validate how separable paradigms are in PCA space with a lightweight classifier.
 
-    This function serves as a quantitative probe to measure how well paradigm classes
-    are separated in the principal component space. By training a simple classifier
-    (k-Nearest Neighbors) on just the PC coordinates, we can objectively assess whether
-    the visual clustering translates to statistical separability. High accuracy with a
-    simple model indicates clear, fundamental separation that doesn't require complex
-    decision boundaries.
+    A k-Nearest Neighbors classifier is trained on repeated stratified splits of the
+    requested principal components. Re-running the validation with multiple random seeds
+    provides a more stable estimate of separability while keeping the original function
+    signature compatible (defaults match the previous single-run behaviour).
 
     Args:
-        pca_df (pd.DataFrame): The DataFrame containing the principal component coordinates
-                               and the target labels for each experimental condition.
-        pc_cols (list of str): A list of the column names corresponding to the principal
-                               components to be used as features (e.g., ['PC1', 'PC2']).
-        target_col (str): The name of the column containing the paradigm labels to predict.
-                          Default is 'Paradigm'.
+        pca_df (pd.DataFrame): Principal component coordinates and paradigm labels.
+        pc_cols (Sequence[str]): Columns to use as features, e.g., ('PC1', 'PC2').
+        target_col (str): Name of the paradigm label column. Default ``'Paradigm'``.
+        repeats (int): Number of random train/test splits to evaluate. Default ``1``.
+        base_seed (int): Seed offset used when generating repeated splits. Default ``42``.
+        test_size (float): Maximum fraction of observations reserved for evaluation.
+            A smaller value may be used automatically to maintain class support. Default ``0.2``.
+        n_neighbors (int | None): Optional override for the KNN neighborhood size.
 
     Returns:
-        dict: A dictionary containing key performance metrics:
-              - 'accuracy': The overall accuracy of the classifier on the test set.
-              - 'classification_report': A detailed report with precision, recall, and F1-scores.
-              - 'confusion_matrix': A numpy array showing prediction vs. actual labels.
-              - 'model_name': A string with the name of the classifier used.
-              - 'feature_names': List of PC columns used as features.
-              - 'class_names': List of unique paradigm classes found in the data.
+        dict: Aggregated validation metrics containing:
+            - ``accuracy`` / ``accuracy_sd``: Mean accuracy and sample SD across repeats.
+            - ``macro_f1`` / ``macro_f1_sd``: Mean macro F1-score and sample SD.
+            - ``classification_report``: Detailed metrics for the first split (backwards compatible).
+            - ``classification_report_mean``: Averaged precision/recall/F1 across repeats.
+            - ``classification_report_runs``: Per-repeat classification report dictionaries.
+            - ``confusion_matrix``: Confusion matrix for the first split.
+            - ``confusion_matrix_sum``: Sum of confusion matrices across repeats.
+            - ``per_run``: List of per-repeat summary metrics.
+            - ``model_name``: String representation of the classifier used.
+            - ``feature_names``: List of PC feature columns.
+            - ``class_names``: Sorted list of detected paradigm labels.
+            - ``train_size`` / ``test_size``: Sizes from the first evaluated split.
+            - ``repeats`` and ``random_seeds``: Metadata for reproducibility.
     """
-    # Prepare the data
+    if repeats < 1:
+        raise ValueError("'repeats' must be at least 1.")
+
+    pc_cols = list(pc_cols)
     X = pca_df[pc_cols].copy()
     y = pca_df[target_col].copy()
 
-    # Handle any potential missing values in the target column
     valid_indices = ~y.isna()
-    X = X[valid_indices]
-    y = y[valid_indices]
+    X = X.loc[valid_indices]
+    y = y.loc[valid_indices]
 
     if len(X) == 0:
         raise ValueError(f"No valid data found. Check that '{target_col}' column has non-null values.")
 
-    # Check if we have enough samples for each class
     class_counts = y.value_counts()
     min_samples_per_class = class_counts.min()
 
     if min_samples_per_class < 2:
-        raise ValueError(f"At least one class has fewer than 2 samples. Cannot perform train/test split. "
-                        f"Class counts: {class_counts.to_dict()}")
+        raise ValueError(
+            "At least one class has fewer than 2 samples. Cannot perform train/test split. "
+            f"Class counts: {class_counts.to_dict()}"
+        )
 
-    # Split the data with stratification to maintain class proportions
-    test_size = min(0.2, 1.0 / min_samples_per_class)  # Ensure at least 1 sample per class in test
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=test_size,
-        random_state=42,
-        stratify=y
-    )
+    if not 0 < test_size < 1:
+        raise ValueError("'test_size' must be between 0 and 1 (exclusive).")
 
-    # Initialize and train a simple k-Nearest Neighbors classifier
-    # Using k=3 as a good default for most cases, but adjust if we have very few samples
-    k = min(3, len(X_train) // len(y.unique()))
-    k = max(1, k)  # Ensure k is at least 1
+    # Cap the evaluation set so each class keeps representation while avoiding empty folds.
+    effective_test_size = min(test_size, 1.0 / max(min_samples_per_class, 1))
+    effective_test_size = max(effective_test_size, 1.0 / len(X))
 
-    model = KNeighborsClassifier(n_neighbors=k)
-    model.fit(X_train, y_train)
-
-    # Make predictions on the test set
-    y_pred = model.predict(X_test)
-
-    # Calculate performance metrics
-    accuracy = accuracy_score(y_test, y_pred)
-
-    # Get unique class names for consistent reporting
     class_names = sorted(y.unique())
 
-    # Generate classification report
-    clf_report = classification_report(
-        y_test, y_pred,
-        target_names=class_names,
-        output_dict=True,
-        zero_division=0
-    )
+    accs = []
+    macro_f1s = []
+    reports = []
+    conf_matrices = []
+    per_run = []
+    used_seeds = []
 
-    # Generate confusion matrix
-    conf_matrix = confusion_matrix(y_test, y_pred, labels=class_names)
+    for repeat_idx in range(repeats):
+        base_state = base_seed + repeat_idx
+        split_seed = base_state
+        current_test_size = effective_test_size
 
-    # Package results
+        for attempt in range(5):
+            X_train, X_test, y_train, y_test = train_test_split(
+                X,
+                y,
+                test_size=current_test_size,
+                random_state=split_seed,
+                stratify=y
+            )
+
+            if len(np.unique(y_test)) == len(class_names):
+                break
+
+            # Expand the evaluation split slightly and try again with nudged seed.
+            current_test_size = min(0.5, current_test_size + max(0.05, 1.0 / len(X)))
+            split_seed += 1
+        else:
+            raise ValueError(
+                "Unable to create a stratified split that retains every class in the test set. "
+                "Consider increasing 'test_size' or reviewing class imbalances."
+            )
+
+        if n_neighbors is None:
+            dynamic_k = len(X_train) // len(class_names)
+            k = max(1, min(3, dynamic_k))
+        else:
+            k = max(1, int(n_neighbors))
+
+        model = KNeighborsClassifier(n_neighbors=k)
+        model.fit(X_train, y_train)
+
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+
+        report = classification_report(
+            y_test,
+            y_pred,
+            target_names=class_names,
+            output_dict=True,
+            zero_division=0
+        )
+        macro_f1 = report['macro avg']['f1-score']
+        conf_matrix = confusion_matrix(y_test, y_pred, labels=class_names)
+
+        accs.append(accuracy)
+        macro_f1s.append(macro_f1)
+        reports.append(report)
+        conf_matrices.append(conf_matrix)
+        used_seeds.append(split_seed)
+
+        per_run.append({
+            'repeat': repeat_idx,
+            'random_state': split_seed,
+            'test_size': len(y_test),
+            'train_size': len(y_train),
+            'accuracy': float(accuracy),
+            'macro_f1': float(macro_f1),
+            'k': k,
+            'classification_report': report,
+            'confusion_matrix': conf_matrix
+        })
+
+    accuracy_mean = float(np.mean(accs))
+    accuracy_sd = float(np.std(accs, ddof=1)) if repeats > 1 else 0.0
+    macro_f1_mean = float(np.mean(macro_f1s))
+    macro_f1_sd = float(np.std(macro_f1s, ddof=1)) if repeats > 1 else 0.0
+
+    confusion_matrix_sum = np.sum(conf_matrices, axis=0)
+
+    def _average_reports(run_reports):
+        averaged = {}
+        for key, value in run_reports[0].items():
+            if isinstance(value, dict):
+                averaged[key] = {}
+                for metric in value:
+                    metric_values = [rep[key][metric] for rep in run_reports if metric in rep[key]]
+                    averaged[key][metric] = float(np.mean(metric_values))
+            else:
+                averaged[key] = float(np.mean([rep[key] for rep in run_reports]))
+        return averaged
+
+    report_mean = _average_reports(reports)
+
+    first_run = per_run[0]
+
     results = {
-        'accuracy': accuracy,
-        'classification_report': clf_report,
-        'confusion_matrix': conf_matrix,
-        'model_name': f'KNeighborsClassifier(n_neighbors={k})',
+        'repeats': repeats,
+        'random_seeds': used_seeds,
+        'accuracy': accuracy_mean,
+        'accuracy_sd': accuracy_sd,
+        'macro_f1': macro_f1_mean,
+        'macro_f1_sd': macro_f1_sd,
+        'classification_report': first_run['classification_report'],
+        'classification_report_mean': report_mean,
+        'classification_report_runs': reports,
+        'confusion_matrix': first_run['confusion_matrix'],
+        'confusion_matrix_sum': confusion_matrix_sum,
+        'model_name': f'KNeighborsClassifier(n_neighbors={first_run["k"]})',
         'feature_names': pc_cols,
         'class_names': class_names,
-        'test_size': len(y_test),
-        'train_size': len(y_train)
+        'train_size': first_run['train_size'],
+        'test_size': first_run['test_size'],
+        'per_run': per_run
     }
 
     return results
