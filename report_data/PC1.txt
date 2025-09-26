@@ -1,0 +1,12 @@
+    Switch Rate & 0.369 \\
+    Task 2 Response Probability & 0.248 \\
+    Task 2 Difficulty is NA = 1 & -0.248 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 NA & -0.248 \\
+    Task 2 CSI is NA = 1 & -0.246 \\
+    Response Set Overlap Mapped RSO NA & -0.244 \\
+    Intra-Trial Task Relationship Mapped ITTR NA & -0.24 \\
+    Intra-Trial Task Relationship Mapped ITTR Different & 0.217 \\
+    Task 2 Cue Type Mapped TCT2 Implicit & 0.199 \\
+    Trial Transition Type Mapped TTT Pure & -0.194 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Arbitrary & 0.187 \\
+    Task 1 Difficulty & -0.148 \\

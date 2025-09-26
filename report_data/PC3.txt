@@ -1,0 +1,12 @@
+    Task 1 CSI & 0.484 \\
+    Task 2 CSI & 0.406 \\
+    RSI & 0.394 \\
+    Task 2 Response Probability & 0.311 \\
+    Task 1 Difficulty & 0.243 \\
+    Distractor SOA & -0.225 \\
+    Inter-task SOA & 0.178 \\
+    Task 2 Difficulty & 0.152 \\
+    Inter-task SOA is NA = 1 & -0.129 \\
+    Distractor SOA is NA = 0 & -0.123 \\
+    Switch Rate & -0.116 \\
+    Inter-task SOA is Predictable N/A & -0.115 \\

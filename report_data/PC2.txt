@@ -1,0 +1,12 @@
+    Task 2 CSI & 0.43 \\
+    Task 2 Response Probability & -0.424 \\
+    Task 1 CSI & 0.405 \\
+    Switch Rate & 0.226 \\
+    Task 1 Difficulty & -0.215 \\
+    Inter-task SOA & -0.189 \\
+    Inter-task SOA is Predictable N/A & 0.18 \\
+    Inter-task SOA is NA = 0 & -0.169 \\
+    Trial Transition Type Mapped TTT Pure & -0.155 \\
+    Task 2 Difficulty & -0.149 \\
+    Task 1 Cue Type Mapped TCT Implicit & -0.142 \\
+    Task 1 Cue Type Mapped TCT Arbitrary & 0.142 \\
