@@ -332,7 +332,7 @@ def reverse_map_categories(df):
     # Handle the binary predictable RSI
     if 'RSI is Predictable' in df_out.columns:
         print(df_out['RSI is Predictable'].value_counts())
-        df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 1 if round(x) == 1 else 'No')
+        df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 'Yes' if round(x) == 1 else 'No')
 
     if 'Inter-task SOA is Predictable' in df_out.columns:
         df_out['Inter-task SOA is Predictable'] = df_out['Inter-task SOA is Predictable'].apply(normalize_tristate_flag)
@@ -1543,7 +1543,7 @@ def generate_interpolated_points(
     interpolated_df = pd.DataFrame(interpolated_points_list)
     # Perform post-reconstruction cleanup
     interpolated_df = reverse_map_categories(interpolated_df)
-    interpolated_df = apply_conceptual_constraints(interpolated_df)
+    #interpolated_df = apply_conceptual_constraints(interpolated_df)
     
     return interpolated_df
 

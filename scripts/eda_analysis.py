@@ -113,9 +113,11 @@ def print_summary_statistics(df_processed):
     Args:
         df_processed (pd.DataFrame): The processed dataset with paradigm labels
     """
-    print("\n" + "="*60)
-    print("OVERALL SUMMARY STATISTICS")
-    print("="*60)
+    print("\n" + "=" * 60)
+    print("STRATIFIED SUMMARY STATISTICS BY PARADIGM")
+    print("=" * 60)
+
+    df_with_display, _ = add_paradigm_display_column(df_processed, include_baseline=False)
 
     # Define key continuous variables for summary
     continuous_vars = [
@@ -124,36 +126,10 @@ def print_summary_statistics(df_processed):
         'Task 1 Difficulty', 'Task 2 Difficulty'
     ]
 
-    # Calculate summary statistics
-    for var in continuous_vars:
-        if var in df_processed.columns:
-            # Handle cleaning for specific variables
-            if var == 'RSI':
-                # Apply RSI cleaning function to get numeric values
-                clean_values = df_processed[var].apply(au.clean_rsi)
-            elif var == 'Switch Rate':
-                # Apply switch rate cleaning function
-                clean_values = df_processed[var].apply(au.clean_switch_rate)
-            else:
-                # Convert to numeric, coercing errors to NaN
-                clean_values = pd.to_numeric(df_processed[var], errors='coerce')
-
-            # Calculate statistics
-            stats = clean_values.describe()
-            print(f"\n{var}:")
-            print(f"  Count (non-missing): {stats['count']:.0f}")
-            print(f"  Mean: {stats['mean']:.3f}")
-            print(f"  Std: {stats['std']:.3f}")
-            print(f"  Min: {stats['min']:.3f}")
-            print(f"  25th percentile: {stats['25%']:.3f}")
-            print(f"  Median: {stats['50%']:.3f}")
-            print(f"  75th percentile: {stats['75%']:.3f}")
-            print(f"  Max: {stats['max']:.3f}")
+    def format_stat(value):
+        return f"{value:.3f}" if pd.notna(value) else "N/A"
 
     # Define categorical/discrete variables for summary
-    print("\nCATEGORICAL FEATURES DISTRIBUTION:")
-    print("-" * 40)
-
     categorical_vars = [
         'Number of Tasks', 'Trial Transition Type', 'Stimulus-Stimulus Congruency',
         'Stimulus-Response Congruency', 'Stimulus Bivalence & Congruency',
@@ -163,24 +139,68 @@ def print_summary_statistics(df_processed):
         'Intra-Trial Task Relationship'
     ]
 
-    for var in categorical_vars:
-        if var in df_processed.columns:
-            # Get value counts, including NaN
-            value_counts = df_processed[var].value_counts(dropna=False)
-            total_count = len(df_processed)
+    for paradigm in PARADIGM_ORDER_MAIN:
+        print(f"\n===== SUMMARY STATISTICS FOR: {paradigm} =====")
 
-            print(f"\n{var}:")
-            for value, count in value_counts.items():
-                percentage = (count / total_count) * 100
-                print(f"  {value}: {count} ({percentage:.1f}%)")
+        subset = df_with_display[df_with_display['Paradigm Display'] == paradigm]
 
-            # Show total non-missing
-            non_missing = df_processed[var].notna().sum()
-            missing = total_count - non_missing
-            if missing > 0:
-                print(f"  Non-missing: {non_missing}/{total_count} ({(non_missing/total_count)*100:.1f}%)")
+        for var in continuous_vars:
+            if var in subset.columns:
+                if var == 'RSI':
+                    clean_values = subset[var].apply(au.clean_rsi)
+                elif var == 'Switch Rate':
+                    clean_values = subset[var].apply(au.clean_switch_rate)
+                else:
+                    clean_values = pd.to_numeric(subset[var], errors='coerce')
 
-    print("\n" + "="*60 + "\n")
+                stats = clean_values.describe()
+                count_raw = stats.get('count', 0)
+                count_value = int(count_raw) if pd.notna(count_raw) else 0
+
+                print(f"\n{var}:")
+                print(f"  Count (non-missing): {count_value}")
+                if count_value > 0:
+                    print(f"  Mean: {format_stat(stats.get('mean'))}")
+                    print(f"  Std: {format_stat(stats.get('std'))}")
+                    print(f"  Min: {format_stat(stats.get('min'))}")
+                    print(f"  25th percentile: {format_stat(stats.get('25%'))}")
+                    print(f"  Median: {format_stat(stats.get('50%'))}")
+                    print(f"  75th percentile: {format_stat(stats.get('75%'))}")
+                    print(f"  Max: {format_stat(stats.get('max'))}")
+                else:
+                    print("  Mean: N/A")
+                    print("  Std: N/A")
+                    print("  Min: N/A")
+                    print("  25th percentile: N/A")
+                    print("  Median: N/A")
+                    print("  75th percentile: N/A")
+                    print("  Max: N/A")
+
+        print("\nCATEGORICAL FEATURES DISTRIBUTION:")
+        print("-" * 40)
+
+        total_count = len(subset)
+
+        for var in categorical_vars:
+            if var in subset.columns:
+                print(f"\n{var}:")
+                if total_count == 0:
+                    print("  No data available.")
+                    continue
+
+                value_counts = subset[var].value_counts(dropna=False)
+
+                for value, count in value_counts.items():
+                    percentage = (count / total_count) * 100 if total_count else 0
+                    print(f"  {value}: {count} ({percentage:.1f}%)")
+
+                non_missing = subset[var].notna().sum()
+                missing = total_count - non_missing
+                if missing > 0:
+                    coverage = (non_missing / total_count) * 100 if total_count else 0
+                    print(f"  Non-missing: {non_missing}/{total_count} ({coverage:.1f}%)")
+
+    print("\n" + "=" * 60 + "\n")
 
 
 def plot_task2_response_probability_distribution(df_processed, output_dir):

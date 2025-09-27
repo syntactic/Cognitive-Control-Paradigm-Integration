@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from pathlib import Path
 
-from analysis_utils import preprocess, create_pca_pipeline
+from analysis_utils import preprocess, create_pca_pipeline, reverse_map_categories
 
 
 def test_pca_pipeline_with_real_dataset():
@@ -109,3 +109,78 @@ def test_pca_pipeline_with_real_dataset():
             assert accuracy > 0.95, f"Binary column {col} accuracy too low: {accuracy:.3f}"
         elif col.endswith(' Mapped'):
             assert accuracy > 0.90, f"Categorical column {col} accuracy too low: {accuracy:.3f}"
+
+
+def test_pca_round_trip_is_near_perfect():
+    """The full PCA round-trip should reproduce the original features."""
+    data_path = Path(__file__).parent.parent / "data" / "super_experiment_design_space.csv"
+    df_real = pd.read_csv(data_path)
+
+    df_features, numerical_cols, categorical_cols, _, _ = preprocess(df_real)
+
+    # Capture the canonical human-readable categories before any transformations.
+    original_human_df = reverse_map_categories(df_features)
+    human_readable_columns = [
+        "Stimulus Bivalence & Congruency",
+        "Stimulus-Stimulus Congruency",
+        "Stimulus-Response Congruency",
+        "Task 1 Stimulus-Response Mapping",
+        "Task 2 Stimulus-Response Mapping",
+        "Response Set Overlap",
+        "Trial Transition Type",
+        "Task 1 Cue Type",
+        "Task 2 Cue Type",
+        "Intra-Trial Task Relationship",
+        "RSI is Predictable",
+        "Inter-task SOA is Predictable",
+    ]
+    original_human_columns = [
+        column for column in human_readable_columns if column in original_human_df.columns
+    ]
+    original_human_values = original_human_df[original_human_columns].copy()
+
+    pipeline = create_pca_pipeline(numerical_cols, categorical_cols)
+    pipeline.fit(df_features)
+
+    preprocessor = pipeline.named_steps["preprocessor"]
+    pca = pipeline.named_steps["pca"]
+
+    # Transform to PCA space and reconstruct back to the original feature space
+    transformed_features = preprocessor.transform(df_features)
+    pc_scores = pca.transform(transformed_features)
+    reconstructed_transformed = pca.inverse_transform(pc_scores)
+    reconstructed_features = preprocessor.inverse_transform(reconstructed_transformed)
+
+    reconstructed_df = pd.DataFrame(
+        reconstructed_features,
+        columns=df_features.columns,
+        index=df_features.index,
+    )
+
+    original_numeric = df_features[numerical_cols].astype(float)
+    reconstructed_numeric = reconstructed_df[numerical_cols].astype(float)
+    numeric_diff = (original_numeric - reconstructed_numeric).abs()
+
+    max_numeric_error = numeric_diff.to_numpy().max()
+    mean_numeric_error = numeric_diff.to_numpy().mean()
+
+    assert max_numeric_error < 1e-9, f"Max numeric error too high: {max_numeric_error}"
+    assert mean_numeric_error < 1e-12, f"Mean numeric error too high: {mean_numeric_error}"
+
+    original_categorical = df_features[categorical_cols]
+    reconstructed_categorical = reconstructed_df[categorical_cols]
+
+    for column in categorical_cols:
+        mismatches = (~original_categorical[column].eq(reconstructed_categorical[column])).sum()
+        assert mismatches == 0, f"Categorical column '{column}' failed to round-trip"
+
+    reconstructed_human_df = reverse_map_categories(reconstructed_df)
+    reconstructed_human_values = reconstructed_human_df[original_human_columns]
+
+    for column in original_human_columns:
+        pd.testing.assert_series_equal(
+            original_human_values[column],
+            reconstructed_human_values[column],
+            check_dtype=False,
+            obj=f"Human-readable column '{column}'",
+        )
