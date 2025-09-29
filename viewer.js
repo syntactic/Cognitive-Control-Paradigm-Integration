@@ -3,6 +3,65 @@ let resolvedData = [];
 let conceptualData = [];
 let currentTrialSequence = []; // Pre-generated trial sequence for selected experiment
 
+// Utility to coerce CSV-style numeric fields into numbers
+function parseNumeric(value) {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+    }
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (trimmed === '' || trimmed.toLowerCase() === 'n/a') {
+            return null;
+        }
+        const numeric = Number(trimmed);
+        return Number.isFinite(numeric) ? numeric : null;
+    }
+
+    return null;
+}
+
+// Parse distribution parameters that may arrive as JSON-encoded strings
+function getDistributionParams(rawValue) {
+    if (!rawValue || rawValue === '[]') {
+        return { values: [] };
+    }
+
+    try {
+        const parsed = typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
+        const arrayValues = Array.isArray(parsed) ? parsed : [];
+        const numericValues = arrayValues
+            .map(parseNumeric)
+            .filter(value => value !== null);
+        return { values: numericValues };
+    } catch (error) {
+        return { values: [], error };
+    }
+}
+
+// Resolve a sensible static SOA fallback from condition metadata
+function resolveStaticSOA(condition, explicitBase) {
+    const candidates = [
+        explicitBase,
+        condition['Inter-task SOA'],
+        condition['SOA'],
+        condition.SOA
+    ];
+
+    for (const candidate of candidates) {
+        const numeric = parseNumeric(candidate);
+        if (numeric !== null) {
+            return numeric;
+        }
+    }
+
+    return 0;
+}
+
 // CSV parser using Papa Parse library
 function parseCSV(csvText) {
     const result = Papa.parse(csvText, {
@@ -258,67 +317,65 @@ function generateTrialDirections(condition, trialAssignment) {
 // Generate ITI for a trial based on distribution parameters (updated to use RSI column names)
 function generateITI(condition) {
     const distributionType = condition.RSI_Distribution_Type || condition.ITI_Distribution_Type || 'fixed';
-    const baseITI = parseFloat(condition.ITI_ms) || 1000;
-    
+    const baseITIValue = parseNumeric(condition.ITI_ms);
+    const fallbackITI = baseITIValue !== null ? baseITIValue : 1000;
+
     if (distributionType === 'fixed') {
-        return baseITI;
+        return fallbackITI;
     }
-    
-    // Parse distribution parameters
-    let params = [];
-    try {
-        const paramsString = condition.RSI_Distribution_Params || condition.ITI_Distribution_Params;
-        if (paramsString && paramsString !== '[]') {
-            params = JSON.parse(paramsString);
-        }
-    } catch (e) {
-        console.warn('Failed to parse RSI_Distribution_Params:', condition.RSI_Distribution_Params);
-        return baseITI;
+
+    const rawParams = condition.RSI_Distribution_Params || condition.ITI_Distribution_Params;
+    const { values: params, error } = getDistributionParams(rawParams);
+
+    if (error) {
+        console.warn('Failed to parse RSI_Distribution_Params:', rawParams);
+        return fallbackITI;
     }
-    
+
     if (distributionType === 'uniform' && params.length >= 2) {
-        // Uniform distribution between min and max
-        const [min, max] = params;
-        return min + Math.random() * (max - min);
+        const [rawMin, rawMax] = params;
+        if (rawMin !== undefined && rawMax !== undefined) {
+            const min = Math.min(rawMin, rawMax);
+            const max = Math.max(rawMin, rawMax);
+            return min + Math.random() * (max - min);
+        }
     } else if (distributionType === 'choice' && params.length > 0) {
-        // Random choice from array of values
         return params[Math.floor(Math.random() * params.length)];
     }
-    
+
     // Default to base ITI if distribution can't be processed
-    return baseITI;
+    return fallbackITI;
 }
 
 // Generate SOA for a trial based on distribution parameters
-function generateSOA(condition, baseSoa = 0) {
+function generateSOA(condition, baseSoa) {
+    const fallbackSOA = resolveStaticSOA(condition, baseSoa);
     const distributionType = condition.SOA_Distribution_Type || 'fixed';
-    
+
     if (distributionType === 'fixed') {
-        return baseSoa;
+        return fallbackSOA;
     }
-    
-    // Parse distribution parameters
-    let params = [];
-    try {
-        if (condition.SOA_Distribution_Params && condition.SOA_Distribution_Params !== '[]') {
-            params = JSON.parse(condition.SOA_Distribution_Params);
-        }
-    } catch (e) {
+
+    const { values: params, error } = getDistributionParams(condition.SOA_Distribution_Params);
+
+    if (error) {
         console.warn('Failed to parse SOA_Distribution_Params:', condition.SOA_Distribution_Params);
-        return baseSoa;
+        return fallbackSOA;
     }
-    
+
     if (distributionType === 'uniform' && params.length >= 2) {
-        // Uniform distribution between min and max
-        const [min, max] = params;
-        return min + Math.random() * (max - min);
+        const [rawMin, rawMax] = params;
+        if (rawMin !== undefined && rawMax !== undefined) {
+            const min = Math.min(rawMin, rawMax);
+            const max = Math.max(rawMin, rawMax);
+            return min + Math.random() * (max - min);
+        }
     } else if (distributionType === 'choice' && params.length > 0) {
-        // Random choice from array of values
         return params[Math.floor(Math.random() * params.length)];
     }
-    
+
     // Default to base SOA if distribution can't be processed
-    return baseSoa;
+    return fallbackSOA;
 }
 
 // Generate task sequence for single-task paradigms
@@ -438,16 +495,27 @@ function generateDynamicSOA(condition) {
     
     if (viewerConfig.SOA_distribution === 'choice' && viewerConfig.SOA_values) {
         // Sample from discrete distribution
-        const values = viewerConfig.SOA_values;
-        return values[Math.floor(Math.random() * values.length)];
+        const values = (Array.isArray(viewerConfig.SOA_values) ? viewerConfig.SOA_values : [])
+            .map(parseNumeric)
+            .filter(value => value !== null);
+        if (values.length > 0) {
+            return values[Math.floor(Math.random() * values.length)];
+        }
     } else if (viewerConfig.SOA_distribution === 'uniform' && viewerConfig.SOA_range) {
         // Sample from uniform distribution
-        const [min, max] = viewerConfig.SOA_range;
-        return min + Math.random() * (max - min);
+        const range = Array.isArray(viewerConfig.SOA_range) ? viewerConfig.SOA_range : [];
+        const minValue = parseNumeric(range[0]);
+        const maxValue = parseNumeric(range[1]);
+
+        if (minValue !== null && maxValue !== null) {
+            const min = Math.min(minValue, maxValue);
+            const max = Math.max(minValue, maxValue);
+            return min + Math.random() * (max - min);
+        }
     }
     
     // Fallback to existing SOA generation logic
-    return generateSOA(condition, 0);
+    return generateSOA(condition);
 }
 
 // Recalculate absolute timings based on dynamic SOA
@@ -456,13 +524,14 @@ function recalculateTimingsWithDynamicSOA(condition, dynamicSOA) {
     
     // For dual-task experiments, we need to recalculate T2 timings based on dynamic SOA
     const nTasks = parseInt(condition.N_Tasks, 10) || 1;
-    
-    if (nTasks === 2 && dynamicSOA !== undefined) {
+    const soaValue = parseNumeric(dynamicSOA);
+
+    if (nTasks === 2 && soaValue !== null) {
         // Get T1 stimulus timing (baseline)
         const t1_stim_start = parseInt(condition.effective_start_stim1_mov) || 0;
         
         // Calculate new T2 stimulus timing: T1_start + dynamic_SOA
-        const t2_stim_start = t1_stim_start + dynamicSOA;
+        const t2_stim_start = t1_stim_start + soaValue;
         const t2_stim_duration = (parseInt(condition.effective_end_stim2_or) || 0) - (parseInt(condition.effective_start_stim2_or) || 0);
         const t2_stim_end = t2_stim_start + t2_stim_duration;
         
@@ -492,13 +561,6 @@ function recalculateTimingsWithDynamicSOA(condition, dynamicSOA) {
         // Update go signal timing to match stimulus
         modifiedCondition.effective_start_go2 = t2_stim_start.toString();
         modifiedCondition.effective_end_go2 = t2_stim_end.toString();
-        
-        console.log(`Recalculated timings for dynamic SOA ${dynamicSOA}ms:`, {
-            t1_stim_start,
-            t2_stim_start,
-            original_soa: parseInt(condition['Inter-task SOA']) || 0,
-            dynamic_soa: dynamicSOA
-        });
     }
     
     return modifiedCondition;
@@ -687,26 +749,50 @@ function updateInfoPanel(conceptualRow) {
     };
     
     // Get SOA value - check for distribution first, then fallback to static value
-    let soaValue = 'N/A';
-    
-    // Check if there's a dynamic SOA distribution in the mapping notes
+    let soaDisplay = 'N/A';
+
+    const formatStaticSOA = () => {
+        const staticCandidate = getValue('Inter-task SOA', 'SOA');
+        const numericValue = parseNumeric(staticCandidate);
+
+        if (numericValue !== null) {
+            return `${numericValue} ms`;
+        }
+        return staticCandidate !== 'N/A' ? staticCandidate : 'N/A';
+    };
+
     try {
         const mappingNotes = extractMappingNotes(conceptualRow);
         const viewerConfig = mappingNotes.viewer_config || {};
-        
+
         if (viewerConfig.SOA_distribution === 'choice' && viewerConfig.SOA_values) {
-            soaValue = `Choice from [${viewerConfig.SOA_values.join(', ')}]ms`;
+            const values = (Array.isArray(viewerConfig.SOA_values) ? viewerConfig.SOA_values : [])
+                .map(parseNumeric)
+                .filter(value => value !== null);
+
+            if (values.length > 0) {
+                soaDisplay = `Choice from [${values.join(', ')}] ms`;
+            } else {
+                soaDisplay = formatStaticSOA();
+            }
         } else if (viewerConfig.SOA_distribution === 'uniform' && viewerConfig.SOA_range) {
-            soaValue = `Uniform(${viewerConfig.SOA_range[0]}, ${viewerConfig.SOA_range[1]})ms`;
+            const range = Array.isArray(viewerConfig.SOA_range) ? viewerConfig.SOA_range : [];
+            const min = parseNumeric(range[0]);
+            const max = parseNumeric(range[1]);
+
+            if (min !== null && max !== null) {
+                const low = Math.min(min, max);
+                const high = Math.max(min, max);
+                soaDisplay = `Uniform(${low}, ${high}) ms`;
+            } else {
+                soaDisplay = formatStaticSOA();
+            }
         } else {
-            // Fallback to static SOA value (only SOA-related columns)
-            const staticSOA = getValue('Inter-task SOA', 'SOA');
-            soaValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
+            soaDisplay = formatStaticSOA();
         }
     } catch (e) {
         // If extractMappingNotes fails, fallback to static SOA value
-        const staticSOA = getValue('Inter-task SOA', 'SOA');
-        soaValue = staticSOA !== 'N/A' ? `${staticSOA}ms` : 'N/A';
+        soaDisplay = formatStaticSOA();
     }
     
     // Clear and rebuild info panel using DOM construction
@@ -727,7 +813,7 @@ function updateInfoPanel(conceptualRow) {
     // Add experiment info rows
     addInfoRow(dl, 'Experiment', getValue('Experiment', ''));
     addInfoRow(dl, 'Number of Tasks', numTasks.toString());
-    addInfoRow(dl, 'SOA', soaValue !== 'N/A' ? `${soaValue}ms` : soaValue);
+    addInfoRow(dl, 'SOA', soaDisplay);
     addInfoRow(dl, 'Task 1 Type', getValue('Task 1 Type', ''));
     
     if (numTasks > 1) {

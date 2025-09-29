@@ -25,6 +25,16 @@ const {
     inconsistentConfigBlock
 } = require('./viewer.test.data.js');
 
+function getDefinitionValue(root, label) {
+    const terms = Array.from(root.querySelectorAll('dt'));
+    const index = terms.findIndex(term => term.textContent === label);
+    if (index === -1) {
+        return null;
+    }
+    const values = root.querySelectorAll('dd');
+    return values[index] ? values[index].textContent : null;
+}
+
 describe('generateITI', () => {
     test('should return the fixed RSI value when the distribution type is "fixed"', () => {
         const condition = {
@@ -704,6 +714,50 @@ describe('generateSOA', () => {
         const result = generateSOA(condition, 100);
         expect([0, 100, 200]).toContain(result);
     });
+
+    test('should default to Inter-task SOA when base is not provided', () => {
+        const condition = {
+            SOA_Distribution_Type: 'fixed',
+            'Inter-task SOA': '275'
+        };
+
+        const { generateSOA } = require('./viewer.js');
+        expect(generateSOA(condition)).toBe(275);
+    });
+
+    test('should default to SOA column when Inter-task SOA is missing', () => {
+        const condition = {
+            SOA_Distribution_Type: 'fixed',
+            SOA: '150'
+        };
+
+        const { generateSOA } = require('./viewer.js');
+        expect(generateSOA(condition)).toBe(150);
+    });
+});
+
+describe('getTrialTransitionType', () => {
+    const { getTrialTransitionType } = require('./viewer.js');
+
+    test('returns Pure for the first trial regardless of task', () => {
+        expect(getTrialTransitionType(0, ['mov', 'or'])).toBe('Pure');
+    });
+
+    test('returns Repeat when consecutive tasks match', () => {
+        const sequence = ['mov', 'mov', 'mov'];
+        expect(getTrialTransitionType(2, sequence)).toBe('Repeat');
+    });
+
+    test('returns Switch when consecutive tasks differ', () => {
+        const sequence = ['mov', 'or', 'mov'];
+        expect(getTrialTransitionType(1, sequence)).toBe('Switch');
+    });
+
+    test('handles dual-task assignments encoded as combined strings', () => {
+        const sequence = ['mov+or', 'mov+or', 'or+mov'];
+        expect(getTrialTransitionType(1, sequence)).toBe('Repeat');
+        expect(getTrialTransitionType(2, sequence)).toBe('Switch');
+    });
 });
 
 describe('Block Grouping Logic', () => {
@@ -1036,14 +1090,13 @@ describe('updateInfoPanel', () => {
         
         updateInfoPanel(conceptualRow);
         const infoPanel = document.getElementById('info-panel');
-        const content = infoPanel.innerHTML;
         
-        expect(content).toContain('Test Experiment');
-        expect(content).toContain('Number of Tasks:</strong> 2');
-        expect(content).toContain('SOA:</strong> 100ms');
-        expect(content).toContain('Task 1 SRM:</strong> Compatible');
-        expect(content).toContain('Task 2 SRM:</strong> Arbitrary');
-        expect(content).toContain('Switch Rate:</strong> 50%');
+        expect(getDefinitionValue(infoPanel, 'Experiment')).toBe('Test Experiment');
+        expect(getDefinitionValue(infoPanel, 'Number of Tasks')).toBe('2');
+        expect(getDefinitionValue(infoPanel, 'SOA')).toBe('100 ms');
+        expect(getDefinitionValue(infoPanel, 'Task 1 SRM')).toBe('Compatible');
+        expect(getDefinitionValue(infoPanel, 'Task 2 SRM')).toBe('Arbitrary');
+        expect(getDefinitionValue(infoPanel, 'Switch Rate')).toBe('50%');
     });
     
     test('should handle single task experiments correctly', () => {
@@ -1057,12 +1110,11 @@ describe('updateInfoPanel', () => {
         
         updateInfoPanel(conceptualRow);
         const infoPanel = document.getElementById('info-panel');
-        const content = infoPanel.innerHTML;
         
-        expect(content).toContain('Number of Tasks:</strong> 1');
-        expect(content).toContain('Stimulus Response Mapping:</strong> Compatible');
-        expect(content).not.toContain('Task 2 Type');
-        expect(content).not.toContain('Task 2 SRM');
+        expect(getDefinitionValue(infoPanel, 'Number of Tasks')).toBe('1');
+        expect(getDefinitionValue(infoPanel, 'Stimulus Response Mapping')).toBe('Compatible');
+        expect(getDefinitionValue(infoPanel, 'Task 2 Type')).toBeNull();
+        expect(getDefinitionValue(infoPanel, 'Task 2 SRM')).toBeNull();
     });
 });
 
@@ -1095,14 +1147,14 @@ describe('updateInfoPanelFromCondition', () => {
         
         updateInfoPanelFromCondition(condition);
         const infoPanel = document.getElementById('info-panel');
-        const content = infoPanel.innerHTML;
         
-        expect(content).toContain('Dual Task Test');
-        expect(content).toContain('Number of Tasks:</strong> 2');
-        expect(content).toContain('Task 1 SRM:</strong> Compatible');
-        expect(content).toContain('Task 2 SRM:</strong> Arbitrary');
-        expect(content).toContain('Switch Rate:</strong> 25%');
-        expect(content).toContain('ITI:</strong> 1500ms (uniform)');
+        expect(getDefinitionValue(infoPanel, 'Experiment')).toBe('Dual Task Test');
+        expect(getDefinitionValue(infoPanel, 'Number of Tasks')).toBe('2');
+        expect(getDefinitionValue(infoPanel, 'Task 1 SRM')).toBe('Compatible');
+        expect(getDefinitionValue(infoPanel, 'Task 2 SRM')).toBe('Arbitrary');
+        expect(getDefinitionValue(infoPanel, 'Switch Rate')).toBe('25%');
+        expect(getDefinitionValue(infoPanel, 'Sequence Type')).toBe('Random');
+        expect(getDefinitionValue(infoPanel, 'ITI')).toBe('1500ms (uniform)');
     });
 });
 
@@ -1110,36 +1162,36 @@ describe('updateInfoPanelFromCondition', () => {
 describe('Regression Tests', () => {
     test('should not display undefined in SOA field', () => {
         document.body.innerHTML = '<div id="info-panel"></div>';
-        
+
         const conceptualRow = {
             'Experiment': 'Test',
             'Number of Tasks': '1',
-            'SOA': undefined, // This was causing "undefined" to appear
+            'SOA': undefined,
             'Inter-task SOA': null
         };
-        
+
         updateInfoPanel(conceptualRow);
-        const content = document.getElementById('info-panel').innerHTML;
-        
-        expect(content).not.toContain('undefinedms');
-        expect(content).toContain('SOA:</strong> N/A');
+        const infoPanel = document.getElementById('info-panel');
+
+        expect(infoPanel.innerHTML).not.toContain('undefined');
+        expect(getDefinitionValue(infoPanel, 'SOA')).toBe('N/A');
     });
-    
+
     test('should not display undefined in Stimulus Response Mapping field', () => {
         document.body.innerHTML = '<div id="info-panel"></div>';
-        
+
         const conceptualRow = {
             'Experiment': 'Test',
             'Number of Tasks': '1',
-            'Stimulus Response Mapping': undefined, // This was causing issues
+            'Stimulus Response Mapping': undefined,
             'Task 1 Stimulus-Response Mapping': 'Compatible'
         };
-        
+
         updateInfoPanel(conceptualRow);
-        const content = document.getElementById('info-panel').innerHTML;
-        
-        expect(content).not.toContain('Stimulus Response Mapping:</strong> undefined');
-        expect(content).toContain('Stimulus Response Mapping:</strong> Compatible');
+        const infoPanel = document.getElementById('info-panel');
+
+        expect(infoPanel.innerHTML).not.toContain('Stimulus Response Mapping:</strong> undefined');
+        expect(getDefinitionValue(infoPanel, 'Stimulus Response Mapping')).toBe('Compatible');
     });
 });
 
@@ -1157,21 +1209,20 @@ describe('Dynamic SOA Generation', () => {
     
     test('should generate SOA from discrete choice distribution', () => {
         const condition = {
-            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "choice", "SOA_values": [1000, 2000, 4000, 8000, 16000]}}'
+            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "choice", "SOA_values": ["1000", 2000, 4000, 8000, 16000]}}'
         };
-        
-        // Test multiple samples to ensure they're all from the valid set
+
         for (let i = 0; i < 10; i++) {
             const soa = generateDynamicSOA(condition);
             expect([1000, 2000, 4000, 8000, 16000]).toContain(soa);
         }
     });
-    
+
     test('should generate SOA from uniform distribution', () => {
         const condition = {
-            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "uniform", "SOA_range": [500, 1500]}}'
+            'Super_Experiment_Mapping_Notes': '{"viewer_config": {"SOA_distribution": "uniform", "SOA_range": ["500", "1500"]}}'
         };
-        
+
         const soa = generateDynamicSOA(condition);
         expect(soa).toBeGreaterThanOrEqual(500);
         expect(soa).toBeLessThanOrEqual(1500);
@@ -1184,6 +1235,16 @@ describe('Dynamic SOA Generation', () => {
         
         const soa = generateDynamicSOA(condition);
         expect(soa).toBe(0); // Default from generateSOA
+    });
+
+    test('should fallback to static Inter-task SOA when dynamic config missing', () => {
+        const condition = {
+            'SOA_Distribution_Type': 'fixed',
+            'Inter-task SOA': '-120'
+        };
+
+        const soa = generateDynamicSOA(condition);
+        expect(soa).toBe(-120);
     });
 });
 
@@ -1235,3 +1296,4 @@ describe('Timing Recalculation', () => {
         expect(() => generateDynamicSOA(condition)).not.toThrow();
     });
 });
+
