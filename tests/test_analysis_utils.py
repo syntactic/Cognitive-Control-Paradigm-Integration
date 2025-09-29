@@ -13,6 +13,9 @@ from analysis_utils import (
     map_sr_congruency,
     classify_paradigm,
     generate_dynamic_view_mapping,
+    get_view_mapping_unified,
+    reverse_map_categories,
+    apply_conceptual_constraints,
     VIEW_MAPPING_UNIFIED
 )
 
@@ -29,6 +32,92 @@ def test_map_sr_congruency():
     assert map_sr_congruency('Neutral') == 'SR_Neutral'
     assert map_sr_congruency('N/A') == 'SR_NA'
     assert map_sr_congruency(np.nan) == 'SR_NA'
+
+def test_get_view_mapping_unified_binary_flags_are_isolated():
+    base_structure = list(VIEW_MAPPING_UNIFIED['Structure'])
+    augmented = get_view_mapping_unified(binary_flags=True)
+
+    # Default mapping should remain unchanged
+    assert VIEW_MAPPING_UNIFIED['Structure'] == base_structure
+
+    expected_flags = {
+        'Inter-task SOA is NA',
+        'Distractor SOA is NA',
+        'Task 2 CSI is NA',
+        'Task 2 Difficulty is NA'
+    }
+
+    structure_values = augmented['Structure']
+    for flag in expected_flags:
+        assert structure_values.count(flag) == 1
+
+    # Repeated calls should be stable
+    assert augmented == get_view_mapping_unified(binary_flags=True)
+
+def test_reverse_map_categories_restores_labels():
+    df = pd.DataFrame({
+        'SBC_Mapped': ['Incongruent'],
+        'Stimulus-Stimulus Congruency Mapped': ['SS_Neutral'],
+        'Stimulus-Response Congruency Mapped': ['SR_Incongruent'],
+        'Task 1 Stimulus-Response Mapping Mapped': ['SRM_Compatible'],
+        'Task 2 Stimulus-Response Mapping Mapped': ['SRM2_Arbitrary'],
+        'Response Set Overlap Mapped': ['RSO_Disjoint'],
+        'Trial Transition Type Mapped': ['TTT_Switch'],
+        'Task 1 Cue Type Mapped': ['TCT_Arbitrary'],
+        'Task 2 Cue Type Mapped': ['TCT2_Implicit'],
+        'Intra-Trial Task Relationship Mapped': ['ITTR_Same'],
+        'RSI is Predictable': [1.0],
+        'Inter-task SOA is Predictable': ['yes']
+    })
+
+    result = reverse_map_categories(df)
+
+    row = result.iloc[0]
+    assert row['Stimulus Bivalence & Congruency'] == 'Incongruent'
+    assert row['Stimulus-Stimulus Congruency'] == 'Neutral'
+    assert row['Stimulus-Response Congruency'] == 'Incongruent'
+    assert row['Task 1 Stimulus-Response Mapping'] == 'Compatible'
+    assert row['Task 2 Stimulus-Response Mapping'] == 'Arbitrary'
+    assert row['Response Set Overlap'] == 'Disjoint'
+    assert row['Trial Transition Type'] == 'Switch'
+    assert row['Task 1 Cue Type'] == 'Arbitrary (Symbolic)'
+    assert row['Task 2 Cue Type'] == 'None/Implicit'
+    assert row['Intra-Trial Task Relationship'] == 'Same'
+    assert row['RSI is Predictable'] == 'Yes'
+    assert row['Inter-task SOA is Predictable'] == 'Yes'
+
+def test_apply_conceptual_constraints_masks_task_two_values():
+    df = pd.DataFrame({
+        'Task 2 Response Probability': [0.2, 0.8],
+        'Trial Transition Type': ['Pure', 'Switch'],
+        'Response Set Overlap': ['N/A', 'Identical'],
+        'Task 2 Difficulty is NA': [1.0, 0.0],
+        'Task 2 CSI is NA': [1.0, 0.0],
+        'Task 2 Stimulus-Response Mapping': ['N/A', 'Arbitrary'],
+        'Task 2 Cue Type': ['N/A', 'Arbitrary'],
+        'Task 2 CSI': [120, 200],
+        'Task 2 Difficulty': [3.5, 2.0]
+    })
+
+    result = apply_conceptual_constraints(df)
+
+    assert result.loc[0, 'Task 2 CSI'] == 'N/A'
+    assert result.loc[0, 'Task 2 Difficulty'] == 'N/A'
+    assert result.loc[0, 'Task 2 Stimulus-Response Mapping'] == 'N/A'
+    assert result.loc[1, 'Task 2 Stimulus-Response Mapping'] == 'Arbitrary'
+    assert result.loc[1, 'Response Set Overlap'] == 'Identical'
+
+def test_apply_conceptual_constraints_handles_missing_helper_columns():
+    df = pd.DataFrame({
+        'Task 2 Response Probability': [0.0],
+        'Trial Transition Type': ['Pure'],
+        'Response Set Overlap': ['N/A'],
+        'Task 2 Stimulus-Response Mapping': ['N/A'],
+        'Task 2 Cue Type': ['N/A']
+    })
+
+    result = apply_conceptual_constraints(df)
+    assert result.loc[0, 'Response Set Overlap'] == 'N/A'
 
 def test_data_validation_logging(caplog):
     """
@@ -379,6 +468,3 @@ def test_interpolation_and_reconstruction(raw_test_data_dict):
     # The inverse transform will pick the most likely category. We can't be too
     # strict here, but we can check that it's a valid category.
     assert reconstructed_params['Stimulus-Response Congruency Mapped'] in ['SR_Incongruent', 'SR_NA']
-
-
-

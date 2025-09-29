@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import re
 import logging
+from copy import deepcopy
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -25,10 +26,22 @@ VIEW_MAPPING_UNIFIED = {
 }
 
 def get_view_mapping_unified(binary_flags=False):
-    view_mapping_unified = VIEW_MAPPING_UNIFIED
+    """Return a copy of the default view mapping with optional binary helper flags."""
+    mapping = deepcopy(VIEW_MAPPING_UNIFIED)
+
     if binary_flags:
-        view_mapping_unified["Structure"].extend(['Inter task SOA is NA', 'Distractor SOA is NA', 'Task 2 CSI is NA', 'Task 2 Difficulty is NA'])
-    return view_mapping_unified
+        extra_flags = [
+            'Inter-task SOA is NA',
+            'Distractor SOA is NA',
+            'Task 2 CSI is NA',
+            'Task 2 Difficulty is NA'
+        ]
+        structure_entries = mapping.setdefault('Structure', [])
+        for flag in extra_flags:
+            if flag not in structure_entries:
+                structure_entries.append(flag)
+
+    return mapping
 
 # =============================================================================
 # 1. Helper Functions for Data Cleaning
@@ -242,12 +255,8 @@ def map_ittr(val): # For Intra-Trial Task Relationship
     return 'ITTR_NA'
 
 def reverse_map_categories(df):
-    """
-    Takes the interpolated dataframe and adds original human-readable columns
-    based on the reconstructed mapped category columns from the PCA inversion.
-    """
+    """Restore human-readable categorical labels after inverse PCA interpolation."""
     df_out = df.copy()
-    print(df_out)
 
     # Define the reverse mappings (the inverse of your 'map_*' functions)
     sbc_reverse_map = {
@@ -331,8 +340,9 @@ def reverse_map_categories(df):
 
     # Handle the binary predictable RSI
     if 'RSI is Predictable' in df_out.columns:
-        print(df_out['RSI is Predictable'].value_counts())
-        df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(lambda x: 'Yes' if round(x) == 1 else 'No')
+        df_out['RSI is Predictable'] = df_out['RSI is Predictable'].apply(
+            lambda x: 'Yes' if round(x) == 1 else 'No'
+        )
 
     if 'Inter-task SOA is Predictable' in df_out.columns:
         df_out['Inter-task SOA is Predictable'] = df_out['Inter-task SOA is Predictable'].apply(normalize_tristate_flag)
@@ -340,27 +350,31 @@ def reverse_map_categories(df):
     return df_out
 
 def apply_conceptual_constraints(df):
-    """
-    Cleans up an interpolated dataframe by applying conceptual rules.
-    For example, if a point is single-task, all T2-related
-    parameters should be set to 'N/A'.
-    """
+    """Apply heuristics so single-task rows do not expose Task 2-specific values."""
     df_out = df.copy()
-    logger = logging.getLogger(__name__)
 
-    # Define a threshold for what we consider a 'single-task' paradigm
-    THRESHOLD = 0.5
+    threshold = 0.5
+    min_criteria = 5
+    index = df_out.index
 
-    # Identify rows that represent functionally single-task paradigms
-    is_single_task = sum([df_out['Task 2 Response Probability'] < THRESHOLD,
-                          df_out['Trial Transition Type'] == 'Pure',
-                          df_out['Response Set Overlap'] == 'N/A',
-                          'Task 2 Difficulty is NA' not in df_out.columns or df_out['Task 2 Difficulty is NA'] > THRESHOLD,
-                          'Task 2 CSI is NA' not in df_out.columns or df_out['Task 2 CSI is NA'] > THRESHOLD,
-                          df_out['Task 2 Stimulus-Response Mapping'] == 'N/A',
-                          df_out['Task 2 Cue Type'] == 'N/A']) > 4
+    def _get_series(name, default_value):
+        if name in df_out.columns:
+            return df_out[name]
+        return pd.Series(default_value, index=index)
 
-    # For these rows, nullify all Task 2-specific parameters
+    conditions = [
+        _get_series('Task 2 Response Probability', 0) < threshold,
+        _get_series('Trial Transition Type', 'Pure') == 'Pure',
+        _get_series('Response Set Overlap', 'N/A') == 'N/A',
+        _get_series('Task 2 Difficulty is NA', 1) > threshold,
+        _get_series('Task 2 CSI is NA', 1) > threshold,
+        _get_series('Task 2 Stimulus-Response Mapping', 'N/A') == 'N/A',
+        _get_series('Task 2 Cue Type', 'N/A') == 'N/A'
+    ]
+
+    score = sum(cond.astype(int) for cond in conditions)
+    is_single_task = score >= min_criteria
+
     t2_columns_to_nullify = [
         'Task 2 CSI',
         'Task 2 Difficulty',
@@ -371,6 +385,7 @@ def apply_conceptual_constraints(df):
 
     for col in t2_columns_to_nullify:
         if col in df_out.columns:
+            df_out[col] = df_out[col].astype(object)
             df_out.loc[is_single_task, col] = 'N/A'
 
     return df_out
@@ -655,7 +670,7 @@ def prepare_mofa_data(df_raw: pd.DataFrame, strategy: str = 'sparse',
         df_long.rename(columns={'Experiment': 'sample'}, inplace=True)
         
         # Generate dynamic view mapping using the fitted preprocessor
-        view_map = generate_dynamic_view_mapping(preprocessor, VIEW_MAPPING_UNIFIED)
+        view_map = generate_dynamic_view_mapping(preprocessor, get_view_mapping_unified(binary_flags=True))
         
         # Add view mapping to df_long
         df_long['view'] = df_long['feature'].map(view_map)
