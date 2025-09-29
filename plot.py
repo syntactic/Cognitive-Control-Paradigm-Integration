@@ -4,8 +4,16 @@ import numpy as np
 import pandas as pd
 import altair as alt
 
-PARADIGM_COLORS = alt.Scale(domain=['Dual-Task_PRP', 'Interference', 'Task Switching', 'Single-Task'], 
+PARADIGM_COLORS = alt.Scale(domain=['Dual-Task_PRP', 'Interference', 'Task Switching', 'Single-Task'],
                             range=['#440154', '#34CBAF', '#CB3450', '#FFA500'])
+
+# Mapping for display labels only - maintaining the correct order
+PARADIGM_DISPLAY_LABELS = {
+    'Dual-Task_PRP': 'Dual-Task/PRP',
+    'Interference': 'Interference',
+    'Task Switching': 'Task Switching',
+    'Single-Task': 'Single Task Baseline'
+}
 
 def hex_to_rgb(h):
     """Converts a hex color string to an RGB tuple."""
@@ -23,7 +31,8 @@ def create_latent_space_plot(
     width: int = 800,
     height: int = 750,
     has_interpolation: bool = False,
-    output_filename: str = None
+    output_filename: str = None,
+    highlight_conditions: list = None
 ):
     """
     Creates a layered Altair scatter plot for a latent space (PCA or MOFA).
@@ -32,6 +41,7 @@ def create_latent_space_plot(
         plot_df (pd.DataFrame): DataFrame containing the data to plot.
                                 Must include x_col, y_col, 'Paradigm', and 'Point Type'.
                                 If has_interpolation is True, must also include 'Parent1' and 'Parent2'.
+                                Must include 'Experimental Condition' column if highlight_conditions is used.
         x_col (str): The name of the column for the x-axis (e.g., 'PC1', 'Factor1').
         y_col (str): The name of the column for the y-axis (e.g., 'PC2', 'Factor2').
         x_title (str): The title for the x-axis.
@@ -42,6 +52,7 @@ def create_latent_space_plot(
         height (int): The height of the chart.
         has_interpolation (bool): If True, adds a layer for interpolated points.
         output_filename (str): If provided, saves the chart to this file.
+        highlight_conditions (list): Optional list of experimental condition strings to highlight.
 
     Returns:
         alt.Chart: The final layered Altair chart object.
@@ -73,11 +84,13 @@ def create_latent_space_plot(
     ).encode(
         x=alt.X(f'{x_col}:Q', title=x_title),
         y=alt.Y(f'{y_col}:Q', title=y_title),
-        #color=alt.Color('Paradigm:N', title='Paradigm Class', scale=PARADIGM_COLORS),
         color=alt.Color(
-            'Paradigm:N', 
-            title='Paradigm Class', 
-            scale=PARADIGM_COLORS,
+            'ParadigmDisplay:N',
+            title='Paradigm Class',
+            scale=alt.Scale(
+                domain=['Dual-Task/PRP', 'Interference', 'Task Switching', 'Single Task Baseline'],
+                range=['#440154', '#34CBAF', '#CB3450', '#FFA500']
+            ),
             legend=alt.Legend(
                 direction='horizontal',
                 orient='bottom',
@@ -86,6 +99,8 @@ def create_latent_space_plot(
             )
         ),
         tooltip=tooltip_cols
+    ).transform_calculate(
+        ParadigmDisplay=f"datum.Paradigm == 'Dual-Task_PRP' ? 'Dual-Task/PRP' : datum.Paradigm == 'Single-Task' ? 'Single Task Baseline' : datum.Paradigm"
     ).transform_filter(
         alt.datum['Point Type'] == 'Empirical Data'
     )
@@ -115,6 +130,76 @@ def create_latent_space_plot(
     chart_layers.append(zero_line_h)
     chart_layers.append(zero_line_v)
 
+    # Layer 5: Highlighted Conditions (added last so they appear on top)
+    if highlight_conditions:
+        # Determine which column to use for experimental conditions
+        condition_col = None
+        if 'Experimental Condition' in plot_df.columns:
+            condition_col = 'Experimental Condition'
+        elif 'Experiment' in plot_df.columns:
+            condition_col = 'Experiment'
+
+        if condition_col:
+            # Debug: Print available experimental conditions
+            unique_conditions = plot_df[plot_df['Point Type'] == 'Empirical Data'][condition_col].unique()
+            print(f"Available conditions in '{condition_col}': {list(unique_conditions)[:10]}...")  # Show first 10
+            print(f"Looking for conditions: {highlight_conditions}")
+
+            # Check if any of our target conditions exist
+            for condition in highlight_conditions:
+                matches = plot_df[(plot_df['Point Type'] == 'Empirical Data') &
+                                (plot_df[condition_col] == condition)]
+                print(f"Condition '{condition}' matches: {len(matches)} rows")
+
+            # Highlighting logic for user-specified conditions
+            for condition in highlight_conditions:
+                # Highlighted points with thick yellow border (drawn on top)
+                highlighted_points = alt.Chart(plot_df).mark_circle(
+                    size=120,  # Slightly larger than regular points
+                    opacity=1.0,  # Full opacity
+                    stroke='gold',  # Yellow border
+                    strokeWidth=3  # Thick border
+                ).encode(
+                    x=alt.X(f'{x_col}:Q'),
+                    y=alt.Y(f'{y_col}:Q'),
+                    color=alt.Color(
+                        'ParadigmDisplay:N',
+                        title='Paradigm Class',
+                        scale=alt.Scale(
+                            domain=['Dual-Task/PRP', 'Interference', 'Task Switching', 'Single Task Baseline'],
+                            range=['#440154', '#34CBAF', '#CB3450', '#FFA500']
+                        ),
+                        legend=None
+                    ),
+                    tooltip=tooltip_cols
+                ).transform_calculate(
+                    ParadigmDisplay=f"datum.Paradigm == 'Dual-Task_PRP' ? 'Dual-Task/PRP' : datum.Paradigm == 'Single-Task' ? 'Single Task Baseline' : datum.Paradigm"
+                ).transform_filter(
+                    (alt.datum['Point Type'] == 'Empirical Data') &
+                    (alt.datum[condition_col] == condition)
+                )
+                chart_layers.append(highlighted_points)
+
+                # Text labels for highlighted conditions - using static text like the working test
+                highlighted_text = alt.Chart(plot_df).mark_text(
+                    align='center',  # Center align the text horizontally
+                    dx=4 + (12 if condition.startswith("R") else 0), 
+                    dy=-15, # Offset text above the point
+                    fontSize=11.3,
+                    fontWeight='bold',
+                    color='red',
+                    stroke='white',  # White outline
+                    strokeWidth=0.5    # Thickness of the white outline
+                ).encode(
+                    x=alt.X(f'{x_col}:Q'),
+                    y=alt.Y(f'{y_col}:Q'),
+                    text=alt.value(condition)  # Use the condition string directly like the working test
+                ).transform_filter(
+                    (alt.datum['Point Type'] == 'Empirical Data') &
+                    (alt.datum[condition_col] == condition)
+                )
+                chart_layers.append(highlighted_text)
+
     # Combine layers
     final_chart = alt.layer(*chart_layers).properties(
         title=chart_title,
@@ -133,7 +218,7 @@ def create_latent_space_plot(
 
     # Save the chart if a filename is provided
     if output_filename:
-        final_chart.save(output_filename)
+        final_chart.save(output_filename, scale_factor=3.0)
 
     return final_chart
 

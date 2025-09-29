@@ -1082,50 +1082,6 @@ def get_component_loadings(pipeline, numerical_cols, categorical_cols):
     )
     return loadings
 
-"""def export_component_loadings(loadings_df, component_name, feature_map, output_path, top_n=10):"""
-"""
-    Selects, sorts, renames, and formats the top N component loadings,
-    then writes them to a file as LaTeX table rows.
-    
-    Args:
-        loadings_df (pd.DataFrame): DataFrame containing all component loadings.
-        component_name (str): The column name of the component to process (e.g., 'PC1').
-        feature_map (dict): A dictionary mapping raw feature names to display names.
-        output_path (str): The file path for the output file (e.g., 'pc1_loadings.tex').
-        top_n (int): The number of top features to export.
-    """# 1. Select, sort, and round the data
-"""
-    component_series = loadings_df[component_name].sort_values(key=abs, ascending=False).head(top_n)
-    df_for_latex = component_series.round(3).reset_index()
-    df_for_latex.columns = ['Feature', 'Loading']
-
-    # 2. Prepare feature names for LaTeX
-    def clean_feature_name(name):
-        name = feature_map.get(name, name)
-        # Replace characters that would break LaTeX
-        name = name.replace('_', ' ').replace('=', ': ')
-        # Escape any remaining special LaTeX characters
-        name = name.replace('&', '\\&').replace('%', '\\%').replace('#', '\\#')
-        return name
-
-    df_for_latex['Feature'] = df_for_latex['Feature'].apply(clean_feature_name)
-
-    # 3. Build the string of LaTeX table rows
-    table_rows = []
-    for index, row in df_for_latex.iterrows():
-        # Format each row as "Feature & Loading \\" with proper indentation
-        table_rows.append(f"    {row['Feature']} & {row['Loading']} \\\\")
-    
-    output_string = "\n".join(table_rows)
-
-    # 4. Write the generated string directly to the output file
-    try:
-        with open(output_path, 'w') as f:
-            f.write(output_string)
-        print(f"Successfully wrote LaTeX content for {component_name} to {output_path}")
-    except IOError as e:
-        print(f"Error writing to file {output_path}: {e}")"""
-
 def _filter_redundant_binary_features(component_series):
     """
     Filters a series of loadings to remove redundant, anti-correlated binary features.
@@ -1321,6 +1277,22 @@ def reconstruct_from_mofa_factors(factor_scores, model, preprocessor_obj):
         
         # Get the exact feature order the preprocessor expects
         expected_feature_order = preprocessor_obj.get_feature_names_out()
+
+        # Debug: Print feature comparison
+        mofa_features = set(W.index)
+        preprocessor_features = set(expected_feature_order)
+
+        missing_in_mofa = preprocessor_features - mofa_features
+        missing_in_preprocessor = mofa_features - preprocessor_features
+
+        print(f"Features in MOFA weights: {len(mofa_features)}")
+        print(f"Features expected by preprocessor: {len(preprocessor_features)}")
+        print(f"Missing in MOFA (will be NaN): {len(missing_in_mofa)}")
+        if missing_in_mofa:
+            print("Missing features:", sorted(list(missing_in_mofa))[:10])  # Show first 10
+        print(f"Missing in preprocessor: {len(missing_in_preprocessor)}")
+        if missing_in_preprocessor:
+            print("Extra MOFA features:", sorted(list(missing_in_preprocessor))[:10])  # Show first 10
 
         # Re-index the weight matrix to match the preprocessor's order
         W_aligned = W.reindex(expected_feature_order)
