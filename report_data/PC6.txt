@@ -1,0 +1,12 @@
+    RSI & 0.595 \\
+    Inter-task SOA & -0.565 \\
+    Switch Rate & 0.281 \\
+    Distractor SOA & 0.226 \\
+    Task 2 CSI & -0.202 \\
+    Response Set Overlap Mapped RSO Identical & -0.183 \\
+    Response Set Overlap Mapped RSO Disjoint & 0.183 \\
+    Distractor SOA is NA = 0 & -0.114 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Compatible & -0.093 \\
+    Task 2 Difficulty & 0.089 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Arbitrary & 0.086 \\
+    Task 1 CSI & -0.075 \\

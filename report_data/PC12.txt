@@ -1,0 +1,12 @@
+    SBC Mapped N/A & 0.358 \\
+    RSI is Predictable = 1 & -0.296 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Compatible & 0.28 \\
+    Task 1 Cue Type Mapped TCT Arbitrary & -0.215 \\
+    Task 1 Cue Type Mapped TCT Implicit & 0.215 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Arbitrary & -0.214 \\
+    Distractor SOA is NA = 0 & -0.212 \\
+    Task 2 Response Probability & -0.197 \\
+    SBC Mapped Incongruent & -0.18 \\
+    Task 1 Difficulty & 0.165 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Compatible & 0.163 \\
+    Task 2 Cue Type Mapped TCT2 Implicit & 0.157 \\

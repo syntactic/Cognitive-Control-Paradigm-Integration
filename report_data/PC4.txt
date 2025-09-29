@@ -1,8 +1,8 @@
     Task 2 Difficulty & 0.683 \\
     Task 1 Difficulty & 0.476 \\
-    RSI & -0.248 \\
+    RSI & -0.232 \\
     Task 1 Stimulus-Response Mapping Mapped SRM Compatible & 0.167 \\
-    Inter-task SOA & -0.177 \\
+    Inter-task SOA & -0.162 \\
     Task 1 Stimulus-Response Mapping Mapped SRM Arbitrary & -0.157 \\
     Distractor SOA is NA = 0 & 0.129 \\
     Task 2 Cue Type Mapped TCT2 Arbitrary & 0.112 \\

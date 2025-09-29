@@ -1,0 +1,12 @@
+    Task 2 Difficulty & 0.396 \\
+    Task 1 Cue Type Mapped TCT Implicit & 0.39 \\
+    Task 1 Cue Type Mapped TCT Arbitrary & -0.39 \\
+    Task 1 CSI & 0.283 \\
+    Task 1 Difficulty & -0.263 \\
+    Task 2 Cue Type Mapped TCT2 Arbitrary & -0.24 \\
+    Task 2 Cue Type Mapped TCT2 Implicit & 0.194 \\
+    SBC Mapped Neutral & -0.171 \\
+    Switch Rate & 0.154 \\
+    RSI & -0.153 \\
+    Distractor SOA & 0.146 \\
+    Task 2 CSI & 0.145 \\

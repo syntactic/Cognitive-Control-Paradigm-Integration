@@ -1,0 +1,12 @@
+    Distractor SOA & 0.829 \\
+    Inter-task SOA & 0.273 \\
+    Task 1 Difficulty & -0.245 \\
+    Task 2 Response Probability & 0.155 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Arbitrary & -0.138 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Compatible & 0.135 \\
+    Task 1 Cue Type Mapped TCT Arbitrary & 0.132 \\
+    Task 1 Cue Type Mapped TCT Implicit & -0.132 \\
+    Switch Rate & -0.108 \\
+    Inter-task SOA is Predictable N/A & -0.098 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Arbitrary & -0.094 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Compatible & 0.087 \\

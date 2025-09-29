@@ -1,0 +1,12 @@
+    Switch Rate & 0.478 \\
+    Task 2 Difficulty & -0.319 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Compatible & 0.279 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Arbitrary & -0.275 \\
+    Task 1 Difficulty & 0.269 \\
+    SBC Mapped Incongruent & 0.254 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Arbitrary & -0.251 \\
+    SBC Mapped Neutral & -0.233 \\
+    Task 2 Stimulus-Response Mapping Mapped SRM2 Compatible & 0.211 \\
+    Distractor SOA is NA = 0 & 0.156 \\
+    SBC Mapped N/A & -0.145 \\
+    SBC Mapped Congruent & 0.124 \\

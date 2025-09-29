@@ -1,0 +1,12 @@
+    Switch Rate & 0.364 \\
+    Distractor SOA is NA = 0 & -0.329 \\
+    RSI & -0.319 \\
+    SBC Mapped N/A & 0.315 \\
+    Task 1 Difficulty & -0.262 \\
+    Response Set Overlap Mapped RSO Identical & -0.247 \\
+    Distractor SOA & -0.178 \\
+    Response Set Overlap Mapped RSO Disjoint & 0.176 \\
+    Task 2 Difficulty & 0.166 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Arbitrary & -0.154 \\
+    Task 1 Stimulus-Response Mapping Mapped SRM Compatible & 0.154 \\
+    Task 1 Cue Type Mapped TCT Implicit & -0.15 \\
