@@ -144,7 +144,22 @@ function convertAbsoluteToSEParams(absoluteRow) {
     seParams.movementKeyMap = { 180: 'a', 0: 'd' };
     seParams.orientationKeyMap = { 180: 'a', 0: 'd' };
     seParams.responseSetRelationship = 'identical';
-    seParams.stimulusCongruency = 'neutral';
+
+    const stimulusValencyRaw = (absoluteRow.Stimulus_Valency || '').toString();
+    const valencyLower = stimulusValencyRaw.toLowerCase();
+    let stimulusCongruency = 'neutral';
+
+    if (valencyLower.includes('incongruent')) {
+        stimulusCongruency = 'incongruent';
+    } else if (valencyLower.includes('congruent')) {
+        stimulusCongruency = 'congruent';
+    } else if (valencyLower.includes('neutral')) {
+        stimulusCongruency = 'neutral';
+    } else if (valencyLower.includes('univalent')) {
+        stimulusCongruency = 'univalent';
+    }
+
+    seParams.stimulusCongruency = stimulusCongruency;
     
     return seParams;
 }
@@ -1164,13 +1179,13 @@ async function runSelectedExperiment() {
         // Set key mappings based on response set relationship
         const responseSetRelationship = condition.Simplified_RSO || 'Identical';
         const keyMappings = {
-            'Identical': {
+            Identical: {
                 movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
                 orientationKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' }
             },
-            'Disjoint': {
+            Disjoint: {
                 movementKeyMap: { 180: 'a', 0: 'd', 90: 'w', 270: 's' },
-                orientationKeyMap: { 90: 'w', 270: 's', 180: 'a', 0: 'd' }
+                orientationKeyMap: { 180: 'j', 0: 'l', 90: 'i', 270: 'k' }
             }
         };
         
