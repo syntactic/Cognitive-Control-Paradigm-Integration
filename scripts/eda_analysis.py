@@ -60,11 +60,18 @@ plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
 
 
-def create_output_directory():
-    """Create output directory for plots if it doesn't exist."""
-    output_dir = Path('eda_plots')
-    output_dir.mkdir(exist_ok=True)
-    return output_dir
+def create_output_directories():
+    """Create output directories for plots and statistics if they don't exist."""
+    base_dir = Path('eda_plots')
+    global_dir = base_dir / 'global'
+    stratified_dir = base_dir / 'stratified'
+    stats_dir = Path('eda_stats')
+
+    global_dir.mkdir(parents=True, exist_ok=True)
+    stratified_dir.mkdir(parents=True, exist_ok=True)
+    stats_dir.mkdir(parents=True, exist_ok=True)
+
+    return global_dir, stratified_dir, stats_dir
 
 
 def load_and_preprocess_data():
@@ -106,18 +113,29 @@ def load_and_preprocess_data():
     return df_processed, df_features
 
 
-def print_summary_statistics(df_processed):
+def generate_summary_statistics(df_processed, stratify=True):
     """
-    Print overall summary statistics for key continuous variables.
+    Generate summary statistics for key continuous variables.
 
     Args:
         df_processed (pd.DataFrame): The processed dataset with paradigm labels
-    """
-    print("\n" + "=" * 60)
-    print("STRATIFIED SUMMARY STATISTICS BY PARADIGM")
-    print("=" * 60)
+        stratify (bool): If True, generate statistics by paradigm. If False, generate global statistics.
 
-    df_with_display, _ = add_paradigm_display_column(df_processed, include_baseline=False)
+    Returns:
+        str: Formatted statistics text
+    """
+    if stratify:
+        title = "STRATIFIED SUMMARY STATISTICS BY PARADIGM"
+        df_with_display, _ = add_paradigm_display_column(df_processed, include_baseline=False)
+        paradigms_to_analyze = PARADIGM_ORDER_MAIN
+    else:
+        title = "GLOBAL SUMMARY STATISTICS"
+        df_with_display = df_processed.copy()
+        paradigms_to_analyze = ['All Data']
+
+    output_text = "\n" + "=" * 60 + "\n"
+    output_text += title + "\n"
+    output_text += "=" * 60 + "\n"
 
     # Define key continuous variables for summary
     continuous_vars = [
@@ -139,10 +157,13 @@ def print_summary_statistics(df_processed):
         'Intra-Trial Task Relationship'
     ]
 
-    for paradigm in PARADIGM_ORDER_MAIN:
-        print(f"\n===== SUMMARY STATISTICS FOR: {paradigm} =====")
-
-        subset = df_with_display[df_with_display['Paradigm Display'] == paradigm]
+    for paradigm in paradigms_to_analyze:
+        if stratify:
+            output_text += f"\n===== SUMMARY STATISTICS FOR: {paradigm} =====\n"
+            subset = df_with_display[df_with_display['Paradigm Display'] == paradigm]
+        else:
+            output_text += f"\n===== GLOBAL SUMMARY STATISTICS =====\n"
+            subset = df_with_display
 
         for var in continuous_vars:
             if var in subset.columns:
@@ -157,50 +178,51 @@ def print_summary_statistics(df_processed):
                 count_raw = stats.get('count', 0)
                 count_value = int(count_raw) if pd.notna(count_raw) else 0
 
-                print(f"\n{var}:")
-                print(f"  Count (non-missing): {count_value}")
+                output_text += f"\n{var}:\n"
+                output_text += f"  Count (non-missing): {count_value}\n"
                 if count_value > 0:
-                    print(f"  Mean: {format_stat(stats.get('mean'))}")
-                    print(f"  Std: {format_stat(stats.get('std'))}")
-                    print(f"  Min: {format_stat(stats.get('min'))}")
-                    print(f"  25th percentile: {format_stat(stats.get('25%'))}")
-                    print(f"  Median: {format_stat(stats.get('50%'))}")
-                    print(f"  75th percentile: {format_stat(stats.get('75%'))}")
-                    print(f"  Max: {format_stat(stats.get('max'))}")
+                    output_text += f"  Mean: {format_stat(stats.get('mean'))}\n"
+                    output_text += f"  Std: {format_stat(stats.get('std'))}\n"
+                    output_text += f"  Min: {format_stat(stats.get('min'))}\n"
+                    output_text += f"  25th percentile: {format_stat(stats.get('25%'))}\n"
+                    output_text += f"  Median: {format_stat(stats.get('50%'))}\n"
+                    output_text += f"  75th percentile: {format_stat(stats.get('75%'))}\n"
+                    output_text += f"  Max: {format_stat(stats.get('max'))}\n"
                 else:
-                    print("  Mean: N/A")
-                    print("  Std: N/A")
-                    print("  Min: N/A")
-                    print("  25th percentile: N/A")
-                    print("  Median: N/A")
-                    print("  75th percentile: N/A")
-                    print("  Max: N/A")
+                    output_text += "  Mean: N/A\n"
+                    output_text += "  Std: N/A\n"
+                    output_text += "  Min: N/A\n"
+                    output_text += "  25th percentile: N/A\n"
+                    output_text += "  Median: N/A\n"
+                    output_text += "  75th percentile: N/A\n"
+                    output_text += "  Max: N/A\n"
 
-        print("\nCATEGORICAL FEATURES DISTRIBUTION:")
-        print("-" * 40)
+        output_text += "\nCATEGORICAL FEATURES DISTRIBUTION:\n"
+        output_text += "-" * 40 + "\n"
 
         total_count = len(subset)
 
         for var in categorical_vars:
             if var in subset.columns:
-                print(f"\n{var}:")
+                output_text += f"\n{var}:\n"
                 if total_count == 0:
-                    print("  No data available.")
+                    output_text += "  No data available.\n"
                     continue
 
                 value_counts = subset[var].value_counts(dropna=False)
 
                 for value, count in value_counts.items():
                     percentage = (count / total_count) * 100 if total_count else 0
-                    print(f"  {value}: {count} ({percentage:.1f}%)")
+                    output_text += f"  {value}: {count} ({percentage:.1f}%)\n"
 
                 non_missing = subset[var].notna().sum()
                 missing = total_count - non_missing
                 if missing > 0:
                     coverage = (non_missing / total_count) * 100 if total_count else 0
-                    print(f"  Non-missing: {non_missing}/{total_count} ({coverage:.1f}%)")
+                    output_text += f"  Non-missing: {non_missing}/{total_count} ({coverage:.1f}%)\n"
 
-    print("\n" + "=" * 60 + "\n")
+    output_text += "\n" + "=" * 60 + "\n"
+    return output_text
 
 
 def plot_task2_response_probability_distribution(df_processed, output_dir):
@@ -597,46 +619,61 @@ def plot_response_set_overlap_by_paradigm(df_processed, output_dir):
     plt.close(fig)
 
 
-def plot_task_structure_parameters(df_processed, output_dir):
+def plot_task_structure_parameters(df_processed, output_dir, stratify=True):
     """
     Create visualizations for task structure parameters.
 
     Args:
         df_processed (pd.DataFrame): The processed dataset
         output_dir (Path): Directory to save plots
+        stratify (bool): If True, filter to specific paradigms. If False, use all data.
     """
-    # Switch Rate - focus on Task Switching paradigm
+    # Switch Rate
     plt.figure(figsize=(10, 6))
 
-    # Filter to Task Switching paradigm
-    task_switching_data = df_processed[df_processed['Paradigm'] == 'Task Switching'].copy()
+    if stratify:
+        # Filter to Task Switching paradigm
+        switch_rate_data = df_processed[df_processed['Paradigm'] == 'Task Switching'].copy()
+        title_suffix = " in Task-Switching Paradigm"
+        color = PARADIGM_COLOR_MAP['Task-Switching']
+    else:
+        # Use all data (excluding NaNs)
+        switch_rate_data = df_processed.copy()
+        title_suffix = " (All Paradigms)"
+        color = 'skyblue'
 
-    if len(task_switching_data) > 0:
+    if len(switch_rate_data) > 0:
         # Clean switch rate data
-        task_switching_data['Switch Rate Clean'] = task_switching_data['Switch Rate'].apply(au.clean_switch_rate)
+        switch_rate_data['Switch Rate Clean'] = switch_rate_data['Switch Rate'].apply(au.clean_switch_rate)
+        switch_rate_clean = switch_rate_data['Switch Rate Clean'].dropna()
 
-        # Create histogram
-        plt.hist(
-            task_switching_data['Switch Rate Clean'],
-            bins=15,
-            alpha=0.7,
-            color=PARADIGM_COLOR_MAP['Task-Switching'],
-            edgecolor='black'
-        )
-        plt.title('Distribution of Switch Rate in Task-Switching Paradigm', fontsize=14, fontweight='bold')
-        plt.xlabel('Switch Rate (%)')
-        plt.ylabel('Number of Conditions')
+        if len(switch_rate_clean) > 0:
+            # Create histogram
+            plt.hist(
+                switch_rate_clean,
+                bins=15,
+                alpha=0.7,
+                color=color,
+                edgecolor='black'
+            )
+            plt.title(f'Distribution of Switch Rate{title_suffix}', fontsize=14, fontweight='bold')
+            plt.xlabel('Switch Rate (%)')
+            plt.ylabel('Number of Conditions')
 
-        # Set more granular x-axis ticks (by 10s)
-        plt.xticks(range(0, 101, 10))
-        plt.grid(True, alpha=0.3)
+            # Set more granular x-axis ticks (by 10s)
+            plt.xticks(range(0, 101, 10))
+            plt.grid(True, alpha=0.3)
 
-        # Add summary statistics as text
-        mean_sr = task_switching_data['Switch Rate Clean'].mean()
-        std_sr = task_switching_data['Switch Rate Clean'].std()
-        plt.text(0.7, 0.8, f'Mean: {mean_sr:.1f}%\nStd: {std_sr:.1f}%\nN: {len(task_switching_data)}',
-                transform=plt.gca().transAxes,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+            # Add summary statistics as text
+            mean_sr = switch_rate_clean.mean()
+            std_sr = switch_rate_clean.std()
+            plt.text(0.7, 0.8, f'Mean: {mean_sr:.1f}%\nStd: {std_sr:.1f}%\nN: {len(switch_rate_clean)}',
+                    transform=plt.gca().transAxes,
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+        else:
+            plt.text(0.5, 0.5, 'No valid Switch Rate data found',
+                    horizontalalignment='center', verticalalignment='center',
+                    transform=plt.gca().transAxes, fontsize=14)
 
     plt.tight_layout()
     plt.savefig(output_dir / 'switch_rate_distribution.svg', format='svg', dpi=300)
@@ -723,24 +760,33 @@ def plot_task_structure_parameters(df_processed, output_dir):
     plt.close()
 
 
-def plot_paradigm_specific_soa_parameters(df_processed, output_dir):
+def plot_paradigm_specific_soa_parameters(df_processed, output_dir, stratify=True):
     """
     Create visualizations for paradigm-specific SOA parameters.
 
     Args:
         df_processed (pd.DataFrame): The processed dataset
         output_dir (Path): Directory to save plots
+        stratify (bool): If True, filter to specific paradigms. If False, use all data.
     """
-    # Inter-task SOA for Dual-Task_PRP only
+    # Inter-task SOA
     plt.figure(figsize=(10, 6))
 
-    # Filter to Dual-Task_PRP paradigm
-    dual_task_data = df_processed[df_processed['Paradigm'] == 'Dual-Task_PRP'].copy()
+    if stratify:
+        # Filter to Dual-Task_PRP paradigm
+        inter_task_data = df_processed[df_processed['Paradigm'] == 'Dual-Task_PRP'].copy()
+        title_suffix = " in Dual-Task/PRP Paradigm"
+        color = PARADIGM_COLOR_MAP['Dual-Task/PRP']
+    else:
+        # Use all data
+        inter_task_data = df_processed.copy()
+        title_suffix = " (All Paradigms)"
+        color = 'purple'
 
-    if len(dual_task_data) > 0:
+    if len(inter_task_data) > 0:
         # Clean inter-task SOA data
-        dual_task_data['Inter-task SOA Clean'] = pd.to_numeric(dual_task_data['Inter-task SOA'], errors='coerce')
-        inter_task_soa_clean = dual_task_data['Inter-task SOA Clean'].dropna()
+        inter_task_data['Inter-task SOA Clean'] = pd.to_numeric(inter_task_data['Inter-task SOA'], errors='coerce')
+        inter_task_soa_clean = inter_task_data['Inter-task SOA Clean'].dropna()
 
         if len(inter_task_soa_clean) > 0:
             # Create histogram with more bins for better granularity near the mean
@@ -748,10 +794,10 @@ def plot_paradigm_specific_soa_parameters(df_processed, output_dir):
                 inter_task_soa_clean,
                 bins=30,
                 alpha=0.7,
-                color=PARADIGM_COLOR_MAP['Dual-Task/PRP'],
+                color=color,
                 edgecolor='black'
             )
-            plt.title('Distribution of Inter-task SOA in Dual-Task/PRP Paradigm', fontsize=14, fontweight='bold')
+            plt.title(f'Distribution of Inter-task SOA{title_suffix}', fontsize=14, fontweight='bold')
             plt.xlabel('Inter-task SOA (ms)')
             plt.ylabel('Number of Conditions')
             plt.grid(True, alpha=0.3)
@@ -767,7 +813,7 @@ def plot_paradigm_specific_soa_parameters(df_processed, output_dir):
                     horizontalalignment='center', verticalalignment='center',
                     transform=plt.gca().transAxes, fontsize=14)
     else:
-        plt.text(0.5, 0.5, 'No Dual-Task_PRP conditions found',
+        plt.text(0.5, 0.5, f'No {"Dual-Task_PRP" if stratify else "Inter-task SOA"} conditions found',
                 horizontalalignment='center', verticalalignment='center',
                 transform=plt.gca().transAxes, fontsize=14)
 
@@ -776,16 +822,24 @@ def plot_paradigm_specific_soa_parameters(df_processed, output_dir):
     plt.savefig(output_dir / 'inter_task_soa_dual_task.png', format='png', dpi=100)
     plt.close()
 
-    # Distractor SOA for Interference paradigm only
+    # Distractor SOA
     plt.figure(figsize=(10, 6))
 
-    # Filter to Interference paradigm
-    interference_data = df_processed[df_processed['Paradigm'] == 'Interference'].copy()
+    if stratify:
+        # Filter to Interference paradigm
+        distractor_data = df_processed[df_processed['Paradigm'] == 'Interference'].copy()
+        title_suffix = " in Interference Paradigm"
+        color = PARADIGM_COLOR_MAP['Interference']
+    else:
+        # Use all data
+        distractor_data = df_processed.copy()
+        title_suffix = " (All Paradigms)"
+        color = 'green'
 
-    if len(interference_data) > 0:
+    if len(distractor_data) > 0:
         # Clean distractor SOA data
-        interference_data['Distractor SOA Clean'] = pd.to_numeric(interference_data['Distractor SOA'], errors='coerce')
-        distractor_soa_clean = interference_data['Distractor SOA Clean'].dropna()
+        distractor_data['Distractor SOA Clean'] = pd.to_numeric(distractor_data['Distractor SOA'], errors='coerce')
+        distractor_soa_clean = distractor_data['Distractor SOA Clean'].dropna()
 
         if len(distractor_soa_clean) > 0:
             # Create histogram
@@ -793,10 +847,10 @@ def plot_paradigm_specific_soa_parameters(df_processed, output_dir):
                 distractor_soa_clean,
                 bins=15,
                 alpha=0.7,
-                color=PARADIGM_COLOR_MAP['Interference'],
+                color=color,
                 edgecolor='black'
             )
-            plt.title('Distribution of Distractor SOA in Interference Paradigm', fontsize=14, fontweight='bold')
+            plt.title(f'Distribution of Distractor SOA{title_suffix}', fontsize=14, fontweight='bold')
             plt.xlabel('Distractor SOA (ms)')
             plt.ylabel('Number of Conditions')
             plt.grid(True, alpha=0.3)
@@ -812,7 +866,7 @@ def plot_paradigm_specific_soa_parameters(df_processed, output_dir):
                     horizontalalignment='center', verticalalignment='center',
                     transform=plt.gca().transAxes, fontsize=14)
     else:
-        plt.text(0.5, 0.5, 'No Interference conditions found',
+        plt.text(0.5, 0.5, f'No {"Interference" if stratify else "Distractor SOA"} conditions found',
                 horizontalalignment='center', verticalalignment='center',
                 transform=plt.gca().transAxes, fontsize=14)
 
@@ -858,74 +912,97 @@ def create_paradigm_overview_plot(df_processed, output_dir):
     plt.close()
 
 
+def run_analysis(df_processed, output_dir, stats_dir, stratify=True):
+    """
+    Run either global or stratified analysis.
+
+    Args:
+        df_processed (pd.DataFrame): The processed dataset
+        output_dir (Path): Directory to save plots
+        stats_dir (Path): Directory to save statistics
+        stratify (bool): If True, run stratified analysis. If False, run global analysis.
+    """
+    analysis_type = "stratified" if stratify else "global"
+    print(f"\n{'='*60}")
+    print(f"RUNNING {analysis_type.upper()} ANALYSIS")
+    print(f"{'='*60}")
+
+    # Generate and save summary statistics
+    stats_text = generate_summary_statistics(df_processed, stratify=stratify)
+    stats_file = stats_dir / f"{analysis_type}_summary_statistics.txt"
+    with open(stats_file, 'w') as f:
+        f.write(stats_text)
+    print(f"✓ Saved {analysis_type} summary statistics to: {stats_file}")
+
+    # Create plots
+    create_paradigm_overview_plot(df_processed, output_dir)
+    print(f"✓ Created paradigm distribution overview plot ({analysis_type})")
+
+    plot_task2_response_probability_distribution(df_processed, output_dir)
+    print(f"✓ Created Task 2 Response Probability distribution plot ({analysis_type})")
+
+    plot_temporal_parameters_by_paradigm(df_processed, output_dir)
+    print(f"✓ Created temporal parameter plots ({analysis_type})")
+
+    plot_merged_conflict_by_paradigm(df_processed, output_dir)
+    print(f"✓ Created merged conflict parameter plot ({analysis_type})")
+
+    plot_response_set_overlap_by_paradigm(df_processed, output_dir)
+    print(f"✓ Created response set overlap plot ({analysis_type})")
+
+    plot_task_structure_parameters(df_processed, output_dir, stratify=stratify)
+    print(f"✓ Created task structure plots ({analysis_type})")
+
+    plot_paradigm_specific_soa_parameters(df_processed, output_dir, stratify=stratify)
+    print(f"✓ Created SOA parameter plots ({analysis_type})")
+
+
 def main():
-    """Main function to run the complete EDA analysis."""
+    """Main function to run both global and stratified EDA analysis."""
     print("="*60)
     print("EXPLORATORY DATA ANALYSIS FOR COGNITIVE SCIENCE EXPERIMENTS")
     print("="*60)
 
-    # Task 1: Setup and Standard Preprocessing
+    # Setup and Standard Preprocessing
     print("\nTask 1: Setup and Preprocessing")
     print("-" * 40)
 
-    output_dir = create_output_directory()
-    print(f"Output directory created: {output_dir}")
+    global_dir, stratified_dir, stats_dir = create_output_directories()
+    print(f"Output directories created:")
+    print(f"  Global plots: {global_dir}")
+    print(f"  Stratified plots: {stratified_dir}")
+    print(f"  Statistics: {stats_dir}")
 
     df_processed, df_features = load_and_preprocess_data()
 
-    # Task 2: Overall Distribution Analysis
-    print("\nTask 2: Overall Distribution Analysis")
-    print("-" * 40)
-
-    print_summary_statistics(df_processed)
-
-    # Create paradigm overview
-    create_paradigm_overview_plot(df_processed, output_dir)
-    print("✓ Created paradigm distribution overview plot")
-
-    # Focus on Task 2 Response Probability (most important parameter)
-    plot_task2_response_probability_distribution(df_processed, output_dir)
-    print("✓ Created Task 2 Response Probability distribution plot")
-
-    # Task 3: Stratified Distribution Analysis
-    print("\nTask 3: Stratified Distribution Analysis by Paradigm")
-    print("-" * 40)
-
-    # Temporal Parameters
-    plot_temporal_parameters_by_paradigm(df_processed, output_dir)
-    print("✓ Created temporal parameter plots (Task 1 CSI, RSI)")
-
-    # Merged Conflict Parameter
-    plot_merged_conflict_by_paradigm(df_processed, output_dir)
-    print("✓ Created merged conflict parameter plot")
-
-    # Response Set Overlap Parameter
-    plot_response_set_overlap_by_paradigm(df_processed, output_dir)
-    print("✓ Created response set overlap stacked bar chart")
-
-    # Task Structure Parameters
-    plot_task_structure_parameters(df_processed, output_dir)
-    print("✓ Created task structure plots (Switch Rate, RSI Predictability)")
-
-    # Paradigm-Specific SOA Parameters
-    plot_paradigm_specific_soa_parameters(df_processed, output_dir)
-    print("✓ Created paradigm-specific SOA plots")
+    # Run both analyses
+    run_analysis(df_processed, global_dir, stats_dir, stratify=False)
+    run_analysis(df_processed, stratified_dir, stats_dir, stratify=True)
 
     # Final summary
     print("\n" + "="*60)
     print("EDA ANALYSIS COMPLETE")
     print("="*60)
-    print(f"All plots saved to: {output_dir.absolute()}")
-    svg_count = len(list(output_dir.glob('*.svg')))
-    png_count = len(list(output_dir.glob('*.png')))
-    print(f"Total plots generated: {svg_count} SVG files, {png_count} PNG files")
+
+    # Count generated files
+    global_svg = len(list(global_dir.glob('*.svg')))
+    global_png = len(list(global_dir.glob('*.png')))
+    stratified_svg = len(list(stratified_dir.glob('*.svg')))
+    stratified_png = len(list(stratified_dir.glob('*.png')))
+    stats_files = len(list(stats_dir.glob('*.txt')))
+
+    print(f"Global analysis: {global_svg} SVG files, {global_png} PNG files")
+    print(f"Stratified analysis: {stratified_svg} SVG files, {stratified_png} PNG files")
+    print(f"Statistics files: {stats_files} text files")
+
     print("\nKey findings summary:")
     print(f"• Total experimental conditions analyzed: {len(df_processed)}")
     print(f"• Paradigm distribution: {df_processed['Paradigm'].value_counts().to_dict()}")
     print(f"• Task 2 Response Probability range: {df_processed['Task 2 Response Probability'].min():.1f} - {df_processed['Task 2 Response Probability'].max():.1f}")
     print("• All visualizations saved as high-quality SVG and PNG files")
-    print("\nThe EDA reveals the parameter distributions across cognitive control paradigms,")
-    print("showing clear distinctions between Interference, Task-Switching, and Dual-Task/PRP experiments.")
+    print("• Summary statistics saved to separate text files for global and stratified analyses")
+    print("\nThe EDA reveals parameter distributions both globally and stratified by paradigm,")
+    print("enabling comparison of overall patterns vs. paradigm-specific characteristics.")
 
 
 if __name__ == "__main__":

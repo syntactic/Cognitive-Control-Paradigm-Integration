@@ -1,0 +1,481 @@
+
+============================================================
+STRATIFIED SUMMARY STATISTICS BY PARADIGM
+============================================================
+
+===== SUMMARY STATISTICS FOR: Interference =====
+
+Task 2 Response Probability:
+  Count (non-missing): 102
+  Mean: 0.000
+  Std: 0.000
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 0.000
+
+RSI:
+  Count (non-missing): 102
+  Mean: 1820.686
+  Std: 2093.534
+  Min: 20.000
+  25th percentile: 1000.000
+  Median: 1000.000
+  75th percentile: 2000.000
+  Max: 12000.000
+
+Task 1 CSI:
+  Count (non-missing): 102
+  Mean: 109.804
+  Std: 334.341
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 2000.000
+
+Task 2 CSI:
+  Count (non-missing): 0
+  Mean: N/A
+  Std: N/A
+  Min: N/A
+  25th percentile: N/A
+  Median: N/A
+  75th percentile: N/A
+  Max: N/A
+
+Inter-task SOA:
+  Count (non-missing): 0
+  Mean: N/A
+  Std: N/A
+  Min: N/A
+  25th percentile: N/A
+  Median: N/A
+  75th percentile: N/A
+  Max: N/A
+
+Distractor SOA:
+  Count (non-missing): 85
+  Mean: 20.000
+  Std: 95.740
+  Min: -100.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 400.000
+
+Switch Rate:
+  Count (non-missing): 102
+  Mean: 0.000
+  Std: 0.000
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 0.000
+
+Task 1 Difficulty:
+  Count (non-missing): 102
+  Mean: 2.554
+  Std: 0.495
+  Min: 1.000
+  25th percentile: 2.000
+  Median: 2.900
+  75th percentile: 3.000
+  Max: 3.000
+
+Task 2 Difficulty:
+  Count (non-missing): 0
+  Mean: N/A
+  Std: N/A
+  Min: N/A
+  25th percentile: N/A
+  Median: N/A
+  75th percentile: N/A
+  Max: N/A
+
+CATEGORICAL FEATURES DISTRIBUTION:
+----------------------------------------
+
+Number of Tasks:
+  1.0: 101 (99.0%)
+  nan: 1 (1.0%)
+  Non-missing: 101/102 (99.0%)
+
+Trial Transition Type:
+  Pure: 102 (100.0%)
+
+Stimulus-Stimulus Congruency:
+  Neutral: 36 (35.3%)
+  Incongruent: 29 (28.4%)
+  Congruent: 17 (16.7%)
+  nan: 14 (13.7%)
+  Neutral (Feature Similar): 3 (2.9%)
+  Neutral (Feature Dissimilar): 3 (2.9%)
+  Non-missing: 88/102 (86.3%)
+
+Stimulus-Response Congruency:
+  nan: 84 (82.4%)
+  Congruent: 7 (6.9%)
+  Incongruent: 7 (6.9%)
+  Neutral: 4 (3.9%)
+  Non-missing: 18/102 (17.6%)
+
+Stimulus Bivalence & Congruency:
+  Neutral: 40 (39.2%)
+  Incongruent: 35 (34.3%)
+  Congruent: 21 (20.6%)
+  N/A: 6 (5.9%)
+
+Response Set Overlap:
+  nan: 102 (100.0%)
+  Non-missing: 0/102 (0.0%)
+
+Task 1 Stimulus-Response Mapping:
+  Arbitrary: 54 (52.9%)
+  Compatible: 45 (44.1%)
+  Incompatible: 3 (2.9%)
+
+Task 2 Stimulus-Response Mapping:
+  nan: 102 (100.0%)
+  Non-missing: 0/102 (0.0%)
+
+Task 1 Cue Type:
+  None/Implicit: 78 (76.5%)
+  Arbitrary: 24 (23.5%)
+
+Task 2 Cue Type:
+  nan: 102 (100.0%)
+  Non-missing: 0/102 (0.0%)
+
+RSI is Predictable:
+  1: 86 (84.3%)
+  0: 16 (15.7%)
+
+Inter-task SOA is Predictable:
+  N/A: 102 (100.0%)
+
+Intra-Trial Task Relationship:
+  nan: 98 (96.1%)
+  Different: 4 (3.9%)
+  Non-missing: 4/102 (3.9%)
+
+===== SUMMARY STATISTICS FOR: Task-Switching =====
+
+Task 2 Response Probability:
+  Count (non-missing): 178
+  Mean: 0.000
+  Std: 0.000
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 0.000
+
+RSI:
+  Count (non-missing): 178
+  Mean: 1016.056
+  Std: 661.557
+  Min: 150.000
+  25th percentile: 600.000
+  Median: 1000.000
+  75th percentile: 1200.000
+  Max: 3063.000
+
+Task 1 CSI:
+  Count (non-missing): 178
+  Mean: 187.079
+  Std: 465.651
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 1908.000
+
+Task 2 CSI:
+  Count (non-missing): 176
+  Mean: 189.205
+  Std: 467.872
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 1908.000
+
+Inter-task SOA:
+  Count (non-missing): 0
+  Mean: N/A
+  Std: N/A
+  Min: N/A
+  25th percentile: N/A
+  Median: N/A
+  75th percentile: N/A
+  Max: N/A
+
+Distractor SOA:
+  Count (non-missing): 157
+  Mean: 20.828
+  Std: 77.269
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 400.000
+
+Switch Rate:
+  Count (non-missing): 178
+  Mean: 46.551
+  Std: 22.900
+  Min: 14.000
+  25th percentile: 33.000
+  Median: 33.000
+  75th percentile: 50.000
+  Max: 100.000
+
+Task 1 Difficulty:
+  Count (non-missing): 178
+  Mean: 2.208
+  Std: 0.407
+  Min: 2.000
+  25th percentile: 2.000
+  Median: 2.000
+  75th percentile: 2.000
+  Max: 3.000
+
+Task 2 Difficulty:
+  Count (non-missing): 178
+  Mean: 2.421
+  Std: 0.517
+  Min: 2.000
+  25th percentile: 2.000
+  Median: 2.000
+  75th percentile: 3.000
+  Max: 4.000
+
+CATEGORICAL FEATURES DISTRIBUTION:
+----------------------------------------
+
+Number of Tasks:
+  1.0: 176 (98.9%)
+  nan: 2 (1.1%)
+  Non-missing: 176/178 (98.9%)
+
+Trial Transition Type:
+  Switch: 92 (51.7%)
+  Repeat: 86 (48.3%)
+
+Stimulus-Stimulus Congruency:
+  Neutral: 63 (35.4%)
+  Incongruent: 58 (32.6%)
+  Congruent: 40 (22.5%)
+  nan: 17 (9.6%)
+  Non-missing: 161/178 (90.4%)
+
+Stimulus-Response Congruency:
+  nan: 162 (91.0%)
+  Congruent: 8 (4.5%)
+  Incongruent: 8 (4.5%)
+  Non-missing: 16/178 (9.0%)
+
+Stimulus Bivalence & Congruency:
+  Neutral: 63 (35.4%)
+  Incongruent: 58 (32.6%)
+  Congruent: 40 (22.5%)
+  N/A: 17 (9.6%)
+
+Response Set Overlap:
+  Identical: 115 (64.6%)
+  Disjoint - Effector: 24 (13.5%)
+  Disjoint - Category (Same Modality): 23 (12.9%)
+  Disjoint - Modality: 8 (4.5%)
+  Disjoint - Modality (Standard): 4 (2.2%)
+  Disjoint - Modality (Non-Standard): 4 (2.2%)
+
+Task 1 Stimulus-Response Mapping:
+  Arbitrary: 101 (56.7%)
+  Compatible: 77 (43.3%)
+
+Task 2 Stimulus-Response Mapping:
+  Arbitrary: 125 (70.2%)
+  Compatible: 51 (28.7%)
+  Incompatible: 2 (1.1%)
+
+Task 1 Cue Type:
+  None/Implicit: 108 (60.7%)
+  Arbitrary: 70 (39.3%)
+
+Task 2 Cue Type:
+  None/Implicit: 108 (60.7%)
+  Arbitrary: 70 (39.3%)
+
+RSI is Predictable:
+  1: 158 (88.8%)
+  0: 20 (11.2%)
+
+Inter-task SOA is Predictable:
+  N/A: 172 (96.6%)
+  No: 6 (3.4%)
+
+Intra-Trial Task Relationship:
+  Different: 178 (100.0%)
+
+===== SUMMARY STATISTICS FOR: Dual-Task/PRP =====
+
+Task 2 Response Probability:
+  Count (non-missing): 101
+  Mean: 0.970
+  Std: 0.119
+  Min: 0.500
+  25th percentile: 1.000
+  Median: 1.000
+  75th percentile: 1.000
+  Max: 1.000
+
+RSI:
+  Count (non-missing): 101
+  Mean: 1318.614
+  Std: 747.721
+  Min: 20.000
+  25th percentile: 1000.000
+  Median: 1000.000
+  75th percentile: 2400.000
+  Max: 3200.000
+
+Task 1 CSI:
+  Count (non-missing): 101
+  Mean: 49.505
+  Std: 150.082
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 500.000
+
+Task 2 CSI:
+  Count (non-missing): 101
+  Mean: 0.000
+  Std: 0.000
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 0.000
+
+Inter-task SOA:
+  Count (non-missing): 89
+  Mean: 434.213
+  Std: 807.211
+  Min: -500.000
+  25th percentile: 50.000
+  Median: 150.000
+  75th percentile: 800.000
+  Max: 6200.000
+
+Distractor SOA:
+  Count (non-missing): 32
+  Mean: -10.625
+  Std: 28.561
+  Min: -85.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 0.000
+  Max: 0.000
+
+Switch Rate:
+  Count (non-missing): 101
+  Mean: 20.653
+  Std: 33.776
+  Min: 0.000
+  25th percentile: 0.000
+  Median: 0.000
+  75th percentile: 67.000
+  Max: 100.000
+
+Task 1 Difficulty:
+  Count (non-missing): 101
+  Mean: 2.446
+  Std: 0.519
+  Min: 1.000
+  25th percentile: 2.000
+  Median: 2.000
+  75th percentile: 3.000
+  Max: 3.000
+
+Task 2 Difficulty:
+  Count (non-missing): 101
+  Mean: 2.495
+  Std: 0.808
+  Min: 1.000
+  25th percentile: 2.000
+  Median: 2.000
+  75th percentile: 3.000
+  Max: 4.000
+
+CATEGORICAL FEATURES DISTRIBUTION:
+----------------------------------------
+
+Number of Tasks:
+  2.0: 101 (100.0%)
+
+Trial Transition Type:
+  Pure: 71 (70.3%)
+  nan: 20 (19.8%)
+  Switch: 6 (5.9%)
+  Repeat: 4 (4.0%)
+  Non-missing: 81/101 (80.2%)
+
+Stimulus-Stimulus Congruency:
+  nan: 57 (56.4%)
+  Incongruent: 21 (20.8%)
+  Congruent: 14 (13.9%)
+  Neutral: 9 (8.9%)
+  Non-missing: 44/101 (43.6%)
+
+Stimulus-Response Congruency:
+  nan: 85 (84.2%)
+  Congruent: 8 (7.9%)
+  Incongruent: 8 (7.9%)
+  Non-missing: 16/101 (15.8%)
+
+Stimulus Bivalence & Congruency:
+  N/A: 41 (40.6%)
+  Incongruent: 29 (28.7%)
+  Congruent: 22 (21.8%)
+  Neutral: 9 (8.9%)
+
+Response Set Overlap:
+  Disjoint - Effector: 51 (50.5%)
+  Disjoint - Modality: 24 (23.8%)
+  Identical: 19 (18.8%)
+  Disjoint - Modality (Standard): 4 (4.0%)
+  Disjoint - Modality (Non-Standard): 3 (3.0%)
+
+Task 1 Stimulus-Response Mapping:
+  Arbitrary: 62 (61.4%)
+  Compatible: 39 (38.6%)
+
+Task 2 Stimulus-Response Mapping:
+  Arbitrary: 73 (72.3%)
+  Compatible: 28 (27.7%)
+
+Task 1 Cue Type:
+  None/Implicit: 91 (90.1%)
+  Arbitrary: 10 (9.9%)
+
+Task 2 Cue Type:
+  None/Implicit: 101 (100.0%)
+
+RSI is Predictable:
+  1: 96 (95.0%)
+  0: 5 (5.0%)
+
+Inter-task SOA is Predictable:
+  Yes: 59 (58.4%)
+  No: 42 (41.6%)
+
+Intra-Trial Task Relationship:
+  Different: 85 (84.2%)
+  Same: 16 (15.8%)
+
+============================================================
