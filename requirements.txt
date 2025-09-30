@@ -1,8 +1,8 @@
-pandas
-numpy
-scikit-learn
-pytest
-matplotlib
-seaborn
-mofapy2
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.6.1
+pytest==8.4.1
+matplotlib==3.10.6
+seaborn==0.13.2
+mofapy2==0.7.2
 git+https://github.com/syntactic/mofax.git@plot_r2_with_provided_ax

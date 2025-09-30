@@ -1,17 +1,17 @@
 {
-  "name": "super-experiment-test",
+  "name": "super-experiment-viewer",
   "version": "1.0.0",
-  "main": "experiment.js",
+  "main": "viewer.js",
   "scripts": {
     "test": "jest",
     "quartz:install": "npm install --prefix ./quartz",
     "quartz:build": "cd quartz && node quartz/bootstrap-cli.mjs build --directory ../content --output ../public",
     "quartz:serve": "cd quartz && node quartz/bootstrap-cli.mjs build --directory ../content --serve --output ../public"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["cognitive-control", "psychology", "neuroscience", "experiment-viewer", "super-experiment"],
+  "author": "Timothy Ho",
+  "license": "MIT",
+  "description": "Interactive web viewer for exploring and simulating cognitive control experiments from the unified design space, built on the Super Experiment framework.",
   "dependencies": {
     "super-experiment": "github:syntactic/super-experiment"
   },
