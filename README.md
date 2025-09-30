@@ -207,4 +207,10 @@ The `Super_Experiment_Mapping_Notes` column in the CSV supports JSON parameter o
 
 ## License
 
-This project is part of a Master's thesis.
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Citation
+
+If you use this work in academic research, please cite:
+
+> Timothy Ho. (2025). Integrating Cognitive Control Paradigms Into a Unified Experimental Design Space: A Parametric Analysis. Master's Thesis.
