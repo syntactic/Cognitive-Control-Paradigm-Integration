@@ -722,14 +722,39 @@ function createTrialSequence(conditionOrBlock, numTrials = 10) {
     return trialSequence;
 }
 
+// Derive Stimulus Bivalence & Congruency from S-S and S-R Congruency
+// Uses analysis_utils.py priority logic with Bivalent- prefix and Univalent default
+function deriveStimulusBivalenceCongruency(ssCongruency, srCongruency) {
+    // Normalize inputs
+    const ss = (ssCongruency || 'N/A').toString().trim();
+    const sr = (srCongruency || 'N/A').toString().trim();
+
+    // Priority logic from analysis_utils.py
+    // Priority 1: If either is Incongruent
+    if (ss === 'Incongruent' || sr === 'Incongruent') {
+        return 'Bivalent-Incongruent';
+    }
+    // Priority 2: If either is Congruent
+    if (ss === 'Congruent' || sr === 'Congruent') {
+        return 'Bivalent-Congruent';
+    }
+    // Priority 3: If either is Neutral
+    if (ss === 'Neutral' || sr === 'Neutral') {
+        return 'Bivalent-Neutral';
+    }
+
+    // Default: Both are N/A → Univalent
+    return 'Univalent';
+}
+
 // Helper function to safely add info panel rows using DOM construction
 function addInfoRow(container, label, value) {
     const dt = document.createElement('dt');
     dt.textContent = label;
-    
+
     const dd = document.createElement('dd');
     dd.textContent = value ?? 'N/A';
-    
+
     container.append(dt, dd);
 }
 
@@ -819,8 +844,13 @@ function updateInfoPanel(conceptualRow) {
     if (numTasks > 1) {
         addInfoRow(dl, 'Task 2 Type', getValue('Task 2 Type', ''));
     }
-    
-    addInfoRow(dl, 'Stimulus Valency', getValue('Stimulus Valency', ''));
+
+    // Derive Stimulus Bivalence & Congruency from S-S and S-R congruency
+    const ssCongruency = getValue('Stimulus-Stimulus Congruency', '');
+    const srCongruency = getValue('Stimulus-Response Congruency', '');
+    const stimulusBivalenceCongruency = deriveStimulusBivalenceCongruency(ssCongruency, srCongruency);
+
+    addInfoRow(dl, 'Stimulus Bivalence & Congruency', stimulusBivalenceCongruency);
     addInfoRow(dl, 'Response Set Overlap', getValue('Response Set Overlap', 'Simplified_RSO'));
     
     // Add SRM info based on number of tasks
@@ -1208,7 +1238,7 @@ function drawTimeline(trialData) {
         soaLabel.setAttribute("font-size", "12px");
         soaLabel.setAttribute("font-weight", "bold");
         soaLabel.textContent = `SOA: ${soa}ms`;
-        g.appendChild(soaLabel);
+        barsGroup.appendChild(soaLabel);
     }
 }
 
@@ -1476,8 +1506,16 @@ function updateInfoPanelFromCondition(condition) {
     if (numTasks > 1) {
         addInfoRow(dl, 'Task 2 Type', getValue(condition.Task_2_Type));
     }
-    
-    addInfoRow(dl, 'Stimulus Valency', getValue(condition.Stimulus_Valency));
+
+    // Get Stimulus Bivalence & Congruency from resolved CSV if available
+    let stimulusBivalenceCongruency = getValue(condition['Stimulus Bivalence & Congruency']);
+
+    // If not in resolved CSV or is N/A, use the old Stimulus_Valency column as fallback
+    if (stimulusBivalenceCongruency === 'N/A') {
+        stimulusBivalenceCongruency = getValue(condition.Stimulus_Valency);
+    }
+
+    addInfoRow(dl, 'Stimulus Bivalence & Congruency', stimulusBivalenceCongruency);
     addInfoRow(dl, 'Response Set Overlap', getValue(condition.Simplified_RSO));
     
     // Add SRM info based on number of tasks
